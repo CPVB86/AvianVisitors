@@ -8,6 +8,56 @@ See it running at [bird.onethreenine.net](https://bird.onethreenine.net).
 
 ---
 
+## Local development / demo mode
+
+For a normal Windows, macOS or Linux computer, use **Python 3.10 or newer**:
+
+```bash
+git clone --branch avian-visitors https://github.com/CPVB86/AvianVisitors.git
+cd AvianVisitors
+python demo/server.py
+```
+
+On Windows, `py -3 demo/server.py` also works if the Python launcher is
+installed. On macOS/Linux use `python3` if `python` is not available.
+No `pip install`, Node.js, PHP, API keys, microphone, BirdNET installation or
+Raspberry Pi hardware is required. Do not install the root `requirements.txt`
+for this demo; it belongs to the production BirdNET analysis stack.
+
+Open **http://127.0.0.1:8000/**. Stop with **Ctrl+C**. If the port is occupied,
+run `python demo/server.py --port 8001` and open http://127.0.0.1:8001/.
+The server binds only to this computer's loopback interface.
+
+The existing Collage, Stats and Atlas use 42 simulated detections across
+seven species with bundled artwork: Huismus (14), Spreeuw (9), Wilde eend (7),
+Stadsduif (5), Raaf (4), Grote zilverreiger (2), Kerkuil (1). These replace the
+original brief's example species because those illustrations are not bundled.
+Switch **24H → 1H** to see the collage change from seven birds to one Huismus
+with two detections. Switch back to restore all seven.
+
+Edit `demo/species.json` and restart to change names/counts. Each scientific
+name must have an existing illustration and entries in `dims.json` and
+`masks.json`; startup reports missing artwork. Counts may be zero (empty
+collage) through 1000 per species. An alternative fixture is supported with
+`python demo/server.py --fixture path/to/species.json`.
+
+Dates are regenerated relative to the current local time; this is a repeatable
+sample, not an accumulating detection history. No local database is written.
+Audio, Wikipedia lookups, generation, administrator controls and educator
+sessions are unavailable in demo mode. The page identifies itself as a demo.
+Production PHP, frontend files, image generators and frame drivers remain
+unchanged; only the demo's served HTML gets a notice and hides station controls.
+
+Run the demo's dependency-free integration tests:
+
+```bash
+python -m unittest discover -s tests -p test_demo.py -v
+```
+
+See [the local demo implementation report](docs/LOCAL_DEVELOPMENT_STATUS.md)
+for architecture, verification, real BirdNET integration and image-generation
+migration notes.
+
 ## BOM
 
 | Qty | Description | Price | Link | Notes |

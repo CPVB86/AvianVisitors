@@ -1,0 +1,9 @@
+[
+  {"sci": "Passer domesticus", "com": "Huismus", "count": 14},
+  {"sci": "Sturnus vulgaris", "com": "Spreeuw", "count": 9},
+  {"sci": "Anas platyrhynchos", "com": "Wilde eend", "count": 7},
+  {"sci": "Columba livia", "com": "Stadsduif", "count": 5},
+  {"sci": "Corvus corax", "com": "Raaf", "count": 4},
+  {"sci": "Ardea alba", "com": "Grote zilverreiger", "count": 2},
+  {"sci": "Tyto alba", "com": "Kerkuil", "count": 1}
+]
