@@ -1,5 +1,15 @@
 # Local development status
 
+## Koerswijziging: Linux-backend (2026-09-25)
+
+Fase 1 is onderzocht: advies is BirdNET-Go release 20260823 in een Debian 13 VM
+met USB-microfoon, later dezelfde release op Pi 5/ARM64. AvianVisitors krijgt
+later een read-only REST-datasource. Zie [onderzoek en acceptatietests](BIRDNET_BACKEND_ADVICE.md).
+De huidige Windows-recorder blijft prototype/fallback. De queue is al begrensd,
+maar tragere analyse leidt nog tot drops en vertraging. Geen verdere grote
+recorderoptimalisatie gepland. Geen VM, Linux-audiotest of adapter uitgevoerd
+in deze onderzoeksronde; demo en JSON-koppeling blijven ongewijzigd.
+
 ## Live BirdNET en continuous recording (2026-09-25)
 
 De nieuwste mijlpaal bouwt voort op de door de gebruiker toegevoegde

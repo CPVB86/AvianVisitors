@@ -14,6 +14,9 @@ De desktopversie draait op **Python 3.10+** op Windows, macOS of Linux.
 De standaardroute gebruikt simulatie. Optioneel zijn lokale live BirdNET-detecties
 beschikbaar; zie [continu luisteren met BirdNET](docs/LIVE_BIRDNET.md).
 
+De live Windows-recorder is een proof-of-concept. Voor de vervolgrichting naar
+een Linux-backend en Raspberry Pi 5: [BirdNET-backendadvies](docs/BIRDNET_BACKEND_ADVICE.md).
+
 ```bash
 git clone --branch avian-visitors https://github.com/CPVB86/AvianVisitors.git
 cd AvianVisitors
