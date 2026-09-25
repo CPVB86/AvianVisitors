@@ -1,5 +1,32 @@
 # Local development status
 
+## Update: Nederlandse interface en OpenAI (2026-09-25)
+
+De gebruiker heeft de OpenAI-migratie nu expliciet gevraagd en de echte
+BirdNET-koppeling voorlopig uitgesteld. Detecties blijven gesimuleerd.
+
+- De publieke interface heet Vogel Bezoeken en gebruikt Nederlandse teksten,
+  familienamen, datums en enkelvoud/meervoud. Interne API-paden en ontwerp-
+  groepssleutels blijven gelijk. Collage/Stats/Atlas en life list zijn behouden.
+- `demo/generate.py` en `avian/scripts/openai_images.py` verzorgen expliciete
+  OpenAI-aanvragen, transparante lokale PNGs en silhouetmaskers. De demoserver
+  combineert lokale `.avian/`-afbeeldingen met de meegeleverde bibliotheek.
+- `demo/config.py` leest de lokale `.env` zonder shell-evaluatie of sleutel-
+  uitvoer. `.env.example` en `demo/requirements-images.txt` beschrijven setup.
+- De negen nieuwe OpenAI-tests en zeven demotests slagen. De bestaande
+  postzegelregressietest slaagt met Nederlandse weergaveteksten; interne
+  CSS-familiesleutels behouden hun oorspronkelijke waarden.
+- Browsercontrole bevestigt Recent gehoord, Nederlandse statistieken,
+  Nederlandse families en '1 soort'. Een echte API-proef en beeldbeoordeling
+  wachten op het bericht van de gebruiker dat de sleutel lokaal is opgeslagen.
+- Het bestaande `pregen.py` leest prompt en soortnotities nu expliciet als
+  UTF-8, zodat dezelfde bronnen op Windows werken. Gemini-aanroepen zijn niet
+  veranderd. Nederlandse soortnamen volgen de aangeleverde detecties; deze
+  wijziging vertaalt niet automatisch iedere soortnaam uit een externe bron.
+
+Start/test/uitvoer: zie [OpenAI-instructies](OPENAI_IMAGES.md).
+De eerdere mijlpaal hieronder beschrijft de toestand vóór deze update.
+
 ## Current implementation
 
 The local proof-of-concept uses the existing browser frontend and bundled art.

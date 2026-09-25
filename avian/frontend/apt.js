@@ -82,8 +82,8 @@
   // Each view's title text. The shared static-head shows one of these
   // based on the current view; identical adjacent values mean the title
   // stays put with no fade (collage and stats both say Heard Recently).
-  var VIEW_TITLES = ['Heard Recently', 'Heard Recently', 'Avian Atlas'];
-  var EMPTY_WINDOW_COPY = 'no detections heard in this window';
+  var VIEW_TITLES = ['Recent gehoord', 'Recent gehoord', 'Vogel Atlas'];
+  var EMPTY_WINDOW_COPY = 'geen detecties in deze periode';
   var staticHead = document.querySelector('.static-head');
   var staticTitle = document.getElementById('staticTitle');
   function applySiteName(value) {
@@ -97,7 +97,7 @@
   }
   function titleForView(i) {
     if (i === 0 && educatorScopeRouteActive()) {
-      return 'Avian Visitors';
+      return 'Vogel Bezoeken';
     }
     return VIEW_TITLES[i];
   }
@@ -2907,14 +2907,14 @@
       btn.setAttribute('aria-label', s.com);
       // Fallback for keyboard / screen-reader users - the visible hover
       // pill below is the primary affordance for sighted mouse users.
-      // "calls" (not "heard") because one bird can rack up dozens of
+      // "detecties" (not "heard") because one bird can rack up dozens of
       // detections in a session; "heard" implies distinct individuals.
       var titleN = +s.n || 0;
       var titlePeriod = educatorScopeId()
         ? 'in ' + educatorScopeLabel(effectiveEducatorScope)
         : windowLabel(currentHours, DATA.recent);
       btn.title = (s.com || s.sci) + ' - ' + fmtN(titleN) + ' ' +
-        (titleN === 1 ? 'call' : 'calls') + ' ' + titlePeriod;
+        (titleN === 1 ? 'detectie' : 'detecties') + ' ' + titlePeriod;
       btn.style.left = r.x + 'px';
       btn.style.top = r.y + 'px';
       btn.style.width = r.fullW + 'px';
@@ -3131,7 +3131,7 @@
       if (hit && !labelsOn()) {
         var s = hit.data;
         var n = +s.n || 0;
-        var noun = (n === 1) ? 'call' : 'calls';
+        var noun = (n === 1) ? 'detectie' : 'detecties';
         var period = educatorScopeId()
           ? 'in ' + educatorScopeLabel(effectiveEducatorScope)
           : windowLabel(currentHours, DATA.recent);
@@ -3184,7 +3184,7 @@
 
   // Collage renders whatever is in DATA.recent.species. When the picker
   // changes, refreshRecent() refetches and re-renders. Empty state shows
-  // the shared "no detections heard in this window" message.
+  // the shared "geen detecties in deze periode" message.
   function renderCollageFromData(animate) {
     var items = (DATA.recent && DATA.recent.species) || [];
     renderCollage(items, animate);
@@ -3211,31 +3211,31 @@
   function fmtN(n) {
     if (n == null) return '-';
     if (n >= 10000) return (n / 1000).toFixed(1) + 'k';
-    return n.toLocaleString();
+    return n.toLocaleString('nl-NL');
   }
   // Compact count for atlas cards (1K, 1.2K); the modal keeps the exact number.
   function fmtNK(n) {
     if (n == null) return '-';
-    return n < 1000 ? n.toLocaleString() : +(n / 1000).toFixed(1) + 'K';
+    return n < 1000 ? n.toLocaleString('nl-NL') : +(n / 1000).toFixed(1) + 'K';
   }
   // Human label for the current time-window picker selection - replaces
   // a bare "window" with the span it actually covers. Thresholds match
   // the winPick buttons (1H / 12H / 24H / 7D / ALL).
   function windowLabel(h, windowData) {
-    if (windowData && windowData.midnight_clamped) return 'since midnight';
-    if (h <= 1) return 'this hour';
-    if (h <= 12) return 'past 12h';
-    if (h <= 24) return 'past 24h';
-    if (h <= 168) return 'past 7d';
-    return 'all time';
+    if (windowData && windowData.midnight_clamped) return 'sinds middernacht';
+    if (h <= 1) return 'dit uur';
+    if (h <= 12) return 'afgelopen 12 uur';
+    if (h <= 24) return 'afgelopen 24 uur';
+    if (h <= 168) return 'afgelopen 7 dagen';
+    return 'totaal';
   }
   function statsWindowLabel(h) {
     if (!hourlyDate) return windowLabel(h, DATA.statsRecent || DATA.recent);
-    if (h <= 1) return 'selected hour';
-    if (h <= 12) return 'final 12h';
-    if (h <= 24) return 'selected day';
-    if (h <= 168) return 'selected 7 days';
-    return 'through selected day';
+    if (h <= 1) return 'geselecteerd uur';
+    if (h <= 12) return 'laatste 12 uur';
+    if (h <= 24) return 'geselecteerde dag';
+    if (h <= 168) return 'geselecteerde 7 dagen';
+    return 'tot en met geselecteerde dag';
   }
 
   // ---- Live Pi data layer ----
@@ -3382,10 +3382,10 @@
       if (isNaN(ms)) return '';
       var d = new Date(ms);
       var p2 = function (n) { return n < 10 ? '0' + n : '' + n; };
-      if (educatorScopeId()) return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      if (educatorScopeId()) return d.toLocaleDateString('nl-NL', { month: 'short', day: 'numeric' });
       if (currentHours <= 36) return p2(d.getHours()) + ':' + p2(d.getMinutes());
-      if (currentHours <= 75 * 24) return (d.getMonth() + 1) + '/' + d.getDate();
-      return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      if (currentHours <= 75 * 24) return d.getDate() + '/' + (d.getMonth() + 1);
+      return d.toLocaleDateString('nl-NL', { month: 'short', day: 'numeric' });
     }
 
     // Faint gridlines at every column boundary. Start at gi=1: the gi=0
@@ -3477,22 +3477,22 @@
     var firstSeenCap = document.getElementById('statsFirstSeenCap');
     var scopedLabel = educatorScopeId() ? educatorScopeLabel(effectiveEducatorScope) : '';
     if (byPeriodCap) byPeriodCap.textContent = scopedLabel
-      ? 'detections in ' + scopedLabel
+      ? 'detecties in ' + scopedLabel
       : past
-      ? 'detections through ' + shortStatsDate(stats.date)
-      : 'detections, grouped by recency';
+      ? 'detecties tot en met ' + shortStatsDate(stats.date)
+      : 'detecties per periode';
     if (firstSeenCap) firstSeenCap.textContent = scopedLabel
-      ? 'first detections in ' + scopedLabel
+      ? 'eerste detecties in ' + scopedLabel
       : past
-      ? 'life list as of ' + shortStatsDate(stats.date)
-      : 'newest additions to the life list';
+      ? 'life list op ' + shortStatsDate(stats.date)
+      : 'nieuwste soorten in de life list';
     document.getElementById('statsByPeriod').innerHTML = scopedLabel
-      ? liRow('CALLS', 'detections', fmtN(all_det))
-        + liRow('BIRDS', 'unique species', fmtN((((DATA.lifelist || {}).species) || []).length))
-      : liRow(past ? 'HOUR' : 'NOW', past ? 'final hour' : 'last hour', fmtN(last_hour))
-        + liRow(past ? 'DAY' : 'TODAY', past ? 'selected date' : 'today', fmtN(today_det))
-        + liRow('7D', past ? 'through this date' : 'last 7 days', fmtN(week_det))
-        + liRow('ALL', past ? 'through this date' : 'all time', fmtN(all_det));
+      ? liRow('DETECTIES', 'detecties', fmtN(all_det))
+        + liRow('SOORTEN', 'unieke soorten', fmtN((((DATA.lifelist || {}).species) || []).length))
+      : liRow(past ? 'UUR' : 'NU', past ? 'laatste uur' : 'afgelopen uur', fmtN(last_hour))
+        + liRow(past ? 'DAG' : 'VANDAAG', past ? 'geselecteerde datum' : 'vandaag', fmtN(today_det))
+        + liRow('7D', past ? 'tot en met deze datum' : 'afgelopen 7 dagen', fmtN(week_det))
+        + liRow('ALLE', past ? 'tot en met deze datum' : 'totaal', fmtN(all_det));
 
     // Top Species - top 5 species in the current window. ./avian/api/birdnet-api.php?action=recent
     // already returns species sorted by last_seen DESC; re-sort by count.
@@ -3504,8 +3504,8 @@
       ? ranked.map(function (s, i) { return liRow(pad(i + 1), s.com, fmtN(+s.n), s.sci); }).join('')
       : '<li class="stats-window-empty"><span class="window-empty">' + EMPTY_WINDOW_COPY + '</span></li>';
     document.getElementById('statsTopSpecCap').textContent = scopedLabel
-      ? 'most-heard, ' + scopedLabel
-      : 'most-heard, ' + statsWindowLabel(currentHours);
+      ? 'meest gehoord, ' + scopedLabel
+      : 'meest gehoord, ' + statsWindowLabel(currentHours);
 
     // First Detections - newest additions to the life list, with a
     // "Xd ago" label computed from first_seen.
@@ -3518,11 +3518,11 @@
         var label = '-';
         if (!isNaN(t)) {
           var daysAgo = Math.floor((now - t) / 86400000);
-          label = daysAgo === 0 ? (past ? 'that day' : 'today') : daysAgo + (past ? 'd prior' : 'd ago');
+          label = daysAgo === 0 ? (past ? 'die dag' : 'vandaag') : daysAgo + (past ? ' d eerder' : ' d geleden');
         }
         return liRow(label, s.com, '', s.sci);
       }).join('')
-      : liRow('-', 'no detections yet', '');
+      : liRow('-', 'nog geen detecties', '');
   }
 
   // ---- Day's Rhythm + hourly ledger ----
@@ -3690,22 +3690,22 @@
     var cap = document.getElementById('statsRhythmCap');
     if (title && cap) {
       if (educatorScopeId()) {
-        title.textContent = 'Listening Rhythm';
-        cap.textContent = 'detections within ' + educatorScopeLabel(effectiveEducatorScope);
+        title.textContent = 'Luisterritme';
+        cap.textContent = 'detecties binnen ' + educatorScopeLabel(effectiveEducatorScope);
       } else if (r && r.mode === 'week') {
-        title.textContent = "Week's Rhythm";
-        cap.textContent = 'average day in this 7-day window, over the previous 7 days';
+        title.textContent = "Weekritme";
+        cap.textContent = 'gemiddelde dag in deze week, vergeleken met de vorige week';
       } else if (currentHours <= 1) {
-        title.textContent = "Hour's Rhythm";
-        cap.textContent = 'detections through the selected hour, over the prior week\'s average';
+        title.textContent = "Uurritme";
+        cap.textContent = 'detecties in dit uur, vergeleken met het weekgemiddelde';
       } else if (!hourlyDate && DATA.stats && DATA.stats.is_today && currentHours < 1000000) {
-        title.textContent = "Today's Rhythm";
+        title.textContent = "Dagritme";
         cap.textContent = currentHours <= 12
-          ? 'detections through the current 12-hour window, over last week\'s average'
-          : 'detections through the day, over last week\'s average';
+          ? 'detecties in de afgelopen 12 uur, vergeleken met het weekgemiddelde'
+          : 'detecties vandaag, vergeleken met het weekgemiddelde';
       } else {
-        title.textContent = "Day's Rhythm";
-        cap.textContent = 'detections on the selected date, over the prior week\'s average';
+        title.textContent = "Dagritme";
+        cap.textContent = 'detecties op deze datum, vergeleken met het weekgemiddelde';
       }
     }
     if (!r || (!(r.today || []).length && !(r.avg || []).length)) {
@@ -3808,10 +3808,10 @@
   }
   function shortStatsDate(s) {
     var d = parseLocalDate(s);
-    if (!d || isNaN(d.getTime())) return String(s || 'today');
+    if (!d || isNaN(d.getTime())) return String(s || 'vandaag');
     var opts = { month: 'short', day: 'numeric' };
     if (d.getFullYear() !== new Date().getFullYear()) opts.year = 'numeric';
-    return d.toLocaleDateString(undefined, opts);
+    return d.toLocaleDateString('nl-NL', opts);
   }
   function stationToday() {
     return (DATA.stats && DATA.stats.station_date)
@@ -3834,8 +3834,8 @@
     }
     var date = statsDateOnScreen();
     var today = stationToday();
-    label.textContent = date === today && !hourlyDate ? 'today' : shortStatsDate(date);
-    label.setAttribute('aria-label', 'Choose stats date, ' + (date === today ? 'today' : shortStatsDate(date)));
+    label.textContent = date === today && !hourlyDate ? 'vandaag' : shortStatsDate(date);
+    label.setAttribute('aria-label', 'Kies datum voor statistieken, ' + (date === today ? 'vandaag' : shortStatsDate(date)));
     next.disabled = !hourlyDate || date >= today;
   }
   function isoLocalDate(d) {
@@ -3888,17 +3888,17 @@
     var firstHeard = (DATA.calendar || {}).first_date || null;
     var lastHeard = (DATA.calendar || {}).last_date || null;
     var counts = statsDateCounts();
-    title.textContent = first.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+    title.textContent = first.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
     var html = '';
     for (var blank = 0; blank < first.getDay(); blank++) html += '<span aria-hidden="true"></span>';
     for (var day = 1; day <= total; day++) {
       var date = isoLocalDate(new Date(year, month, day));
       var count = counts[date] || 0;
       var disabled = date > today || (firstHeard && date < firstHeard);
-      var readable = new Date(year, month, day).toLocaleDateString(undefined, {
+      var readable = new Date(year, month, day).toLocaleDateString('nl-NL', {
         weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
       });
-      var aria = readable + (count ? ', ' + count + ' detection' + (count === 1 ? '' : 's') : ', no detections');
+      var aria = readable + (count ? ', ' + count + (count === 1 ? ' detectie' : ' detecties') : ', geen detecties');
       html += '<button type="button" role="gridcell" data-date="' + date + '"'
         + (count ? ' class="has-data' + (date === today ? ' is-today' : '') + '"' : (date === today ? ' class="is-today"' : ''))
         + ' aria-label="' + aria + '" aria-selected="' + (date === selected ? 'true' : 'false') + '"'
@@ -3976,7 +3976,7 @@
     }
     var total = rowsArr.length;
     var hourCount = rng.to - rng.from + 1;
-    var html = '<table class="heatmap-table' + (hourCount > 8 ? ' heatmap-compressed' : '') + '"><thead><tr><th class="heatmap-corner" aria-label="species"></th>';
+    var html = '<table class="heatmap-table' + (hourCount > 8 ? ' heatmap-compressed' : '') + '"><thead><tr><th class="heatmap-corner" aria-label="soorten"></th>';
     for (var hh = rng.from; hh <= rng.to; hh++) {
       var majorHour = hourCount <= 12 || hh % 3 === 0 || hh === rng.to;
       html += '<th class="heatmap-hour' + (majorHour ? ' heatmap-hour-major' : '') + '">' + pad(hh) + '</th>';
@@ -5313,7 +5313,7 @@
 
     if (!lifelist.length) {
       showAtlasEmpty('No birds detected yet.',
-        'The atlas fills up as BirdNET-Pi identifies new species.');
+        'De atlas vult zich zodra BirdNET-Pi nieuwe soorten herkent.');
       return;
     }
 
@@ -5392,10 +5392,10 @@
         ? educatorDetectionId(recentBySci[s.sci] && recentBySci[s.sci].detection_id)
         : null;
       var audioSrc = mediaApiUrl('recording', { sci: s.sci, detection: detectionId }, renderedScopeId);
-      // The "all time" window makes the windowed count identical to the
+      // The "totaal" window makes the windowed count identical to the
       // all-time count - collapse to a single stat rather than print the
       // same number twice. Otherwise label the count with its span.
-      var allLabel = educatorScopeId() ? educatorScopeLabel(effectiveEducatorScope) : 'all time';
+      var allLabel = educatorScopeId() ? educatorScopeLabel(effectiveEducatorScope) : 'totaal';
       var statRows = isAllWindow
         ? '<div><span class="n">' + fmtNK(total) + '</span><span class="lbl-inline">' + escHtml(allLabel) + '</span></div>'
         : '<div><span class="n">' + fmtNK(win) + '</span><span class="lbl-inline">' + windowLabel(atlasHours, DATA.recent) + '</span></div>'
@@ -5475,7 +5475,7 @@
         if (!run.length) return;
         out += '<section class="fam-block">'
              + '<h2 class="atlas-fam"><span>' + escHtml(cur) + '</span><i></i>'
-             + '<em>' + run.length + ' species</em></h2>'
+             + '<em>' + run.length + (run.length === 1 ? ' soort' : ' soorten') + '</em></h2>'
              + '<div class="atlas-fam-grid">' + run.join('') + '</div></section>';
         run = [];
       }
@@ -5526,7 +5526,7 @@
     // - The spectrogram is lazily fetched on first play (saves a Pi hit
     //   for every card visible on initial render).
     // - If the recording endpoint 404s (no detection yet for this
-    //   species), the button reverts and shows "no audio".
+    //   species), the button reverts and shows "geen audio".
     // The Atlas root survives every render, including keyed stamp-card reuse.
     // One delegated play handler therefore covers both layouts without ever
     // accumulating listeners on a retained card or button.
@@ -8453,16 +8453,16 @@
     if (isNaN(date.getTime())) return d + ' ' + (t || '');
     var now = Date.now();
     var ago = Math.floor((now - date.getTime()) / 1000);
-    if (ago < 60) return ago + 's ago';
-    if (ago < 3600) return Math.floor(ago / 60) + 'm ago';
-    if (ago < 86400) return Math.floor(ago / 3600) + 'h ago';
-    return Math.floor(ago / 86400) + 'd ago';
+    if (ago < 60) return ago + ' s geleden';
+    if (ago < 3600) return Math.floor(ago / 60) + ' min geleden';
+    if (ago < 86400) return Math.floor(ago / 3600) + ' uur geleden';
+    return Math.floor(ago / 86400) + ' d geleden';
   }
   function fmtDateLine(d, t) {
     if (!d) return '';
     try {
       var date = new Date(d + 'T' + (t || '00:00:00'));
-      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) +
+      return date.toLocaleDateString('nl-NL', { month: 'short', day: 'numeric' }) +
         ' - ' + (t ? t.slice(0, 5) : '');
     } catch (e) { return d + ' ' + (t || ''); }
   }
@@ -9177,7 +9177,7 @@
     }
     document.getElementById('modalSci').textContent = sci;
     var sciParts = sci.trim().split(/\s+/);
-    var family = window.STAMPS && window.STAMPS.latinOf ? window.STAMPS.latinOf(sci) : '';
+    var family = window.STAMPS && window.STAMPS.familyOf ? window.STAMPS.familyOf(sci) : '';
     if (!family && window.STAMPS && window.STAMPS.familyOf) family = window.STAMPS.familyOf(sci);
     document.getElementById('modalFamily').textContent = family || '-';
     document.getElementById('modalGenus').textContent = sciParts[0] || '-';
@@ -9193,11 +9193,11 @@
     document.getElementById('modalFirstSeen').textContent = '-';
     document.getElementById('modalRarity').textContent = '-';
     document.getElementById('modalRarity').classList.remove('rare');
-    document.getElementById('modalDesc').textContent = 'Loading description...';
+    document.getElementById('modalDesc').textContent = 'Beschrijving laden...';
     document.getElementById('modalDesc').classList.add('placeholder');
     var previousDistinctive = document.querySelector('.postcard-about .about-distinctive');
     if (previousDistinctive) previousDistinctive.remove();
-    document.getElementById('modalRecordings').innerHTML = '<li class="rec-empty">Loading recordings...</li>';
+    document.getElementById('modalRecordings').innerHTML = '<li class="rec-empty">Opnamen laden...</li>';
     document.getElementById('modalRecCount').textContent = '';
     document.getElementById('modalWiki').href = wikiUrl(sci);
     var ebirdLink = document.getElementById('modalEbird');
@@ -9235,14 +9235,14 @@
       if (contentRequest !== POSTCARD_CONTENT_REQUEST) return;
       var s = j.summary || {};
       document.getElementById('modalCommon').textContent = s.com || sci;
-      document.getElementById('modalAllTime').textContent = (+s.total || 0).toLocaleString();
+      document.getElementById('modalAllTime').textContent = (+s.total || 0).toLocaleString('nl-NL');
       document.getElementById('modalFirstSeen').textContent = s.first_seen ? fmtRecTime(s.first_seen.split(' ')[0], s.first_seen.split(' ')[1]) : '-';
       var rar = rarityLabel(+s.total || 0, s.first_seen);
       var rarEl = document.getElementById('modalRarity');
-      rarEl.textContent = rar;
+      rarEl.textContent = ({common:'algemeen', regular:'regelmatig', occasional:'af en toe', uncommon:'schaars', rare:'zeldzaam', new:'nieuw'})[rar] || rar;
       if (rar === 'rare') rarEl.classList.add('rare');
       var dets = j.detections || [];
-      document.getElementById('modalRecCount').textContent = dets.length + (dets.length === 1 ? ' recording' : ' recordings');
+      document.getElementById('modalRecCount').textContent = dets.length + (dets.length === 1 ? ' opname' : ' opnamen');
       document.getElementById('modalRecordings').innerHTML = dets.length
         ? dets.map(function (d) {
           return '<li class="rec-row" data-file="' + escHtml(d.file || '') + '" data-date="' + escHtml(d.d || '')
@@ -9254,7 +9254,7 @@
             + '<span class="date-time"><b>' + fmtDateLine(d.d, d.t) + '</b></span>'
             + '</button>'
             + '<div class="rec-spectro" aria-hidden="true">'
-            + '<div class="rec-spectro-loading">loading spectrogram...</div>'
+            + '<div class="rec-spectro-loading">spectrogram laden...</div>'
             + '<div class="rec-spectro-played"></div>'
             + '<div class="rec-loop-region" aria-hidden="true"></div>'
             + '<div class="rec-spectro-cursor"></div>'
@@ -9269,11 +9269,11 @@
             + '</div>'
             + '</li>';
         }).join('')
-        : '<li class="rec-empty">No recordings yet.</li>';
+        : '<li class="rec-empty">Nog geen opnamen.</li>';
       document.getElementById('modalRecordings').scrollTop = 0;
     }).catch(function () {
       if (contentRequest !== POSTCARD_CONTENT_REQUEST) return;
-      document.getElementById('modalRecordings').innerHTML = '<li class="rec-empty">Failed to load recordings.</li>';
+      document.getElementById('modalRecordings').innerHTML = '<li class="rec-empty">Opnamen laden mislukt.</li>';
     });
 
     // Wikipedia lead (description + genus / family). `format=6` deliberately
@@ -9293,7 +9293,7 @@
     }).catch(function () {
       if (contentRequest !== POSTCARD_CONTENT_REQUEST) return;
       var desc = document.getElementById('modalDesc');
-      desc.textContent = 'No description available.';
+      desc.textContent = 'Geen beschrijving beschikbaar.';
       desc.classList.add('placeholder');
     });
     return imageReady;
@@ -9442,7 +9442,7 @@
     var existingDistinctive = aboutBody && aboutBody.querySelector('.about-distinctive');
     if (existingDistinctive) existingDistinctive.remove();
     if (!paragraphs.length) {
-      desc.textContent = 'No description available.';
+      desc.textContent = 'Geen beschrijving beschikbaar.';
       desc.classList.add('placeholder');
       return;
     }
@@ -13057,7 +13057,7 @@
         var action = button.dataset.maintenanceAction;
         var prompt = action === 'services'
           ? 'Reinstall service files and web links?'
-          : 'Pull the latest Avian Visitors release? The update stops if tracked local code has changed.';
+          : 'Pull the latest Vogel Bezoeken release? The update stops if tracked local code has changed.';
         if (!confirm(prompt)) return;
         var card = button.closest('[data-maintenance-card]');
         var out = card && card.querySelector('.state');

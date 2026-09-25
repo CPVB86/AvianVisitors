@@ -19,6 +19,26 @@ ROOT = Path(__file__).resolve().parents[1]
 FRONTEND = ROOT / "avian/frontend"
 ILLUSTRATIONS = ROOT / "avian/assets/illustrations"
 FIXTURE = Path(__file__).with_name("species.json")
+LOCAL_ART = ROOT / ".avian/illustrations"
+LOCAL_TABLES = ROOT / ".avian/frontend"
+
+
+def art_table(name):
+    table = json.loads((FRONTEND / name).read_text(encoding="utf-8"))
+    local = LOCAL_TABLES / name
+    if local.is_file():
+        table.update(json.loads(local.read_text(encoding="utf-8")))
+    return table
+
+
+def illustration(sci, pose=1):
+    name = slug(sci) + ("-2" if pose == 2 else "") + ".png"
+    for directory in (LOCAL_ART, ILLUSTRATIONS):
+        if (directory / name).is_file():
+            return directory / name
+    if pose == 2:
+        return illustration(sci, 1)
+    return ILLUSTRATIONS / name
 
 
 def slug(sci):
@@ -27,8 +47,8 @@ def slug(sci):
 
 def load_species(path):
     species = json.loads(Path(path).read_text(encoding="utf-8"))
-    dims = json.loads((FRONTEND / "dims.json").read_text(encoding="utf-8"))
-    masks = json.loads((FRONTEND / "masks.json").read_text(encoding="utf-8"))
+    dims = art_table("dims.json")
+    masks = art_table("masks.json")
     if not isinstance(species, list) or len(species) > 100:
         raise ValueError("fixture must be an array of at most 100 species")
     seen = set()
@@ -44,7 +64,7 @@ def load_species(path):
             raise ValueError("counts must be 0..1000 and species must be unique")
         seen.add(sci)
         key = slug(sci)
-        if key not in dims or key not in masks or not (ILLUSTRATIONS / f"{key}.png").is_file():
+        if key not in dims or key not in masks or not illustration(sci).is_file():
             raise ValueError(f"no bundled illustration and mask for {sci}")
     return species
 
@@ -92,7 +112,7 @@ def public_data(species, query, now=None):
     action = query.get("action", "stats")
     if action == "recent":
         result.update(hours=hours, species=group_species(recent),
-                      site_name="AvianVisitors demo - gesimuleerde detecties",
+                      site_name="Vogel Bezoeken - gesimuleerde detecties",
                       reset_at_midnight=False, midnight_clamped=False,
                       window_start=(anchor - timedelta(hours=hours)).isoformat(" "))
     elif action == "stats":
@@ -169,6 +189,9 @@ class DemoHandler(BaseHTTPRequestHandler):
         parsed = urlsplit(self.path)
         path = unquote(parsed.path)
         query = {k: v[-1] for k, v in parse_qs(parsed.query).items()}
+        if path in ("/dims.json", "/masks.json"):
+            self.send_json(art_table(path[1:]))
+            return
         if path == "/avian/api/birdnet-api.php":
             try:
                 self.send_json(public_data(self.server.species, query))
@@ -188,10 +211,10 @@ class DemoHandler(BaseHTTPRequestHandler):
             if sci not in {b["sci"] for b in self.server.species}:
                 self.send_error(404)
                 return
-            name = slug(sci) + ("-2" if query.get("pose") == "2" else "") + ".png"
-            target = ILLUSTRATIONS / name
-            if not target.is_file():
-                target = ILLUSTRATIONS / (slug(sci) + ".png")
+            target = illustration(sci, 2 if query.get("pose") == "2" else 1)
+        elif path in ("/avian/assets/references/sparrow-blossom-single-v2.png",
+                      "/avian/assets/references/sparrow-blossom-pair-v2.png"):
+            target = ROOT / path.lstrip("/")
         elif path.startswith("/avian/api/"):
             self.send_json({"error": "Unavailable in local demo"}, 404)
             return

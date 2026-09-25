@@ -263,7 +263,7 @@
     perf: 'scallop',
     html:
       '<div class="face tpl-squaretone" style="--face:#efefeb">' +
-        '<div class="sq-meta"><span>{{SCI}}</span><span>{{ORDER}}</span><span>AVIANVISITORS</span></div>' +
+        '<div class="sq-meta"><span>{{SCI}}</span><span>{{ORDER}}</span><span>VOGEL BEZOEKEN</span></div>' +
         '<h3 class="sq-name">{{NAME_MUSEUM}}</h3>' +
         '<div class="sq-value">{{INDEX}}</div>' +
         '<div class="sq-panel">' +
@@ -287,7 +287,7 @@
         '<div class="ti-gallery"><canvas class="fxc ti-bird" data-fx="triennaleAbstract" data-src="{{SRC}}" data-opt=\'{"pad":0.03,"scale":1.02,"rotate":5,"offsetX":0.006,"offsetY":0.02,"ink":"#171a18","mid":"#60645f","paper":"#e7e0cf"}\' aria-label="Abstract print of {{NAME}}"></canvas></div>' +
         '<footer class="ti-foot">' +
           '<svg class="ti-name" viewBox="0 0 100 34" preserveAspectRatio="none" role="img" aria-label="{{NAME}}">{{TRIENNALE_NAME}}</svg>' +
-          '<svg class="ti-denom" viewBox="0 0 100 45" preserveAspectRatio="none" role="img" aria-label="Issue {{INDEX}}, AvianVisitors"><text class="ti-index" x="0" y="27" textLength="100" lengthAdjust="spacingAndGlyphs">{{INDEX}}</text><text class="ti-brand" x="0" y="40" textLength="100" lengthAdjust="spacingAndGlyphs">AVIANVISITORS</text></svg>' +
+          '<svg class="ti-denom" viewBox="0 0 100 45" preserveAspectRatio="none" role="img" aria-label="Issue {{INDEX}}, Vogel Bezoeken"><text class="ti-index" x="0" y="27" textLength="100" lengthAdjust="spacingAndGlyphs">{{INDEX}}</text><text class="ti-brand" x="0" y="40" textLength="100" lengthAdjust="spacingAndGlyphs">VOGEL BEZOEKEN</text></svg>' +
         '</footer>' +
         '<div class="ti-texture" aria-hidden="true"></div>' +
       '</div>'

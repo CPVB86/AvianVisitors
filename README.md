@@ -58,6 +58,18 @@ See [the local demo implementation report](docs/LOCAL_DEVELOPMENT_STATUS.md)
 for architecture, verification, real BirdNET integration and image-generation
 migration notes.
 
+## Nederlandse interface en OpenAI-illustraties
+
+De publieke collage heet **Vogel Bezoeken**. Collage, Stats, Atlas en life list
+blijven herkenbaar; koppen, statistieken, familienamen en vogelgegevens zijn
+Nederlands. De BirdNET-detecties blijven voorlopig gesimuleerd.
+
+De optionele OpenAI-generator maakt lokale transparante illustraties en
+silhouetmaskers, zonder de productie/Gemini-route te wijzigen. Zie
+[OpenAI instellen en één proefafbeelding maken](docs/OPENAI_IMAGES.md).
+API-sleutels horen in de genegeerde `.env`; uitvoer staat in de genegeerde
+`.avian/`. Normaal bladeren veroorzaakt geen beeldgeneratie.
+
 ## BOM
 
 | Qty | Description | Price | Link | Notes |

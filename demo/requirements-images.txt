@@ -1,0 +1,2 @@
+# Optional: only the explicit image-generation CLI needs this.
+Pillow>=10.0

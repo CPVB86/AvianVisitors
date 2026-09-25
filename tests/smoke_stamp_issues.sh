@@ -75,12 +75,12 @@ const stampSource = fs.readFileSync(path.join(frontend, 'stamps.js'), 'utf8');
 assert.doesNotMatch(stampSource, /ORDERED_STYLES|hashPick/,
   'unsupported names must not retain the legacy template hash path');
 [
-  ['Megaceryle alcyon', 'Kingfishers', 'ribbonbird'],
-  ['Mareca strepera', 'Waterfowl', 'linescreen'],
-  ['Stelgidopteryx serripennis', 'Swallows', 'ribbonbird'],
-  ['Certhia americana', 'Treecreepers', 'ribbonbird'],
-  ['Tringa melanoleuca', 'Shorebirds', 'ribbonbird'],
-  ['Limnodromus scolopaceus', 'Shorebirds', 'ribbonbird']
+  ['Megaceryle alcyon', 'IJsvogels', 'ribbonbird'],
+  ['Mareca strepera', 'Eendachtigen', 'linescreen'],
+  ['Stelgidopteryx serripennis', 'Zwaluwen', 'ribbonbird'],
+  ['Certhia americana', 'Boomkruipers', 'ribbonbird'],
+  ['Tringa melanoleuca', 'Strandlopers en snippen', 'ribbonbird'],
+  ['Limnodromus scolopaceus', 'Strandlopers en snippen', 'ribbonbird']
 ].forEach(([sci, family, style]) => {
   assert.equal(stamps.familyOf(sci), family, `${sci} family`);
   assert.equal(stamps.styleFor(sci).id, style, `${sci} style`);
@@ -96,8 +96,15 @@ assert.doesNotMatch(stampSource, /ORDERED_STYLES|hashPick/,
   assert.equal(stamps.latinOf(sci), latin, `${sci} Latin family`);
 });
 
+assert.equal(stamps.familyOf('Passer domesticus'), 'Mussen');
+assert.equal(stamps.familyOf('Sturnus vulgaris'), 'Spreeuwen');
+assert.equal(stamps.familyOf('Tyto alba'), 'Kerkuilen');
+const dutchDove = stamps.markup({sci:'Columba livia',com:'Stadsduif',index:1}, './bird.png');
+assert.match(dutchDove, /data-family="Doves &amp; Pigeons"/);
+assert.match(dutchDove, /Vogel Bezoeken|VOGEL BEZOEKEN/);
+assert.match(dutchDove, /Duiven|DUIVEN/);
 const future = 'Futuregenus example';
-assert.equal(stamps.familyOf(future), 'Other', 'unknown genera remain Other');
+assert.equal(stamps.familyOf(future), 'Overige vogels', 'unknown genera have a Dutch fallback');
 assert.equal(stamps.latinOf(future), '', 'unknown genera have no false Latin family');
 assert.equal(stamps.styleFor(future).id, 'ribbonbird', 'unknown genera use ribbonbird');
 const futureMarkup = stamps.markup({ sci: future, com: 'Future Bird', index: 1 }, './bird.png');

@@ -24,7 +24,7 @@
           '<div class="tf-spines">',
             '<span>{{ORDER}}</span>',
             '<span>{{SCI}}</span>',
-            '<span>AvianVisitors</span>',
+            '<span>Vogel Bezoeken</span>',
           '</div>',
         '</aside>',
         '<div class="tf-title">{{NAME}}</div>',
@@ -52,7 +52,7 @@
         '<div class="fr-value"><strong>{{INDEX}}</strong></div>',
         '<div class="fr-edge fr-name">{{FLY_NAME}}</div>',
         '<div class="fr-edge fr-sci">{{SCI}}</div>',
-        '<div class="fr-edge fr-right">{{ORDER}} · AVIANVISITORS</div>',
+        '<div class="fr-edge fr-right">{{ORDER}} · VOGEL BEZOEKEN</div>',
         '<div class="fr-bird"><canvas class="fxc fr-bird-plate" data-fx="lineEngraving" data-src="{{SRC}}" data-opt=\'{"fit":"bird","pad":0.09,"scale":0.84,"rotate":6,"offsetX":0,"offsetY":0.018,"ink":"#f4f0e7","gap":0.019,"lineWidth":0.0038,"edgeThreshold":0.047,"detailThreshold":0.14,"hatchThreshold":0.22,"hatchStrength":0.86,"crossHatch":false,"deepHatch":false,"smoothRadius":2,"rangeSigma":0.1,"dropout":false,"seed":13}\' aria-label="{{NAME}}"></canvas></div>',
       '</div>'
     ].join('')
@@ -68,7 +68,7 @@
         '<div class="ml-index"><b>{{INDEX}}</b></div>',
         '<div class="ml-spine ml-name">{{NAME}}</div>',
         '<div class="ml-spine ml-sci">{{SCI}}</div>',
-        '<div class="ml-spine ml-right">{{ORDER}} · AVIANVISITORS</div>',
+        '<div class="ml-spine ml-right">{{ORDER}} · VOGEL BEZOEKEN</div>',
         '<div class="ml-art">',
         '<canvas class="fxc ml-bird-plate" data-fx="horizontalRelief" data-src="{{SRC}}" data-opt=\'{"fit":"bird","pad":0.07,"scale":0.76,"rotate":-8,"offsetX":-0.035,"offsetY":0.1,"ink":"#c92f31","gap":0.0175,"contrast":1.5,"toneGamma":1.08,"toneLow":0.12,"toneHigh":0.88,"smoothRadius":3,"minLine":0.11,"maxLine":0.7}\' aria-label="{{NAME}}"></canvas>',
         '</div>',
@@ -84,7 +84,7 @@
     html: [
       '<div class="face tpl-wax-botanical" style="--face:#f1eee6">',
         '<div class="wb-field">',
-          '<div class="wb-mast"><span>AVIANVISITORS</span><b>{{INDEX}}</b></div>',
+          '<div class="wb-mast"><span>VOGEL BEZOEKEN</span><b>{{INDEX}}</b></div>',
           '<svg class="wb-side" viewBox="0 0 32 116" role="img" aria-label="{{ORDER}}, {{SCI}}">',
             '<text class="wb-family" x="10.1" y="112" transform="rotate(-90 10.1 112)" textLength="104" lengthAdjust="spacing">{{ORDER}}</text>',
             '<text class="wb-scientific" x="21.2" y="112" transform="rotate(-90 21.2 112)" textLength="104" lengthAdjust="spacing">{{SCI}}</text>',

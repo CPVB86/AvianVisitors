@@ -69,6 +69,8 @@ class DemoTests(unittest.TestCase):
         status, _, body = self.request("/")
         self.assertEqual(status, 200)
         self.assertIn(b"gesimuleerde detecties", body)
+        for name in ("sparrow-blossom-single-v2.png", "sparrow-blossom-pair-v2.png"):
+            self.assertEqual(self.request("/avian/assets/references/" + name)[0], 200)
         for bird in self.species:
             for pose in (1, 2):
                 url = "/avian/api/cutout.php?sci=" + bird["sci"].replace(" ", "%20") + "&pose=" + str(pose)

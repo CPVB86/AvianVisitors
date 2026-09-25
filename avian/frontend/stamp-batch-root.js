@@ -12,7 +12,7 @@
       '<div class="hi-field">' +
         '<canvas class="fxc hi-bird" data-fx="inkStamp" data-src="{{SRC}}" data-paper="./assets/stamp/paper-texture-grey.png" data-opt=\'{"fit":"bird","pad":0.008,"scale":1.075,"offsetX":0.025,"offsetY":0.025,"ink":"#18221d","lift":0.105,"contrast":1.24}\' aria-label="{{NAME}}"></canvas>' +
         '<div class="hi-field-copy"><b>ACCIPITRIDAE</b><span>{{SCI}}</span></div>' +
-        '<strong class="hi-imprint">AVIANVISITORS</strong>' +
+        '<strong class="hi-imprint">VOGEL BEZOEKEN</strong>' +
       '</div>' +
       '<aside class="hi-rail">' +
         '<strong class="hi-name">{{NAME}}</strong>' +
@@ -44,7 +44,7 @@
         '<canvas class="fxc sg-blossom sg-blossom-a" data-fx="duotoneCutout" data-src="./avian/assets/references/sparrow-blossom-single-v2.png" data-opt=\'' + JSON.stringify(flowerOpt) + '\' aria-hidden="true"></canvas>' +
         '<canvas class="fxc sg-blossom sg-blossom-b" data-fx="duotoneCutout" data-src="./avian/assets/references/sparrow-blossom-pair-v2.png" data-opt=\'' + JSON.stringify(flowerOpt) + '\' aria-hidden="true"></canvas>' +
         '<canvas class="fxc sg-bird" data-fx="duotoneCutout" data-src="{{SRC}}" data-opt=\'' + JSON.stringify(birdOpt) + '\' aria-label="{{NAME}}"></canvas>' +
-        '<span class="sg-side sg-project">AVIANVISITORS</span>' +
+        '<span class="sg-side sg-project">VOGEL BEZOEKEN</span>' +
         '<span class="sg-side sg-species">{{NAME}}</span>' +
         '<b class="sg-number">{{INDEX}}</b>' +
         '<footer class="sg-footer"><em>{{SCI}}</em><strong>{{ORDER}}</strong></footer>' +
@@ -92,10 +92,10 @@
         '</svg>' +
         '<span class="gf-shadow" style="--src:url(\'{{SRC_ALT}}\')"></span>' +
         '<img class="gf-bird" src="{{SRC_ALT}}" alt="{{NAME}}">' +
-        '<svg class="gf-seal" viewBox="0 0 100 100" aria-label="Avian Visitors registration seal">' +
+        '<svg class="gf-seal" viewBox="0 0 100 100" aria-label="Vogel Bezoeken registration seal">' +
           '<defs><path id="gf-seal-{{INDEX}}" d="M50 50m-28 0a28 28 0 1 1 56 0a28 28 0 1 1-56 0"/></defs>' +
           '<circle class="gf-seal-dot" cx="50" cy="50" r="38"/>' +
-          '<text class="gf-seal-ring" textLength="172" lengthAdjust="spacing"><textPath href="#gf-seal-{{INDEX}}" startOffset="50%" text-anchor="middle">AVIAN · VISITORS · AVIAN · VISITORS ·</textPath></text>' +
+          '<text class="gf-seal-ring" textLength="172" lengthAdjust="spacing"><textPath href="#gf-seal-{{INDEX}}" startOffset="50%" text-anchor="middle">VOGEL · BEZOEKEN · VOGEL · BEZOEKEN ·</textPath></text>' +
           '<text class="gf-seal-number" x="50" y="61" text-anchor="middle" transform="rotate(7 50 50)">{{INDEX}}</text>' +
         '</svg>' +
       '</div>' +
