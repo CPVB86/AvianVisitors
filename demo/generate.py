@@ -7,6 +7,7 @@ Outputs stay in ignored .avian/; production assets and Gemini remain intact.
 import argparse
 from io import BytesIO
 import json
+import logging
 import os
 from pathlib import Path
 import re
@@ -71,7 +72,11 @@ def main():
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--force", action="store_true", help="Explicitly regenerate existing local images")
     args = parser.parse_args()
-    load_env()
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    try:
+        load_env()
+    except (OSError, ValueError):
+        parser.exit(1, "Configuratie ongeldig; controleer .env (waarden worden niet gelogd).\n")
     if not re.fullmatch(r"[A-Za-z]{2,40}(?: [a-z]{2,40}){1,3}", args.sci):
         parser.error("Invalid scientific name")
     model = os.environ.get("OPENAI_IMAGE_MODEL") or openai_images.DEFAULT_MODEL
@@ -80,8 +85,6 @@ def main():
     output = ROOT / ".avian/illustrations"
     frontend = ROOT / ".avian/frontend"
     if not args.dry_run:
-        if not os.environ.get("OPENAI_API_KEY"):
-            parser.error("Set OPENAI_API_KEY in .env; do not pass secrets on the command line")
         try:
             import PIL
         except ImportError:
@@ -113,13 +116,14 @@ def main():
             if args.dry_run:
                 print(prompt)
                 continue
-            data = openai_images.generate_png(os.environ["OPENAI_API_KEY"], prompt,
+            logging.info("Beeldgeneratie gestart: %s", slug)
+            data = openai_images.generate_png(os.environ.get("OPENAI_API_KEY", ""), prompt,
                                              [path for _, path in refs], model, quality)
             raw = output / "raw"
             raw.mkdir(exist_ok=True)
             (raw / target.name).write_bytes(data)
             save_cutout(data, target)
-            print(f"Saved {target}")
+            logging.info("Beeldgeneratie geslaagd: %s", target)
         if not args.dry_run:
             dims, masks = build_masks.build_tables(output)
             for name, table in (("dims.json", dims), ("masks.json", masks)):
@@ -130,7 +134,8 @@ def main():
     except FileExistsError:
         parser.exit(1, "Another generation holds .avian/image-generation.lock. If a previous process crashed, remove that lock only after it has stopped.\n")
     except (ValueError, RuntimeError, OSError) as error:
-        parser.exit(1, str(error) + "\n")
+        logging.error("Beeldgeneratie mislukt: %s", error)
+        parser.exit(1)
     finally:
         if handle:
             handle.close()

@@ -8,9 +8,10 @@ See it running at [bird.onethreenine.net](https://bird.onethreenine.net).
 
 ---
 
-## Local development / demo mode
+## Desktop / Local development
 
-For a normal Windows, macOS or Linux computer, use **Python 3.10 or newer**:
+De desktopversie draait op **Python 3.10+** op Windows, macOS of Linux.
+Gebruik voor deze fase alleen de simulatie; BirdNET en hardware zijn niet nodig.
 
 ```bash
 git clone --branch avian-visitors https://github.com/CPVB86/AvianVisitors.git
@@ -18,45 +19,92 @@ cd AvianVisitors
 python demo/server.py
 ```
 
-On Windows, `py -3 demo/server.py` also works if the Python launcher is
-installed. On macOS/Linux use `python3` if `python` is not available.
-No `pip install`, Node.js, PHP, API keys, microphone, BirdNET installation or
-Raspberry Pi hardware is required. Do not install the root `requirements.txt`
-for this demo; it belongs to the production BirdNET analysis stack.
+Dit is de hoofdroute. Op Windows mag `py -3` en op macOS/Linux `python3`
+worden gebruikt wanneer `python` niet beschikbaar is. De gewone app heeft
+**geen pip-pakketten** nodig. Installeer niet de root `requirements.txt`:
+die hoort bij de oorspronkelijke BirdNET/Pi-installatie.
 
-Open **http://127.0.0.1:8000/**. Stop with **Ctrl+C**. If the port is occupied,
-run `python demo/server.py --port 8001` and open http://127.0.0.1:8001/.
-The server binds only to this computer's loopback interface.
+Open **http://127.0.0.1:8000/**. Stop in de terminal met **Ctrl+C**.
+Met `python demo/server.py --open-browser` opent de standaardbrowser automatisch
+via Python `webbrowser`; zonder die optie verandert er niets aan je browser.
+De server luistert uitsluitend op deze computer (127.0.0.1).
 
-The existing Collage, Stats and Atlas use 42 simulated detections across
-seven species with bundled artwork: Huismus (14), Spreeuw (9), Wilde eend (7),
-Stadsduif (5), Raaf (4), Grote zilverreiger (2), Kerkuil (1). These replace the
-original brief's example species because those illustrations are not bundled.
-Switch **24H → 1H** to see the collage change from seven birds to one Huismus
-with two detections. Switch back to restore all seven.
+### Configuratie
 
-Edit `demo/species.json` and restart to change names/counts. Each scientific
-name must have an existing illustration and entries in `dims.json` and
-`masks.json`; startup reports missing artwork. Counts may be zero (empty
-collage) through 1000 per species. An alternative fixture is supported with
-`python demo/server.py --fixture path/to/species.json`.
+Kopieer optioneel `.env.example` naar `.env` in de repository-root. Een schone
+checkout start ook zonder `.env`. De shellomgeving heeft voorrang op het bestand.
 
-Dates are regenerated relative to the current local time; this is a repeatable
-sample, not an accumulating detection history. No local database is written.
-Audio, Wikipedia lookups, generation, administrator controls and educator
-sessions are unavailable in demo mode. The page identifies itself as a demo.
-Production PHP, frontend files, image generators and frame drivers remain
-unchanged; only the demo's served HTML gets a notice and hides station controls.
+| Instelling | Standaard | Gebruik |
+|---|---|---|
+| `APP_MODE` | `demo` | Alleen simulatie wordt ondersteund; andere waarden geven een startfout. |
+| `APP_PORT` | `8000` | Lokale poort; `--port 8001` heeft voorrang. |
+| `DEMO_FIXTURE` | `demo/species.json` | JSON-detecties; relatieve paden zijn vanaf de repository-root. `--fixture` heeft voorrang. |
+| `OPENAI_API_KEY` | leeg | Alleen nodig voor expliciet genereren van ontbrekende beelden. |
+| `OPENAI_IMAGE_MODEL` | `gpt-image-2.5-flare` | Model voor de optionele generator. |
+| `OPENAI_IMAGE_QUALITY` | `medium` | Kwaliteit voor de optionele generator. |
 
-Run the demo's dependency-free integration tests:
+Er zijn geen verplichte environment variables voor de desktopapp. `.env` en
+`.avian/` blijven buiten Git. Deel de sleutel niet via URL of commandoregel.
+
+### Simulatie en opgeslagen beelden
+
+De standaardfixture levert 42 detecties over zeven soorten met meegeleverde
+illustraties. Tijdstippen worden relatief aan de huidige tijd berekend.
+**24H → 1H** laat het verschil zien: zeven soorten tegenover één Huismus met
+twee detecties. Dit is geen groeiende detectiehistorie en gebruikt geen database.
+
+Voor eigen data: kopieer `demo/species.json` naar `.avian/species.json`, pas
+namen/aantallen aan en stel `DEMO_FIXTURE=.avian/species.json` in. Maak de map
+`.avian` indien nodig eerst aan. Herstart na een fixturewijziging. Elke rij heeft
+`sci`, `com` en `count` (0–1000); maximaal 100 unieke soorten. Ongeldige JSON of
+velden geven een gecontroleerde startfout. Een soort zonder beeld/masker wordt
+met een waarschuwing overgeslagen; overige soorten blijven bruikbaar.
+
+Lokale beelden staan in `.avian/illustrations/`, originele API-uitvoer in
+`raw/` daaronder en maskers/afmetingen in `.avian/frontend/`. Complete lokale
+beelden krijgen voorrang op de meegeleverde bibliotheek. Ontbrekende of ongeldige
+lokale tabellen vallen terug op meegeleverde beelden. Voor een uitsluitend lokaal
+beschikbare soort: herstel de cache uit je back-up of bouw maskers opnieuw met
+de generator (bestaande beelden worden overgeslagen). Bewaar de hele `.avian/`
+beeldenset als je naar een andere computer verhuist; die wordt niet gepusht.
+
+### OpenAI (optioneel)
+
+Alleen voor beeldgeneratie:
 
 ```bash
-python -m unittest discover -s tests -p test_demo.py -v
+python -m pip install -r demo/requirements-images.txt
+python demo/generate.py --sci "Turdus merula" --com "Merel" --pose both --dry-run
 ```
 
-See [the local demo implementation report](docs/LOCAL_DEVELOPMENT_STATUS.md)
-for architecture, verification, real BirdNET integration and image-generation
-migration notes.
+Vul de sleutel lokaal in `.env` in. Verwijder `--dry-run` alleen wanneer je bewust
+betaalde beelden wilt maken. `--pose both` maakt de ontbrekende zittende en
+vliegende pose. Bestaande beelden worden hergebruikt; `--force` genereert opnieuw.
+Starten, bladeren en verversen veroorzaken nooit API-kosten.
+Zie [OpenAI en referentiebeelden](docs/OPENAI_IMAGES.md) voor details.
+
+### Problemen oplossen, stoppen en updaten
+
+- Poort bezet: stop de andere server of gebruik `--port 8001`.
+- Startfout: controleer modus, poort en fixture; waarden uit `.env` worden niet gelogd.
+- Geen vogels: kies 24H en controleer aantallen en waarschuwingen over ontbrekende beelden.
+- Beschadigde lokale maskers: herstel `.avian/frontend/` of voer de generator uit
+  voor een al bestaande soort; hergebruik kost geen API-aanvraag (Pillow is nodig).
+- API-fout: de generator stopt zonder automatische retry. Bij een time-out eerst
+  API-verbruik controleren; een aanvraag kan al verwerkt zijn. De app blijft bruikbaar.
+- Wijzigingen niet zichtbaar: herlaad de pagina; na fixture/configwijziging de server herstarten.
+- Updaten: **Ctrl+C**, `git pull --rebase`, daarna opnieuw `python demo/server.py`.
+
+Audio, externe encyclopedie en stationbeheer zijn niet beschikbaar in de
+simulatie. De bestaande Pi/BirdNET/e-inkcode blijft behouden.
+
+Gerichte desktoptests (Pillow nodig voor de beeldtests):
+
+```bash
+python -m unittest tests.test_demo tests.test_openai_images -v
+```
+
+Zie [desktopstatus en uitgevoerde controles](docs/LOCAL_DEVELOPMENT_STATUS.md).
 
 ## Nederlandse interface en OpenAI-illustraties
 

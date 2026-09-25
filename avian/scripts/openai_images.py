@@ -54,6 +54,8 @@ def generate_png(key, prompt, references=(), model=DEFAULT_MODEL, quality="mediu
     try:
         with (opener or urllib.request.urlopen)(request, timeout=240) as response:
             payload = json.load(response)
+    except (json.JSONDecodeError, UnicodeError):
+        raise RuntimeError("OpenAI returned invalid JSON. No automatic retry was made.") from None
     except urllib.error.HTTPError as error:
         # Do not echo remote bodies: proxies may reflect request credentials.
         raise RuntimeError(f"OpenAI returned HTTP {error.code}; check account access, billing, model and key. No automatic retry was made.") from None

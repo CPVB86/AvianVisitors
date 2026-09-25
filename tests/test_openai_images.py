@@ -57,6 +57,13 @@ class OpenAIImagesTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "not a PNG"):
             openai_images.generate_png("test-secret", "bird", opener=invalid)
 
+    def test_invalid_json_is_sanitized_without_retry(self):
+        def invalid(request, timeout):
+            return BytesIO(b"not-json test-secret")
+        with self.assertRaisesRegex(RuntimeError, "invalid JSON") as caught:
+            openai_images.generate_png("test-secret", "bird", opener=invalid)
+        self.assertNotIn("test-secret", str(caught.exception))
+
     def test_key_is_required_without_network(self):
         with self.assertRaisesRegex(ValueError, "OPENAI_API_KEY"):
             openai_images.build_request("", "bird")

@@ -1,5 +1,62 @@
 # Local development status
 
+## Desktopstabilisatie (2026-09-25)
+
+De lokale desktoproute is `python demo/server.py`, Python 3.10+, standaardbibliotheek.
+`DemoDetectionSource` vormt een kleine grens tussen de HTTP-laag en gesimuleerde
+JSON-detecties. De bestaande frontend en productie/Pi/e-inkroutes blijven behouden.
+Alle desktopinstellingen en stappen staan bovenaan README onder Desktop / Local development.
+
+Gewijzigd: `demo/server.py` (datasource, configuratie, logging, timeouts, herstel,
+favicon), `demo/config.py` en `.env.example` (demo/poort/fixture),
+`demo/generate.py` (cache zonder sleutel, veilige configuratiefouten, logging),
+`avian/scripts/openai_images.py` (ongeldige API-JSON), frontend `index.html`
+(cacheversies), gerichte tests en documentatie. Geen nieuwe runtimeframeworks.
+
+Werkelijk uitgevoerd:
+
+- Schone HEAD-export plus de wijzigingen van deze ronde, zonder lokale cache of
+  sleutel, met gekopieerde `.env.example`. Start met `python -S` vanuit een andere
+  werkmap: HTML, alle gekoppelde scripts/styles/favicon, tabellen en beeld/API-routes
+  bereikbaar; 42 detecties / 7 soorten. De eerste controle vond een ontbrekende
+  favicon-route; na herstel is dezelfde controle geslaagd.
+- Geïsoleerde Python-venv aangemaakt; pytest en Pillow via pip geïnstalleerd.
+  De gewone desktopstart heeft deze pakketten niet nodig.
+- 23 gerichte tests geslaagd, plus 16 subtests: demo, OpenAI-mocks, Atlas classic,
+  Atlas always-all en frontend-cacheversies. Postzegel-JavaScript uit de bestaande
+  shelltest direct met Node uitgevoerd en geslaagd.
+- Volledige pytest-suite geprobeerd: eerste run 83 passed, 7 skipped, 29 failed,
+  7 errors (88 subtests passed). Twee fouten waren verouderde cacheversiecontroles:
+  opgelost en afzonderlijk opnieuw geslaagd. Resterende blokkades betreffen
+  Windows/Linux-shelluitvoering, ontbrekende PHP/audio/frame-dependencies en
+  een Linux-fontaanname. Geen claim dat de volledige productiesuite groen is.
+  Hardware-/root-/live-shellsmokes zijn niet op deze Windows-host uitgevoerd.
+- Cache-smoke met beide opgeslagen Merel-poses, zonder sleutel en met API-functie
+  vervangen door een harde fout bij aanroep: beide overgeslagen, maskers vernieuwd,
+  geen API-aanroep. Deze stabilisatieronde heeft geen beelden gegenereerd.
+- Browser herladen en Atlas/Collage bekeken op 1366x768 en 1920x1080; geen horizontale
+  overflow, geen mislukte niet-lege afbeeldingsbronnen en geen console-errors/warnings.
+  Nederlandse namen en gesimuleerde Merel/detecties zichtbaar. Stats-data geladen.
+- Server gestopt/herstart. De huidige lokale sessie gebruikt expliciet
+  `--fixture .avian/species.json` (8 soorten / 56 detecties); een schone checkout
+  gebruikt standaard de meegeleverde fixture (7 soorten / 42 detecties).
+
+Beperkingen / inspectie:
+
+- Alleen Windows is daadwerkelijk uitgevoerd. Padresolutie, standaardbibliotheek
+  en optionele `webbrowser`-opening zijn cross-platform ontworpen; macOS/Linux en
+  automatisch openen zijn alleen via code-inspectie beoordeeld.
+- Geen desktop-exe, service of database; terminal blijft open. Ontbrekende lokale
+  illustratie/maskerparen vallen terug of slaan de betreffende soort over.
+  PNG-signatuur en maskerstructuur worden gecontroleerd; dit is geen volledige
+  beeldintegriteits- of anatomiecontrole. Genereerresultaten blijven visuele review nodig hebben.
+- Voor BirdNET-Pi later: adres/authenticatie en leveringsformaat bepalen, een tweede
+  datasource met dezelfde publieke JSON-contracten toevoegen, netwerkfouten en
+  echte detecties testen. Nu is alleen `APP_MODE=demo` toegestaan.
+- Gegenereerde bestanden en `.env` blijven buiten Git. Back-up/overzetten van
+  `.avian/illustrations` en `.avian/frontend` gebeurt afzonderlijk.
+
+
 ## Update: Nederlandse interface en OpenAI (2026-09-25)
 
 De gebruiker heeft de OpenAI-migratie nu expliciet gevraagd en de echte

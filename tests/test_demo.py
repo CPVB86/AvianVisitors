@@ -7,6 +7,8 @@ import sys
 import tempfile
 import threading
 import unittest
+from unittest.mock import patch
+import demo.server as demo_server
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from demo.server import FIXTURE, load_species, make_server, public_data
@@ -69,6 +71,7 @@ class DemoTests(unittest.TestCase):
         status, _, body = self.request("/")
         self.assertEqual(status, 200)
         self.assertIn(b"gesimuleerde detecties", body)
+        self.assertEqual(self.request("/favicon.png")[0], 200)
         for name in ("sparrow-blossom-single-v2.png", "sparrow-blossom-pair-v2.png"):
             self.assertEqual(self.request("/avian/assets/references/" + name)[0], 200)
         for bird in self.species:
@@ -87,12 +90,38 @@ class DemoTests(unittest.TestCase):
         self.assertEqual(self.request("/avian/api/birdnet-api.php?hours=bad")[0], 400)
 
     def test_invalid_fixtures_fail_before_startup(self):
-        for fixture in ([dict(self.species[0], count=-1)], [dict(self.species[0], sci="Turdus merula")], [None]):
+        for fixture in ([dict(self.species[0], count=-1)], [None]):
             with tempfile.TemporaryDirectory() as folder:
                 path = Path(folder) / "birds.json"
                 path.write_text(json.dumps(fixture), encoding="utf-8")
                 with self.assertRaises(ValueError):
                     load_species(path)
+
+    def test_optional_cache_corruption_uses_bundled_art(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            for content in ("{broken", "[]", '{"passer-domesticus": null}'):
+                for name in ("dims.json", "masks.json"):
+                    (root / name).write_text(content)
+                with patch.object(demo_server, "LOCAL_TABLES", root):
+                    self.assertEqual(len(load_species(FIXTURE)), 7)
+                    self.assertIn("passer-domesticus", demo_server.art_table("dims.json"))
+                    self.assertEqual(demo_server.illustration("Passer domesticus").parent,
+                                     demo_server.ILLUSTRATIONS)
+
+    def test_missing_art_skips_only_affected_species(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "birds.json"
+            path.write_text(json.dumps([self.species[0], dict(sci="Unknown species", com="Onbekend", count=1)]))
+            with self.assertLogs("vogel.desktop", level="WARNING"):
+                birds = load_species(path)
+            self.assertEqual(birds, [self.species[0]])
+
+    def test_missing_required_table_returns_503_and_server_recovers(self):
+        with patch.object(demo_server, "art_table", side_effect=OSError("missing")):
+            with self.assertLogs("vogel.desktop", level="ERROR"):
+                self.assertEqual(self.request("/dims.json")[0], 503)
+        self.assertEqual(self.request("/dims.json")[0], 200)
 
 
 if __name__ == "__main__":

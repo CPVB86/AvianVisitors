@@ -10,6 +10,11 @@ from collections import Counter, defaultdict
 from datetime import datetime, timedelta
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
+import logging
+import os
+import sys
+import webbrowser
+import base64
 import mimetypes
 from pathlib import Path
 import re
@@ -21,24 +26,71 @@ ILLUSTRATIONS = ROOT / "avian/assets/illustrations"
 FIXTURE = Path(__file__).with_name("species.json")
 LOCAL_ART = ROOT / ".avian/illustrations"
 LOCAL_TABLES = ROOT / ".avian/frontend"
+sys.path.insert(0, str(ROOT))
+from demo.config import load_env
+LOG = logging.getLogger("vogel.desktop")
+
+
+def read_table(path):
+    value = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(value, dict):
+        raise ValueError("expected a JSON object")
+    return value
+
+
+def valid_plate(path):
+    try:
+        with path.open("rb") as stream:
+            return stream.read(8) == b"\x89PNG\r\n\x1a\n"
+    except OSError:
+        return False
+
+
+def local_catalog():
+    """Only use complete image/table pairs; a broken optional cache is harmless."""
+    try:
+        dims = read_table(LOCAL_TABLES / "dims.json")
+        masks = read_table(LOCAL_TABLES / "masks.json")
+    except (OSError, ValueError):
+        return {}, {}
+    good_dims, good_masks = {}, {}
+    for key, dim in dims.items():
+        try:
+            if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", key):
+                continue
+            mask = masks[key]
+            if not (isinstance(dim, list) and len(dim) == 2 and
+                    all(type(v) is int and 0 < v <= 560 for v in dim)):
+                continue
+            w, h = mask["w"], mask["h"]
+            if not (type(w) is int and type(h) is int and 0 < w <= 93 and 0 < h <= 93):
+                continue
+            if len(base64.b64decode(mask["bits"], validate=True)) != (w * h + 7) // 8:
+                continue
+            if not valid_plate(LOCAL_ART / (key + ".png")):
+                continue
+            good_dims[key], good_masks[key] = dim, mask
+        except (KeyError, TypeError, ValueError):
+            continue
+    return good_dims, good_masks
 
 
 def art_table(name):
-    table = json.loads((FRONTEND / name).read_text(encoding="utf-8"))
-    local = LOCAL_TABLES / name
-    if local.is_file():
-        table.update(json.loads(local.read_text(encoding="utf-8")))
+    table = read_table(FRONTEND / name)
+    table.update(local_catalog()[0 if name == "dims.json" else 1])
     return table
 
 
 def illustration(sci, pose=1):
-    name = slug(sci) + ("-2" if pose == 2 else "") + ".png"
-    for directory in (LOCAL_ART, ILLUSTRATIONS):
-        if (directory / name).is_file():
-            return directory / name
+    name = slug(sci) + ("-2" if pose == 2 else "")
+    if name in local_catalog()[0]:
+        return LOCAL_ART / (name + ".png")
+    bundled = ILLUSTRATIONS / (name + ".png")
+    if valid_plate(bundled):
+        return bundled
     if pose == 2:
         return illustration(sci, 1)
-    return ILLUSTRATIONS / name
+    return bundled
 
 
 def slug(sci):
@@ -52,6 +104,7 @@ def load_species(path):
     if not isinstance(species, list) or len(species) > 100:
         raise ValueError("fixture must be an array of at most 100 species")
     seen = set()
+    available = []
     for bird in species:
         if not isinstance(bird, dict):
             raise ValueError("each species must be an object")
@@ -64,9 +117,11 @@ def load_species(path):
             raise ValueError("counts must be 0..1000 and species must be unique")
         seen.add(sci)
         key = slug(sci)
-        if key not in dims or key not in masks or not illustration(sci).is_file():
-            raise ValueError(f"no bundled illustration and mask for {sci}")
-    return species
+        if key not in dims or key not in masks or not valid_plate(illustration(sci)):
+            LOG.warning("Soort overgeslagen: %s; afbeelding of masker ontbreekt. Herstel de lokale cache of gebruik meegeleverde soorten.", sci)
+            continue
+        available.append(bird)
+    return available
 
 
 def detections(species, now):
@@ -165,7 +220,34 @@ def public_data(species, query, now=None):
     return result
 
 
+class DemoDetectionSource:
+    """Small datasource boundary; no production or hardware imports."""
+    def __init__(self, fixture):
+        self.species = load_species(fixture)
+
+    def query(self, query):
+        return public_data(self.species, query)
+
+
 class DemoHandler(BaseHTTPRequestHandler):
+    def setup(self):
+        super().setup()
+        self.connection.settimeout(15)
+
+    def log_message(self, format, *args):
+        # Do not log raw URLs: they may contain accidentally pasted credentials.
+        if len(args) > 1 and str(args[1]).isdigit() and int(args[1]) >= 400:
+            LOG.warning("HTTP %s (%s)", args[1], self.command)
+
+    def do_GET(self):
+        try:
+            self.serve_get()
+        except (BrokenPipeError, ConnectionResetError, TimeoutError):
+            pass
+        except (OSError, ValueError, TypeError):
+            LOG.error("Verzoek mislukt: lokaal bestand ontbreekt of is ongeldig")
+            self.send_json({"error": "Lokale bestanden niet beschikbaar. Controleer de terminal."}, 503)
+
     def send_bytes(self, body, content_type, status=200):
         self.send_response(status)
         self.send_header("Content-Type", content_type)
@@ -185,7 +267,7 @@ class DemoHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         self.send_json({"error": "Read-only demo: station controls are unavailable."}, 405)
 
-    def do_GET(self):
+    def serve_get(self):
         parsed = urlsplit(self.path)
         path = unquote(parsed.path)
         query = {k: v[-1] for k, v in parse_qs(parsed.query).items()}
@@ -194,7 +276,7 @@ class DemoHandler(BaseHTTPRequestHandler):
             return
         if path == "/avian/api/birdnet-api.php":
             try:
-                self.send_json(public_data(self.server.species, query))
+                self.send_json(self.server.source.query(query))
             except (ValueError, OverflowError):
                 self.send_json({"error": "Invalid date or numeric parameter"}, 400)
             except KeyError:
@@ -215,6 +297,8 @@ class DemoHandler(BaseHTTPRequestHandler):
         elif path in ("/avian/assets/references/sparrow-blossom-single-v2.png",
                       "/avian/assets/references/sparrow-blossom-pair-v2.png"):
             target = ROOT / path.lstrip("/")
+        elif path == "/favicon.png":
+            target = ROOT / "avian/assets/favicon.png"
         elif path.startswith("/avian/api/"):
             self.send_json({"error": "Unavailable in local demo"}, 404)
             return
@@ -239,29 +323,55 @@ class DemoHandler(BaseHTTPRequestHandler):
 
 
 def make_server(port=8000, fixture=FIXTURE):
-    species = load_species(fixture)
+    source = DemoDetectionSource(fixture)
     server = ThreadingHTTPServer(("127.0.0.1", port), DemoHandler)
-    server.species = species
+    server.source = source
+    server.species = source.species
     return server
 
 
 def main():
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--port", type=int, default=8000)
-    parser.add_argument("--fixture", type=Path, default=FIXTURE)
+    parser.add_argument("--port", type=int, help="Override APP_PORT (default 8000)")
+    parser.add_argument("--fixture", type=Path, help="Override DEMO_FIXTURE; relative to repository root")
+    parser.add_argument("--open-browser", action="store_true", help="Open the local page in your default browser")
     args = parser.parse_args()
     try:
-        server = make_server(args.port, args.fixture)
+        load_env()
+        mode = os.environ.get("APP_MODE", "demo")
+        if mode != "demo":
+            raise ValueError("APP_MODE moet demo zijn; andere datasources zijn nog niet beschikbaar")
+        port = args.port if args.port is not None else int(os.environ.get("APP_PORT", "8000"))
+        if not 1 <= port <= 65535:
+            raise ValueError("APP_PORT/--port moet tussen 1 en 65535 liggen")
+        fixture = args.fixture or Path(os.environ.get("DEMO_FIXTURE") or str(FIXTURE))
+        if not fixture.is_absolute():
+            fixture = ROOT / fixture
+        server = make_server(port, fixture)
     except (OSError, ValueError) as error:
-        parser.exit(1, f"Cannot start demo: {error}\n")
-    print(f"AvianVisitors demo: http://127.0.0.1:{server.server_port}/", flush=True)
-    print("Synthetic detections only. Ctrl+C to stop. No API keys or hardware required.", flush=True)
+        LOG.error("Starten mislukt (%s). Controleer .env, fixture en of de poort vrij is.", type(error).__name__)
+        parser.exit(1, "Gebruik --help voor opties. Ongeldige configuratiewaarden worden niet gelogd.\n")
+    LOG.info("Vogel Bezoeken gestart | modus=demo | datasource=DemoDetectionSource")
+    LOG.info("Fixture: %s | %d soorten | %d gesimuleerde detecties", fixture,
+             len(server.species), sum(b["count"] for b in server.species))
+    if LOCAL_ART.exists() and not local_catalog()[0]:
+        LOG.warning("Lokale beeldcache ontbreekt of is ongeldig; meegeleverde beelden blijven beschikbaar")
+    url = f"http://127.0.0.1:{server.server_port}/"
+    LOG.info("%s | Stoppen: Ctrl+C | Geen automatische API-aanvragen", url)
+    if args.open_browser:
+        try:
+            if not webbrowser.open(url):
+                LOG.warning("Browser kon niet worden geopend; open de URL handmatig")
+        except webbrowser.Error:
+            LOG.warning("Browser kon niet worden geopend; open de URL handmatig")
     try:
         server.serve_forever()
     except KeyboardInterrupt:
         pass
     finally:
         server.server_close()
+        LOG.info("Applicatie gestopt")
 
 
 if __name__ == "__main__":
