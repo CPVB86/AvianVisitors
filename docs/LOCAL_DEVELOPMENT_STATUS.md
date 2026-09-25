@@ -1,5 +1,17 @@
 # Local development status
 
+## Live BirdNET en continuous recording (2026-09-25)
+
+De nieuwste mijlpaal bouwt voort op de door de gebruiker toegevoegde
+BirdNETDetectionSource. APP_MODE=birdnet en BIRDNET_JSON_PATH zijn behouden.
+`demo/live_birdnet.py` en de geïnstalleerde kopie in C:\BirdNET gebruiken nu een
+continue audiostream, producerthread en begrensde queue van 3 blokken.
+De WAV-predict-route, confidence 0.60 en persistent JSON-contract zijn behouden.
+Echte microfoon/ONNX-interleaving en Ctrl+C zijn getest. De API met bestaande live
+JSON werkt. Zie [volledige workflow, bewijs en beperkingen](LIVE_BIRDNET.md).
+Eerdere vermeldingen hieronder dat alleen demo ondersteund wordt zijn historisch.
+
+
 ## Desktopstabilisatie (2026-09-25)
 
 De lokale desktoproute is `python demo/server.py`, Python 3.10+, standaardbibliotheek.

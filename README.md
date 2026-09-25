@@ -11,7 +11,8 @@ See it running at [bird.onethreenine.net](https://bird.onethreenine.net).
 ## Desktop / Local development
 
 De desktopversie draait op **Python 3.10+** op Windows, macOS of Linux.
-Gebruik voor deze fase alleen de simulatie; BirdNET en hardware zijn niet nodig.
+De standaardroute gebruikt simulatie. Optioneel zijn lokale live BirdNET-detecties
+beschikbaar; zie [continu luisteren met BirdNET](docs/LIVE_BIRDNET.md).
 
 ```bash
 git clone --branch avian-visitors https://github.com/CPVB86/AvianVisitors.git
@@ -36,7 +37,8 @@ checkout start ook zonder `.env`. De shellomgeving heeft voorrang op het bestand
 
 | Instelling | Standaard | Gebruik |
 |---|---|---|
-| `APP_MODE` | `demo` | Alleen simulatie wordt ondersteund; andere waarden geven een startfout. |
+| `APP_MODE` | `demo` | `demo` voor simulatie, `birdnet` voor live JSON. |
+| `BIRDNET_JSON_PATH` | leeg | Vereist bij `APP_MODE=birdnet`; pad naar live-detections.json. |
 | `APP_PORT` | `8000` | Lokale poort; `--port 8001` heeft voorrang. |
 | `DEMO_FIXTURE` | `demo/species.json` | JSON-detecties; relatieve paden zijn vanaf de repository-root. `--fixture` heeft voorrang. |
 | `OPENAI_API_KEY` | leeg | Alleen nodig voor expliciet genereren van ontbrekende beelden. |
