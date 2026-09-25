@@ -95,3 +95,8 @@ nieuwe afbeelding; de bestaande frontend kan een ontbrekend-beeldweergave tonen.
 API-bronnen: [sounddevice opname](https://python-sounddevice.readthedocs.io/en/0.5.6/api/raw-streams.html)
 en [BirdNET](https://github.com/birdnet-team/birdnet). De geïnstalleerde library en
 bestaande WAV-aanroep waren leidend bij implementatie.
+
+Compatibiliteitsfix: oudere species-records zonder `first_seen` worden geaccepteerd.
+De ontbrekende historische datum wordt niet verzonnen en cumulatieve tellingen
+blijven behouden. Getest met de bestaande lokale JSON zonder die te wijzigen,
+en met een regressietest die 1200 naar 1201 verhoogt.

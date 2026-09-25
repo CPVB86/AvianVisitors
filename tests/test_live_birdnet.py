@@ -69,6 +69,22 @@ class LiveTests(unittest.TestCase):
             self.assertEqual(state["detections"][-1]["detected_at"], stamp.isoformat(timespec="seconds"))
             self.assertFalse(live.JSON_OUTPUT.with_suffix(".tmp").exists())
 
+    def test_legacy_species_without_first_seen_preserves_history(self):
+        with tempfile.TemporaryDirectory() as folder, patch.object(live, "JSON_OUTPUT", Path(folder)/"state.json"):
+            legacy = dict(scientific_name="Columba livia", common_name="Rock Dove",
+                          count=1200, max_confidence=.99, last_seen="2026-09-25T12:00:00+02:00")
+            original = dict(source="birdnet-live", updated_at=legacy["last_seen"],
+                            detections=[], species=[legacy])
+            live.JSON_OUTPUT.write_text(json.dumps(original))
+            before = live.JSON_OUTPUT.read_bytes()
+            self.assertEqual(live.load_detection_state(), original)
+            self.assertEqual(live.JSON_OUTPUT.read_bytes(), before)
+            live.save_detections([dict(scientific_name="Columba livia", common_name="Rock Dove", confidence=.9)])
+            saved = json.loads(live.JSON_OUTPUT.read_text())
+            self.assertEqual(saved["species"][0]["count"], 1201)
+            self.assertEqual(saved["species"][0]["max_confidence"], .99)
+            self.assertNotIn("first_seen", saved["species"][0])
+
     def test_json_recovery_empty_invalid_unknown_species(self):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder)/"live.json"

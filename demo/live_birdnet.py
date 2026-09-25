@@ -208,8 +208,10 @@ def load_detection_state():
             state = json.load(file)
             if not isinstance(state, dict) or not isinstance(state.get("detections"), list) or not isinstance(state.get("species"), list):
                 raise ValueError("Ongeldig JSON-contract; bestaande historie wordt niet overschreven")
+            # Older writers did not store first_seen. Keep it absent rather
+            # than inventing a lifetime first detection from the bounded buffer.
             for item in state["species"]:
-                if not isinstance(item, dict) or not all(k in item for k in ("scientific_name", "common_name", "count", "max_confidence", "first_seen", "last_seen")) or type(item["count"]) is not int or item["count"] < 0:
+                if not isinstance(item, dict) or not all(k in item for k in ("scientific_name", "common_name", "count", "max_confidence", "last_seen")) or type(item["count"]) is not int or item["count"] < 0:
                     raise ValueError("Ongeldige species-totalen; herstel de bestaande historie")
             return state
 
