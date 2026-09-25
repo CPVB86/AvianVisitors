@@ -80,11 +80,17 @@ Verified by execution on Windows, 2026-09-25:
   illustrations and Dutch labels. The API and UI show the specified counts
   14/9/7/5/4/2/1 (42 total).
 - Selecting 1H changes the actual collage to one Huismus with two calls;
-  selecting 24H restores seven birds. Stats renders totals and charts.
+  selecting 24H restores seven birds. Stats renders totals and charts;
+  Atlas renders the seven illustrated stamps. Browser console inspection
+  reported no warnings/errors during these checks.
 - All seven new tests pass, including all initial frontend API requests and
   both image poses for all seven species.
 - Existing `test_birdweather_architecture.py`: nine tests pass, one PHP
   syntax check skips because PHP is unavailable.
+- A fresh local Git clone of implementation commit `e8c3ed4` passes all seven
+  demo tests with Python 3.12.14 and `-S` (site-packages disabled). The same
+  checkout starts via `python -S demo/server.py --port 8001`, verifying that
+  the startup needs no untracked configuration or installed dependencies.
 
 Not verified on this computer: physical Raspberry Pi/audio/e-ink deployment,
 real BirdNET database integration, Gemini calls or OpenAI image generation.
