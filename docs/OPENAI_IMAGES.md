@@ -99,9 +99,10 @@ python -m unittest discover -s tests -p test_demo.py -v
 De negen OpenAI-tests gebruiken nagebootste netwerkantwoorden en tijdelijke
 afbeeldingen; ze kosten niets. Ze testen onder meer referentie-upload, PNG-
 validatie, foutafhandeling zonder sleuteluitvoer, lokale maskers en behoud van
-bestaande beelden. De zeven demotests blijven geslaagd. Een echte API-aanroep
-en de visuele kwaliteit van een gegenereerde vogel zijn nog niet geverifieerd;
-de sleutel en de afgesproken proef zijn daarvoor de volgende stap.
+bestaande beelden. De zeven demotests blijven geslaagd. De eerste echte API-aanroep is op 25 september 2026 geslaagd: één Merel,
+zittende pose, medium. PNG, transparantie, maskers en laden in de demo werken.
+Visuele inspectie toont een zachte gloed rond de vogel; het resultaat is een
+proefbeeld en nog geen definitief goedgekeurde illustratie.
 
 Deze route is bedoeld voor de lokale app. De bestaande generatieknop op een
 Raspberry Pi gebruikt nog Gemini; die migratie is niet stilzwijgend uitgevoerd.

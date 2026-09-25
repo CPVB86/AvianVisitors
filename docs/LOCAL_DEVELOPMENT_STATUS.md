@@ -17,8 +17,11 @@ BirdNET-koppeling voorlopig uitgesteld. Detecties blijven gesimuleerd.
   postzegelregressietest slaagt met Nederlandse weergaveteksten; interne
   CSS-familiesleutels behouden hun oorspronkelijke waarden.
 - Browsercontrole bevestigt Recent gehoord, Nederlandse statistieken,
-  Nederlandse families en '1 soort'. Een echte API-proef en beeldbeoordeling
-  wachten op het bericht van de gebruiker dat de sleutel lokaal is opgeslagen.
+  Nederlandse families en '1 soort'. De echte OpenAI-proef is geslaagd: één
+  Merel (medium, zittende pose) is gegenereerd en de lokale maskers zijn gebouwd.
+  Het beeld heeft alfa-transparantie, maar ook een zachte gloed rondom de vogel;
+  dit blijft een proefbeeld. De lokale demo gebruikt nu `.avian/species.json`
+  met de Merel toegevoegd (14 gesimuleerde detecties). Beeld en sleutel blijven lokaal.
 - Het bestaande `pregen.py` leest prompt en soortnotities nu expliciet als
   UTF-8, zodat dezelfde bronnen op Windows werken. Gemini-aanroepen zijn niet
   veranderd. Nederlandse soortnamen volgen de aangeleverde detecties; deze
