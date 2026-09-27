@@ -122,6 +122,24 @@ class LiveTests(unittest.TestCase):
             finally:
                 server.shutdown(); server.server_close(); thread.join()
 
+    def test_live_names_are_translated_to_dutch_with_safe_fallback(self):
+        stamp = datetime.now().astimezone().isoformat()
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "state.json"
+            path.write_text(json.dumps(dict(detections=[
+                dict(scientific_name="Parus major", common_name="Great Tit",
+                     confidence=.9, detected_at=stamp),
+                dict(scientific_name="Coloeus monedula", common_name="Western Jackdaw",
+                     confidence=.8, detected_at=stamp),
+                dict(scientific_name="Unknown species", common_name="Unknown Bird",
+                     confidence=.7, detected_at=stamp),
+            ])))
+            rows = birdnet_rows(path)
+            self.assertEqual(
+                [row["com"] for row in rows],
+                ["Koolmees", "Kauw", "Unknown Bird"],
+            )
+
     def test_config_and_server_modes(self):
         with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {}, clear=True):
             path = Path(folder)/".env"

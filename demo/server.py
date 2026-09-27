@@ -29,6 +29,11 @@ ILLUSTRATIONS = ROOT / "avian/assets/illustrations"
 FIXTURE = Path(__file__).with_name("species.json")
 LOCAL_ART = ROOT / ".avian/illustrations"
 LOCAL_TABLES = ROOT / ".avian/frontend"
+DUTCH_LABELS = ROOT / "model/l18n/labels_nl.json"
+DUTCH_SCIENTIFIC_ALIASES = {
+    # BirdNET may emit the newer genus while its bundled labels still use Corvus.
+    "Coloeus monedula": "Corvus monedula",
+}
 sys.path.insert(0, str(ROOT))
 from demo.config import load_env
 
@@ -40,6 +45,28 @@ def read_table(path):
     if not isinstance(value, dict):
         raise ValueError("expected a JSON object")
     return value
+
+
+def dutch_common_names():
+    """Load the bundled BirdNET Dutch names once, without making them required."""
+    try:
+        labels = read_table(DUTCH_LABELS)
+    except (OSError, ValueError):
+        return {}
+
+    return {
+        sci: name.strip()
+        for sci, name in labels.items()
+        if isinstance(sci, str) and isinstance(name, str) and name.strip()
+    }
+
+
+_DUTCH_COMMON_NAMES = dutch_common_names()
+
+
+def display_common_name(sci, fallback):
+    canonical = DUTCH_SCIENTIFIC_ALIASES.get(sci, sci)
+    return _DUTCH_COMMON_NAMES.get(canonical, fallback)
 
 
 def valid_plate(path):
@@ -220,6 +247,8 @@ def birdnet_rows(path):
         if not isinstance(com, str) or not com.strip():
             com = sci
 
+        com = display_common_name(sci.strip(), com.strip())
+
         try:
             confidence = float(confidence)
         except (TypeError, ValueError):
@@ -241,7 +270,7 @@ def birdnet_rows(path):
         rows.append(
             {
                 "sci": sci.strip(),
-                "com": com.strip(),
+                "com": com,
                 "at": at.replace(microsecond=0),
                 "conf": confidence,
             }

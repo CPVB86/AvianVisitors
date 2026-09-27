@@ -86,7 +86,11 @@ heeft nog geen harde afbreekdeadline; afsluiten kan daarop wachten.
 python -m unittest tests.test_live_birdnet tests.test_demo tests.test_openai_images -v
 ```
 
-Nog niet gedaan: SQLite/full-history, Nederlandse soortcatalogus, Pi/Frame,
+De desktopserver vertaalt live soortnamen via de meegeleverde Nederlandse
+BirdNET-catalogus. Als een wetenschappelijke naam daarin ontbreekt, blijft de
+naam uit de live feed zichtbaar.
+
+Nog niet gedaan: SQLite/full-history, Pi/Frame,
 macOS/Linux hardwaretests, langdurige opnameproef. De web-API blijft voor historie
 op de 500-eventbuffer gebaseerd; de recorder bewaart de cumulatieve soorttotalen.
 Een onbekende soort zonder plaat blijft in de API maar krijgt geen automatische
