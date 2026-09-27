@@ -1395,9 +1395,8 @@
   }
 
   /* Editorial detection timeline. One evenly-spaced column per species,
-     ordered by last-detection time (x = time). Black square fills its
-     column so neighbours touch at the gridline; its height up the column
-     encodes count. Small rotated label + per-column timestamp at the
+     ordered by last-detection time (x = time). A transparent bird plate's
+     height up the column encodes count. Small rotated label + per-column timestamp at the
      bottom. Fits the viewport - never scrolls. */
   .stats-timeline {
     position: relative;
@@ -1440,15 +1439,15 @@
   .stats-tl-square {
     position: absolute; left: 50%;
     transform: translateX(-50%);
-    background: var(--ink);
-    /* Paper-coloured side borders. box-sizing: border-box keeps the box
-       column-filling, so the fill just insets 1px each side. Where two
-       squares touch, the abutting borders read as a crisp white line
-       directly between them; on the cluster's outer edges they vanish
-       into the matching paper background. */
-    border-left: 1px solid var(--paper);
-    border-right: 1px solid var(--paper);
-    transition: background 140ms ease, transform 140ms ease;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 140ms ease, filter 140ms ease;
+  }
+  .stats-tl-square img {
+    width: 100%; height: 100%; display: block; object-fit: contain;
+    filter: drop-shadow(0 1px 2px rgba(26,22,18,.16));
+  }
+  .stats-tl-square.needs-art img {
+    opacity: .72;
   }
   .stats-tl-col { cursor: pointer; }
   /* Cross-highlight: hovering a square or a table row lights up the
@@ -1456,8 +1455,8 @@
      label scales + shifts to the accent ink, so the whole column reads
      as selected. */
   .stats-tl-col.sync-hi .stats-tl-square {
-    background: var(--accent);
     transform: translateX(-50%) scale(1.18);
+    filter: saturate(1.12) drop-shadow(0 2px 5px rgba(26,22,18,.18));
   }
   .stats-tl-col.sync-hi .stats-tl-label {
     transform: rotate(-90deg) translateY(55%) scale(1.1);

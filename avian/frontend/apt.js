@@ -3313,9 +3313,8 @@
 
   // Editorial detection timeline. One evenly-spaced column per species,
   // ordered oldest -> newest by last detection (x = time). Each species
-  // owns a cell, so the black squares never overlap and a square fills
-  // its column width - neighbours touch at the shared gridline. The
-  // square's height up the column encodes detection count; a small
+  // owns a cell, so the bird plates never overlap. The illustration's
+  // height up the column encodes detection count; a small
   // rotated label (common + scientific name) sits at the column's
   // bottom, and each column carries its own timestamp on the x-axis.
   function drawHistograms(animate) {
@@ -3410,10 +3409,15 @@
       var centerPct = (i + 0.5) / C * 100;
       var n = +s.n || 0;
       var bottomPct = (n / maxN) * SPAN * 100;   // square height = quantity
+      var needsArt = tablesReady && !DIMS[slugify(s.sci)];
+      var imageSrc = needsArt
+        ? './nest-eggs.webp'
+        : defaultCutoutSrc(s.sci, 1, IMG_VERSION, s.com);
       cols += ''
-        + '<div class="stats-tl-col" data-sci="' + s.sci + '" style="left:' + centerPct.toFixed(3) + '%;width:' + colW.toFixed(2) + 'px">'
-        + '<div class="stats-tl-square" style="bottom:' + bottomPct.toFixed(1) + '%;width:' + sq.toFixed(1) + 'px;height:' + sq.toFixed(1) + 'px"></div>'
-        + '<div class="stats-tl-label" style="bottom:calc(' + bottomPct.toFixed(1) + '% + ' + (sq + LABEL_GAP) + 'px)"><span class="com">' + (s.com || s.sci) + '</span><span class="sci">' + s.sci + '</span></div>'
+        + '<div class="stats-tl-col" data-sci="' + escHtml(s.sci) + '" style="left:' + centerPct.toFixed(3) + '%;width:' + colW.toFixed(2) + 'px">'
+        + '<div class="stats-tl-square' + (needsArt ? ' needs-art' : '') + '" style="bottom:' + bottomPct.toFixed(1) + '%;width:' + sq.toFixed(1) + 'px;height:' + sq.toFixed(1) + 'px">'
+        + '<img loading="lazy" decoding="async" src="' + escHtml(imageSrc) + '" alt="" onerror="this.onerror=null;this.src=\'./nest-eggs.webp\'"></div>'
+        + '<div class="stats-tl-label" style="bottom:calc(' + bottomPct.toFixed(1) + '% + ' + (sq + LABEL_GAP) + 'px)"><span class="com">' + escHtml(s.com || s.sci) + '</span><span class="sci">' + escHtml(s.sci) + '</span></div>'
         + '</div>';
       var showStamp = (i % stride === 0) || (i === C - 1);
       var lab = showStamp ? fmtTs(parseTs(s.last_seen)) : '';
