@@ -9,7 +9,7 @@ import urllib.error
 from unittest.mock import patch
 from datetime import datetime
 from demo import live_birdnet as live
-from demo.server import BirdNETDetectionSource, birdnet_rows, make_server
+from demo.server import AutoImageGenerator, BirdNETDetectionSource, birdnet_rows, make_server
 from demo.config import load_env
 
 
@@ -139,6 +139,39 @@ class LiveTests(unittest.TestCase):
                 [row["com"] for row in rows],
                 ["Koolmees", "Kauw", "Unknown Bird"],
             )
+
+    def test_auto_images_attempt_each_missing_accepted_species_once(self):
+        calls = []
+        rows = [
+            dict(sci="Testus birdus", com="Testvogel"),
+            dict(sci="Testus birdus", com="Testvogel"),
+        ]
+        with tempfile.TemporaryDirectory() as folder, \
+                patch("demo.server.illustration_available", return_value=False):
+            state = Path(folder) / "attempts.json"
+            generator = AutoImageGenerator(
+                state_path=state,
+                runner=lambda sci, com: calls.append((sci, com)),
+            )
+            self.assertEqual(generator.consider(rows), 1)
+            generator._queue.join()
+            self.assertEqual(calls, [("Testus birdus", "Testvogel")])
+            self.assertEqual(generator.consider(rows), 0)
+
+            restarted = AutoImageGenerator(
+                state_path=state,
+                runner=lambda sci, com: calls.append((sci, com)),
+            )
+            self.assertEqual(restarted.consider(rows), 0)
+            saved = json.loads(state.read_text())
+            self.assertEqual(saved["species"]["Testus birdus"]["status"], "generated")
+
+    def test_auto_generator_requests_both_poses(self):
+        completed = type("Completed", (), {"returncode": 0, "stdout": "", "stderr": ""})()
+        with patch("demo.server.subprocess.run", return_value=completed) as run:
+            AutoImageGenerator._run_generator("Parus major", "Koolmees")
+        command = run.call_args.args[0]
+        self.assertEqual(command[-2:], ["--pose", "both"])
 
     def test_config_and_server_modes(self):
         with tempfile.TemporaryDirectory() as folder, patch.dict(os.environ, {}, clear=True):

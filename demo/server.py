@@ -18,7 +18,9 @@ import logging
 import mimetypes
 import os
 from pathlib import Path
+import queue
 import re
+import subprocess
 import sys
 from urllib.parse import parse_qs, unquote, urlsplit
 import webbrowser
@@ -38,6 +40,7 @@ sys.path.insert(0, str(ROOT))
 from demo.config import load_env
 
 LOG = logging.getLogger("vogel.desktop")
+AUTO_IMAGE_STATE = ROOT / ".avian/auto-image-generation.json"
 
 
 def read_table(path):
@@ -146,6 +149,24 @@ def illustration(sci, pose=1):
         return illustration(sci, 1)
 
     return bundled
+
+
+def illustration_available(sci):
+    base = slug(sci)
+    dims = art_table("dims.json")
+    masks = art_table("masks.json")
+    local_dims, _ = local_catalog()
+    for key in (base, base + "-2"):
+        if key not in dims or key not in masks:
+            return False
+        path = (
+            LOCAL_ART / (key + ".png")
+            if key in local_dims
+            else ILLUSTRATIONS / (key + ".png")
+        )
+        if not valid_plate(path):
+            return False
+    return True
 
 
 def slug(sci):
@@ -541,11 +562,124 @@ class DemoDetectionSource:
         return public_data(self.species, query)
 
 
+class AutoImageGenerator:
+    """Attempt one complete local pose set for each accepted live species."""
+
+    def __init__(self, state_path=AUTO_IMAGE_STATE, runner=None):
+        self.state_path = Path(state_path)
+        self.runner = runner or self._run_generator
+        self._lock = threading.Lock()
+        self._queue = queue.Queue()
+        self._worker = None
+        self._state = self._load_state()
+
+    def _load_state(self):
+        try:
+            value = json.loads(self.state_path.read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            return {"species": {}}
+        except (OSError, ValueError):
+            LOG.warning("Automatische beeldstatus is ongeldig; automatische generatie uit voorzorg overgeslagen")
+            return {"species": {"*": {"status": "invalid-state"}}}
+
+        species = value.get("species") if isinstance(value, dict) else None
+        if not isinstance(species, dict):
+            LOG.warning("Automatische beeldstatus is ongeldig; automatische generatie uit voorzorg overgeslagen")
+            return {"species": {"*": {"status": "invalid-state"}}}
+        return {"species": species}
+
+    def _save_state(self):
+        self.state_path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = self.state_path.with_suffix(".tmp")
+        temporary.write_text(
+            json.dumps(self._state, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+        temporary.replace(self.state_path)
+
+    def consider(self, rows):
+        candidates = {}
+        for row in rows:
+            sci, com = row.get("sci"), row.get("com")
+            if isinstance(sci, str) and isinstance(com, str):
+                candidates.setdefault(sci, com)
+
+        queued = 0
+        with self._lock:
+            attempts = self._state["species"]
+            if "*" in attempts:
+                return 0
+            for sci, com in candidates.items():
+                if sci in attempts or illustration_available(sci):
+                    continue
+                attempts[sci] = {
+                    "common_name": com,
+                    "status": "queued",
+                    "attempted_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+                }
+                self._queue.put((sci, com))
+                queued += 1
+            if queued:
+                self._save_state()
+                if not self._worker or not self._worker.is_alive():
+                    self._worker = threading.Thread(
+                        target=self._work,
+                        name="avian-auto-images",
+                        daemon=True,
+                    )
+                    self._worker.start()
+        return queued
+
+    def _work(self):
+        while True:
+            try:
+                sci, com = self._queue.get_nowait()
+            except queue.Empty:
+                return
+            try:
+                self.runner(sci, com)
+            except (OSError, RuntimeError, subprocess.SubprocessError) as error:
+                status = "failed"
+                LOG.error("Automatische illustratie mislukt voor %s: %s", sci, error)
+            else:
+                status = "generated"
+                LOG.info("Automatische illustratie gereed: %s", sci)
+            finally:
+                with self._lock:
+                    record = self._state["species"].get(sci, {})
+                    record["status"] = status
+                    record["completed_at"] = datetime.now().astimezone().isoformat(timespec="seconds")
+                    self._state["species"][sci] = record
+                    self._save_state()
+                self._queue.task_done()
+
+    @staticmethod
+    def _run_generator(sci, com):
+        completed = subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "demo/generate.py"),
+                "--sci", sci,
+                "--com", com,
+                "--pose", "both",
+            ],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            timeout=300,
+            check=False,
+        )
+        if completed.returncode:
+            detail = (completed.stderr or completed.stdout or "generator stopped").strip().splitlines()
+            raise RuntimeError(detail[-1][:240] if detail else "generator stopped")
+
+
 class BirdNETDetectionSource:
     """Live datasource backed by live-detections.json."""
 
-    def __init__(self, path):
+    def __init__(self, path, image_generator=None):
         self.path = Path(path)
+        self.image_generator = image_generator
 
         self._rows = []
         self._lock = threading.Lock()
@@ -561,6 +695,10 @@ class BirdNETDetectionSource:
                 self._unavailable = True
             else:
                 self._rows = rows
+                if self.image_generator:
+                    queued = self.image_generator.consider(rows)
+                    if queued:
+                        LOG.info("%d ontbrekende soortillustratie(s) ingepland", queued)
                 if self._unavailable:
                     LOG.info("BirdNET JSON weer beschikbaar")
                 self._unavailable = False
@@ -799,6 +937,18 @@ def make_server(port=8000, source=None):
     return server
 
 
+def env_flag(name, default=False):
+    value = os.environ.get(name)
+    if value is None or not value.strip():
+        return default
+    normalized = value.strip().lower()
+    if normalized in {"1", "true", "yes", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "off"}:
+        return False
+    raise ValueError(f"{name} moet true of false zijn")
+
+
 def main():
     logging.basicConfig(
         level=logging.INFO,
@@ -880,7 +1030,14 @@ def main():
             if not birdnet_path.is_absolute():
                 birdnet_path = ROOT / birdnet_path
 
-            source = BirdNETDetectionSource(birdnet_path)
+            auto_images = env_flag("AUTO_GENERATE_IMAGES", False)
+            if auto_images and not os.environ.get("OPENAI_API_KEY", "").strip():
+                raise ValueError("AUTO_GENERATE_IMAGES vereist OPENAI_API_KEY")
+
+            source = BirdNETDetectionSource(
+                birdnet_path,
+                AutoImageGenerator() if auto_images else None,
+            )
 
         server = make_server(
             port=port,
@@ -926,10 +1083,11 @@ def main():
         )
 
     url = f"http://127.0.0.1:{server.server_port}/"
-    LOG.info(
-        "%s | Stoppen: Ctrl+C | Geen automatische API-aanvragen",
-        url,
-    )
+    if mode == "birdnet" and source.image_generator:
+        api_note = "Automatische OpenAI-illustraties: aan (twee poses, één poging per soort)"
+    else:
+        api_note = "Geen automatische API-aanvragen"
+    LOG.info("%s | Stoppen: Ctrl+C | %s", url, api_note)
 
     if args.open_browser:
         try:

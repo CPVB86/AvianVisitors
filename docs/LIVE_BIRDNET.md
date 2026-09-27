@@ -2,7 +2,10 @@
 
 De recorder is een zelfstandig proces. De grens blijft:
 microfoon → BirdNET 3.0 ONNX → atomische JSON → BirdNETDetectionSource → frontend.
-Er zijn geen OpenAI-aanvragen in deze route.
+Standaard zijn er geen OpenAI-aanvragen in deze route. Met de expliciete
+instelling `AUTO_GENERATE_IMAGES=true` kan de desktopserver een lokale zittende
+én vliegende illustratie laten maken voor iedere geaccepteerde soort die nog
+geen complete beeldset heeft.
 
 ## Starten
 
@@ -94,7 +97,8 @@ Nog niet gedaan: SQLite/full-history, Pi/Frame,
 macOS/Linux hardwaretests, langdurige opnameproef. De web-API blijft voor historie
 op de 500-eventbuffer gebaseerd; de recorder bewaart de cumulatieve soorttotalen.
 Een onbekende soort zonder plaat blijft in de API maar krijgt geen automatische
-nieuwe afbeelding; de bestaande frontend kan een ontbrekend-beeldweergave tonen.
+nieuwe afbeelding tenzij `AUTO_GENERATE_IMAGES=true` is ingesteld; zonder die
+opt-in toont de frontend de ontbrekend-beeldweergave.
 
 API-bronnen: [sounddevice opname](https://python-sounddevice.readthedocs.io/en/0.5.6/api/raw-streams.html)
 en [BirdNET](https://github.com/birdnet-team/birdnet). De geïnstalleerde library en

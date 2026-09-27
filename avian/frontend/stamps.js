@@ -2321,6 +2321,7 @@ document.documentElement.setAttribute('data-stamps-stage', 'fx-ready');
     Sturnus:'Blackbirds & Orioles', Xanthocephalus:'Blackbirds & Orioles',
     // chickadees, titmice, bushtits, nuthatches, wrens, kinglets
     Baeolophus:'Chickadees & Titmice', Poecile:'Chickadees & Titmice',
+    Cyanistes:'Chickadees & Titmice', Parus:'Chickadees & Titmice',
     Psaltriparus:'Chickadees & Titmice', Sitta:'Chickadees & Titmice',
     Troglodytes:'Chickadees & Titmice', Thryomanes:'Chickadees & Titmice',
     Catherpes:'Chickadees & Titmice', Regulus:'Chickadees & Titmice',
@@ -2382,6 +2383,10 @@ document.documentElement.setAttribute('data-stamps-stage', 'fx-ready');
     return null;
   }
   function styleFor(sci) {
+    var genus = String(sci || '').split(' ')[0];
+    // The European tits have detailed generated colour plates. Keep those
+    // recognisable instead of reducing them to the shared monochrome issue.
+    if ((genus === 'Cyanistes' || genus === 'Parus') && TPL.nzplate) return TPL.nzplate;
     var g = groupFor(sci);
     if (g && GROUP_STYLE[g] && TPL[GROUP_STYLE[g]]) return TPL[GROUP_STYLE[g]];
     // Batch C registers the final shared issue before apt.js renders the Atlas.

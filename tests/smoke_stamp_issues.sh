@@ -107,6 +107,10 @@ const future = 'Futuregenus example';
 assert.equal(stamps.familyOf(future), 'Overige vogels', 'unknown genera have a Dutch fallback');
 assert.equal(stamps.latinOf(future), '', 'unknown genera have no false Latin family');
 assert.equal(stamps.styleFor(future).id, 'ribbonbird', 'unknown genera use ribbonbird');
+assert.equal(stamps.styleFor('Cyanistes caeruleus').id, 'nzplate',
+  'European tits keep their full-colour illustration');
+assert.equal(stamps.styleFor('Parus major').id, 'nzplate',
+  'European tits keep their full-colour illustration');
 const futureMarkup = stamps.markup({ sci: future, com: 'Future Bird', index: 1 }, './bird.png');
 assert.match(futureMarkup, /data-family="Other"/);
 assert.match(futureMarkup, /data-style="ribbonbird"/);

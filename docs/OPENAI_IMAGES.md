@@ -51,6 +51,24 @@ beelden worden overgeslagen; alleen `--force` vraagt opnieuw generatie aan.
 Er zijn geen automatische retries: bij een time-out kan het verzoek al
 verwerkt zijn. Controleer je API-verbruik voordat je het opnieuw probeert.
 
+## Automatisch bij live waarnemingen
+
+Zet in `.env` naast `APP_MODE=birdnet`:
+
+```env
+AUTO_GENERATE_IMAGES=true
+```
+
+De desktopserver plant dan een zittende én vliegende illustratie in zodra een
+door de recorder geaccepteerde soort in het live JSON-bestand staat en zowel de
+meegeleverde als lokale bibliotheek nog geen complete zittende én vliegende set
+voor die soort heeft. Een bestaande pose wordt niet opnieuw gemaakt. De
+recorder past zijn confidence-drempel vóór opslag toe; afgewezen voorspellingen bereiken deze
+generator dus niet. Pogingen staan in `.avian/auto-image-generation.json` en
+worden nooit automatisch herhaald, ook niet na een fout of time-out. Herstart
+de server na een wijziging aan `.env`; herlaad de browser wanneer een nieuw
+beeld in de collage moet verschijnen.
+
 Resultaten staan lokaal onder `.avian/`:
 
 - `illustrations/raw/`: origineel API-resultaat, ook voor visuele beoordeling;

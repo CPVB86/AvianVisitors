@@ -47,6 +47,7 @@ checkout start ook zonder `.env`. De shellomgeving heeft voorrang op het bestand
 | `OPENAI_API_KEY` | leeg | Alleen nodig voor expliciet genereren van ontbrekende beelden. |
 | `OPENAI_IMAGE_MODEL` | `gpt-image-2.5-flare` | Model voor de optionele generator. |
 | `OPENAI_IMAGE_QUALITY` | `medium` | Kwaliteit voor de optionele generator. |
+| `AUTO_GENERATE_IMAGES` | `false` | In BirdNET-modus een zittende én vliegende afbeelding maken voor iedere geaccepteerde soort die nog geen complete beeldset heeft. |
 
 Er zijn geen verplichte environment variables voor de desktopapp. `.env` en
 `.avian/` blijven buiten Git. Deel de sleutel niet via URL of commandoregel.
@@ -85,8 +86,19 @@ python demo/generate.py --sci "Turdus merula" --com "Merel" --pose both --dry-ru
 Vul de sleutel lokaal in `.env` in. Verwijder `--dry-run` alleen wanneer je bewust
 betaalde beelden wilt maken. `--pose both` maakt de ontbrekende zittende en
 vliegende pose. Bestaande beelden worden hergebruikt; `--force` genereert opnieuw.
-Starten, bladeren en verversen veroorzaken nooit API-kosten.
+Met de standaardinstelling veroorzaken starten, bladeren en verversen nooit
+API-kosten. Alleen de expliciete automatische modus hieronder vormt daarop een
+uitzondering.
 Zie [OpenAI en referentiebeelden](docs/OPENAI_IMAGES.md) voor details.
+
+In live BirdNET-modus kan bewuste, eenmalige achtergrondgeneratie worden
+ingeschakeld met `AUTO_GENERATE_IMAGES=true`. Alleen soorten die al in het
+BirdNET-detectiebestand zijn opgenomen en nog geen illustratie hebben worden
+ingepland. Per soort worden de zittende en vliegende pose gevraagd; een al
+aanwezige pose wordt hergebruikt. Iedere poging wordt vóór
+de aanvraag vastgelegd in `.avian/auto-image-generation.json`; ook na een fout
+of herstart volgt daarom geen automatische tweede betaalde poging. Gebruik voor
+bewust herstel het handmatige commando hierboven.
 
 ### Problemen oplossen, stoppen en updaten
 
