@@ -2,6 +2,13 @@
 
 *A live bird collage from your window.*
 
+## Backyard backend (nieuwe fundering)
+
+De zelfstandige Python/FastAPI-backend staat in [backyard/](backyard/README.md).
+Backyard wordt eigenaar van detecties; AvianVisitors blijft de presentatielaag.
+De fundering heeft SQLite en een geteste healthcheck op poort 8010. BirdNET-ingest
+en de koppeling met deze frontend volgen later. Zie de eigen README voor setup.
+
 See it running at [bird.onethreenine.net](https://bird.onethreenine.net).
 
 <img alt="avianvisitors collage" src="docs/thumb.png" />
