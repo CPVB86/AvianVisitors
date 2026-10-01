@@ -20,7 +20,7 @@ add_action( 'admin_enqueue_scripts', function ( $hook ) {
 	if ( ! in_array( $hook, array( 'backyard_page_backyard-manual', 'toplevel_page_backyard' ), true ) ) {
 		return;
 	}
-	wp_enqueue_style( 'backyard-manual', plugins_url( 'manual.css', __FILE__ ), array(), '0.2.3' );
+	wp_enqueue_style( 'backyard-manual', plugins_url( 'manual.css', __FILE__ ), array(), '0.2.4' );
 	if ( 'backyard_page_backyard-manual' === $hook ) {
 		wp_enqueue_script( 'backyard-manual', plugins_url( 'manual.js', __FILE__ ), array(), '0.2.3', true );
 	}
@@ -76,7 +76,9 @@ function backyard_manual_page() {
 	foreach ( $modules as $module => $shortcodes ) {
 		echo '<section class="backyard-card"><h2>' . esc_html( $module ) . '</h2>';
 		foreach ( $shortcodes as $entry ) {
-			echo '<div class="backyard-command backyard-shortcode-row backyard-copy-item"><div><strong>' . esc_html( $entry['title'] ?? $entry['shortcode'] ) . '</strong><p>' . esc_html( $entry['description'] ) . '</p>';
+			echo '<div class="backyard-command backyard-shortcode-row backyard-copy-item"><div><strong>' . esc_html( $entry['title'] ?? $entry['shortcode'] ) . '</strong><p>' . esc_html( $entry['description'] ) . '</p></div>';
+			echo '<button type="button" class="backyard-copy-shortcode" aria-label="' . esc_attr( 'Kopieer shortcode ' . $entry['shortcode'] ) . '"><code>' . esc_html( $entry['shortcode'] ) . '</code><span class="dashicons dashicons-admin-page" aria-hidden="true"></span></button>';
+			echo '<p class="backyard-copy-status screen-reader-text" role="status" aria-live="polite"></p>';
 			if ( $entry['parameters'] ) {
 				echo '<details class="backyard-parameters"><summary>Parameters</summary><dl>';
 				foreach ( $entry['parameters'] as $name => $description ) {
@@ -85,8 +87,6 @@ function backyard_manual_page() {
 				echo '</dl></details>';
 			}
 			echo '</div>';
-			echo '<button type="button" class="backyard-copy-shortcode" aria-label="' . esc_attr( 'Kopieer shortcode ' . $entry['shortcode'] ) . '"><code>' . esc_html( $entry['shortcode'] ) . '</code><span class="dashicons dashicons-admin-page" aria-hidden="true"></span></button>';
-			echo '<p class="backyard-copy-status screen-reader-text" role="status" aria-live="polite"></p></div>';
 		}
 		echo '</section>';
 	}

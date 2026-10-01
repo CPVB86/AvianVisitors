@@ -99,6 +99,10 @@
 	margin: 6px 0;
 }
 
+.backyard-parameters {
+	grid-column: 1 / -1;
+}
+
 .backyard-parameters summary {
 	cursor: pointer;
 }

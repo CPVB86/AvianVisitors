@@ -55,7 +55,8 @@ in deze commando’s terecht. Pi-paden/services volgen het aangeleverde spiekbri
 de ingestelde trackingbranch, zonder een branchnaam vast te leggen.
 
 De Handleiding groepeert commando’s en shortcodes in kaarten. Shortcodes hebben
-links een titel, korte uitleg en uitklapbare parameters, rechts de kopieerbare code.
+links een titel en korte uitleg, rechts de kopieerbare code. Uitklapbare parameters
+staan op een aparte rij over beide kolommen, zodat de code op zijn plek blijft.
 Een groene gloed die uitdooft bevestigt het kopiëren; schermlezers ontvangen een
 tekstbevestiging. Dit werkt ook met toetsenbordbediening. CSS wordt op Handleiding
 en Instellingen geladen; kopieer-JavaScript alleen op Handleiding.
