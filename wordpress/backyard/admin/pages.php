@@ -43,7 +43,7 @@ function backyard_settings_page() {
 	}
 	echo '<form id="backyard-settings" method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
 	settings_fields( 'backyard' );
-	echo '<section class="backyard-card"><h2>PI Connection</h2>';
+	echo '<section class="backyard-card"><h2>Pi Connection</h2>';
 	if ( null !== $result ) {
 		$class  = is_wp_error( $result ) ? 'notice notice-error' : 'notice notice-success';
 		$text   = is_wp_error( $result ) ? $result->get_error_message() : 'API bereikbaar — database ok.';

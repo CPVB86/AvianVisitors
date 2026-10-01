@@ -60,7 +60,7 @@ staan op een aparte rij over beide kolommen, zodat de code op zijn plek blijft.
 Een groene gloed die uitdooft bevestigt het kopiëren; schermlezers ontvangen een
 tekstbevestiging. Dit werkt ook met toetsenbordbediening. CSS wordt op Handleiding
 en Instellingen geladen; kopieer-JavaScript alleen op Handleiding.
-Instellingen groepeert URL, token en testknop in **PI Connection**, met de algemene
+Instellingen groepeert URL, token en testknop in **Pi Connection**, met de algemene
 opslagknop buiten de kaart. De test blijft de opgeslagen verbinding gebruiken.
 
 Plaats in een WordPress-shortcodeblok:

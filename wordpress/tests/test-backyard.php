@@ -96,7 +96,7 @@ $settings_html = page();
 check( $GLOBALS['submit_buttons'][0][4]['form'] === 'backyard-connection-test', 'Test button targets separate nonce form' );
 check( $GLOBALS['submit_buttons'][1][0] === 'Instellingen opslaan', 'General save button follows connection card' );
 check( strpos( $settings_html, 'id="backyard-connection-test"' ) > strpos( $settings_html, '</form>' ), 'Test form is not nested in settings form' );
-check( strpos( $settings_html, '<h2>PI Connection</h2>' ) !== false, 'Connection card' );
+check( strpos( $settings_html, '<h2>Pi Connection</h2>' ) !== false, 'Connection card' );
 check( count( $requests ) === $before, 'No health request on page load' );
 $_SERVER['REQUEST_METHOD'] = 'POST';
 $_POST['backyard_test_connection'] = '1';
