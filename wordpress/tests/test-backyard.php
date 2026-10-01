@@ -163,4 +163,21 @@ reply( 200, '{"unexpected":"object"}' );
 check( strpos( backyard_birds_log(), 'tijdelijk niet beschikbaar' ) !== false, 'Unexpected object is not a list' );
 $response = new WP_Error( 'transport', 'private ' . $token );
 check( backyard_birds_log() === '<p>Vogelregistraties zijn tijdelijk niet beschikbaar.</p>', 'Public error is generic' );
+$translated_bird = array_merge( $bird, array( 'common_name' => 'Great Tit', 'common_name_nl' => 'Koolmees' ) );
+reply( 200, json_encode( array( $translated_bird ) ) );
+check( strpos( backyard_birds_log(), '<td>Koolmees</td>' ) !== false, 'Default language is Dutch' );
+foreach ( array( 'nl' => 'Koolmees', 'NL' => 'Koolmees', 'en' => 'Great Tit', 'EN' => 'Great Tit', 'unknown' => 'Great Tit' ) as $language => $name ) {
+	check( strpos( backyard_birds_log( array( 'language' => $language, 'limit' => '50' ) ), '<td>' . $name . '</td>' ) !== false, 'Language selection and unknown-language fallback' );
+	check( substr( end( $requests )[0], -8 ) === 'limit=50', 'Language preserves limit' );
+}
+foreach ( array( null, '', '   ', array() ) as $translation ) {
+	reply( 200, json_encode( array( array_merge( $translated_bird, array( 'common_name_nl' => $translation ) ) ) ) );
+	check( strpos( backyard_birds_log( array( 'language' => 'nl' ) ), '<td>Great Tit</td>' ) !== false, 'Unavailable translation falls back to common_name' );
+}
+unset( $translated_bird['common_name_nl'] );
+reply( 200, json_encode( array( $translated_bird ) ) );
+check( strpos( backyard_birds_log(), '<td>Great Tit</td>' ) !== false, 'Missing translation field falls back' );
+$translated_bird['common_name_nl'] = '<script>translation</script>';
+reply( 200, json_encode( array( $translated_bird ) ) );
+check( strpos( backyard_birds_log(), '<td>&lt;script&gt;translation&lt;/script&gt;</td>' ) !== false, 'Translated names are escaped' );
 echo "Backyard contract tests passed (WordPress doubles).\n";

@@ -8,7 +8,11 @@ function backyard_birds_detections( $limit = 50 ) {
 }
 
 function backyard_birds_log( $attributes = array() ) {
-	$attributes = shortcode_atts( array( 'limit' => 25 ), $attributes, 'backyard_birds_log' );
+	$attributes = shortcode_atts( array( 'limit' => 25, 'language' => 'nl' ), $attributes, 'backyard_birds_log' );
+	$language = is_string( $attributes['language'] ) ? strtolower( trim( $attributes['language'] ) ) : '';
+	// Add language-to-field mappings here when the API supplies more translations.
+	$name_fields = array( 'nl' => 'common_name_nl', 'en' => 'common_name' );
+	$name_field = $name_fields[ $language ] ?? 'common_name';
 	$limit = filter_var( $attributes['limit'], FILTER_VALIDATE_INT );
 	$limit = false === $limit ? 25 : max( 1, min( 100, $limit ) );
 	$rows = backyard_birds_detections( $limit );
@@ -34,7 +38,11 @@ function backyard_birds_log( $attributes = array() ) {
 			return $error;
 		}
 		$html .= '<tr><td><time datetime="' . esc_attr( gmdate( 'c', $timestamp ) ) . '">' . esc_html( wp_date( 'd-m-Y H:i', $timestamp ) ) . '</time></td>';
-		$html .= '<td>' . esc_html( $row['common_name'] ?? '—' ) . '</td><td>' . esc_html( $row['scientific_name'] ?? '—' ) . '</td>';
+		$name = $row[ $name_field ] ?? null;
+		if ( ! is_string( $name ) || '' === trim( $name ) ) {
+			$name = $row['common_name'] ?? '—';
+		}
+		$html .= '<td>' . esc_html( $name ) . '</td><td>' . esc_html( $row['scientific_name'] ?? '—' ) . '</td>';
 		$html .= '<td>' . esc_html( number_format_i18n( (float) $row['confidence'] * 100, 1 ) . '%' ) . '</td></tr>';
 	}
 	return $html . '</tbody></table>';
@@ -44,8 +52,11 @@ add_shortcode( 'backyard_birds_log', 'backyard_birds_log' );
 add_filter( 'backyard_shortcode_docs', function ( $entries ) {
 	$entries[] = array(
 		'module' => 'Birds', 'title' => 'Recente vogelregistraties', 'shortcode' => '[backyard_birds_log]',
-		'parameters' => array( 'limit' => 'Aantal recente registraties; standaard 25, minimaal 1, maximaal 100.' ),
-		'parameter_examples' => array( 'limit' => '[backyard_birds_log limit="50"]' ),
+		'parameters' => array(
+			'limit' => 'Aantal recente registraties; standaard 25, minimaal 1, maximaal 100.',
+			'language' => 'Taal van de soortnaam: nl (standaard) of en, ongeacht hoofdletters. Ontbrekende vertalingen of onbekende talen vallen terug op common_name.',
+		),
+		'parameter_examples' => array( 'limit' => '[backyard_birds_log limit="50"]', 'language' => '[backyard_birds_log language="nl" limit="50"]' ),
 		'description' => 'De laatste vogelregistraties met tijd, soort en confidence. Nieuwste bovenaan, in de WordPress-tijdzone.',
 	);
 	return $entries;
