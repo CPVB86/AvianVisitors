@@ -50,3 +50,46 @@
 	min-height: 1.5em;
 	margin: 6px 0;
 }
+
+.backyard-commands,
+.backyard-command-details {
+	max-width: 1100px;
+}
+
+.backyard-command {
+	display: grid;
+	grid-template-columns: minmax(160px, 1fr) minmax(0, 3fr);
+	align-items: center;
+	gap: 4px 16px;
+	padding: 8px 0;
+	border-bottom: 1px solid #dcdcde;
+}
+
+.backyard-command code {
+	overflow-wrap: anywhere;
+}
+
+.backyard-command .backyard-copy-status {
+	grid-column: 2;
+	min-height: 0;
+	margin: 0;
+}
+
+.backyard-command-details {
+	margin-top: 16px;
+}
+
+.backyard-command-details summary {
+	padding: 12px 0;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+@media (max-width: 600px) {
+	.backyard-command {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	.backyard-command .backyard-copy-status {
+		grid-column: 1;
+	}
+}

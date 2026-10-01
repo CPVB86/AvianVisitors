@@ -47,6 +47,13 @@ Gebruik HTTPS of een versleutelde privéverbinding (zoals Tailscale).
 
 ## Birds-shortcode
 
+De Handleiding heeft ook vier veelgebruikte, kopieerbare beheercommando’s en
+een standaard ingeklapt overzicht voor PowerShell en de Pi na SSH. API-tests
+vragen het token verborgen in PowerShell op; het WordPress-token komt nooit
+in deze commando’s terecht. Pi-paden/services volgen het aangeleverde spiekbriefje;
+`operations.status` is niet in deze repository aanwezig. Git ophalen gebruikt
+de ingestelde trackingbranch, zonder een branchnaam vast te leggen.
+
 Onder **Handleiding → Shortcodes** staat elke geregistreerde shortcode in een
 eigen tegel met uitleg en parameters. Klik op de code om deze te kopiëren;
 een melding bevestigt het resultaat. Dit werkt ook met toetsenbordbediening.

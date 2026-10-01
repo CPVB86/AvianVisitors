@@ -2,7 +2,7 @@
 document.querySelectorAll('.backyard-copy-shortcode').forEach((button) => {
 	button.addEventListener('click', async () => {
 		const code = button.querySelector('code');
-		const status = button.closest('.backyard-shortcode-tile').querySelector('.backyard-copy-status');
+		const status = button.closest('.backyard-copy-item').querySelector('.backyard-copy-status');
 		status.textContent = '';
 		let copied = false;
 		try {

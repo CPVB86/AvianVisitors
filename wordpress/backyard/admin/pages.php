@@ -1,5 +1,6 @@
 <?php
 defined( 'ABSPATH' ) || exit;
+require_once __DIR__ . '/commands.php';
 
 add_action( 'admin_menu', function () {
 	add_menu_page( 'Backyard', 'Backyard', 'manage_options', 'backyard', 'backyard_settings_page', 'dashicons-carrot' );
@@ -19,8 +20,8 @@ add_action( 'admin_enqueue_scripts', function ( $hook ) {
 	if ( 'backyard_page_backyard-manual' !== $hook ) {
 		return;
 	}
-	wp_enqueue_style( 'backyard-manual', plugins_url( 'manual.css', __FILE__ ), array(), '0.2.1' );
-	wp_enqueue_script( 'backyard-manual', plugins_url( 'manual.js', __FILE__ ), array(), '0.2.1', true );
+	wp_enqueue_style( 'backyard-manual', plugins_url( 'manual.css', __FILE__ ), array(), '0.2.2' );
+	wp_enqueue_script( 'backyard-manual', plugins_url( 'manual.js', __FILE__ ), array(), '0.2.2', true );
 } );
 
 function backyard_require_admin() {
@@ -54,7 +55,9 @@ function backyard_settings_page() {
 function backyard_manual_page() {
 	backyard_require_admin();
 	echo '<div class="wrap"><h1>Backyard handleiding</h1><p>Stel onder Backyard → Instellingen de API base URL in, sla deze op en klik op Test verbinding.</p>';
-	echo '<p>Een privé-adres zoals 192.168.1.31 werkt alleen als de WordPress-server dat netwerk kan bereiken.</p><h2>Shortcodes</h2>';
+	echo '<p>Een privé-adres zoals 192.168.1.31 werkt alleen als de WordPress-server dat netwerk kan bereiken.</p>';
+	backyard_manual_commands();
+	echo '<h2>Shortcodes</h2>';
 	$entries = backyard_shortcode_docs();
 	if ( ! $entries ) {
 		echo '<p>Er zijn nog geen publieke shortcodes beschikbaar.</p>';
@@ -63,7 +66,7 @@ function backyard_manual_page() {
 	}
 	echo '<div class="backyard-shortcode-grid">';
 	foreach ( $entries as $entry ) {
-		echo '<section class="backyard-shortcode-tile"><h3>' . esc_html( $entry['module'] ) . '</h3>';
+		echo '<section class="backyard-shortcode-tile backyard-copy-item"><h3>' . esc_html( $entry['module'] ) . '</h3>';
 		echo '<button type="button" class="backyard-copy-shortcode" aria-label="' . esc_attr( 'Kopieer shortcode ' . $entry['shortcode'] ) . '"><code>' . esc_html( $entry['shortcode'] ) . '</code><span class="dashicons dashicons-admin-page" aria-hidden="true"></span></button>';
 		echo '<p class="backyard-copy-status" role="status" aria-live="polite"></p>';
 		echo '<p>' . esc_html( $entry['description'] ) . '</p><dl>';
