@@ -1,5 +1,8 @@
 # AvianVisitors
 
+De WordPress-plugin **Backyard** (fase 1) staat in
+[wordpress/backyard/](wordpress/backyard/README.md), met installatie- en API-testinstructies.
+
 *A live bird collage from your window.*
 
 ## Backyard backend (nieuwe fundering)

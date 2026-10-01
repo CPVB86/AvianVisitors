@@ -1,0 +1,73 @@
+# Backyard WordPress-plugin — fase 1
+
+Kleine adminplugin voor WordPress 6.0+ en PHP 7.4+. Geen Composer, buildstap,
+publieke shortcodes, cronjobs of lokale kopie van detecties. De API/Pi blijft
+de bron van waarheid. Alleen de base URL wordt als WordPress-optie opgeslagen.
+
+## Installatie
+
+Kopieer deze volledige map `backyard` naar `wp-content/plugins/backyard` op
+de WordPress-server van backyard.runiversity.nl. Activeer **Backyard** onder
+**Plugins**. Alternatief: zip deze map inclusief de bovenliggende mapnaam
+`backyard` en upload via **Plugins → Nieuwe plugin → Plugin uploaden**.
+De Python-backend in de repositorymap `backyard/` hoort niet in de pluginzip.
+
+Activatie voegt alleen de standaardinstelling toe, zonder bestaande waarden
+te overschrijven. Deactivatie behoudt instellingen. Er zijn geen taken om te
+stoppen, tabellen om te verwijderen of rewrite-regels om te vernieuwen.
+
+## API-verbinding testen
+
+1. Open **Backyard → Instellingen** als beheerder (`manage_options`).
+2. Vul de base URL in, standaard `http://192.168.1.31:8010`, zonder `/api/health`.
+3. Klik **Instellingen opslaan**, daarna **Test verbinding**.
+4. Een geldig antwoord `{"status":"ok","service":"backyard","database":"ok"}`
+   toont **API bereikbaar — database ok**. Databasefalen (HTTP 503), HTTP-fouten,
+   ongeldige antwoorden en verbindingsfouten worden afzonderlijk gemeld.
+
+De test gebruikt de opgeslagen URL, doet één server-side GET en wacht maximaal
+5 seconden. Redirects worden niet gevolgd; HTTPS-certificaatcontrole blijft aan.
+LAN-adressen zijn bewust toegestaan voor de Pi. Alleen beheerders kunnen de
+URL aanpassen/testen; beide formulieren gebruiken WordPress-noncecontrole.
+Gebruik geen inloggegevens of tokens in de URL.
+
+Een extern gehoste WordPress-server kan `192.168.1.31` niet vanzelf bereiken.
+Er is een netwerkroute nodig (bijvoorbeeld een privéverbinding), en de API moet
+op die interface luisteren. De backend luistert volgens zijn huidige README
+standaard alleen op loopback. Publiceer de API niet onbeveiligd om dit op te lossen.
+Browser-CORS is voor deze server-side verzoeken niet nodig.
+
+## Uitbreiden in fase 2
+
+- `backyard.php`: bootstrap, lifecycle en laden van vier onafhankelijke modules.
+- `includes/settings.php`: Settings API en URL-validatie.
+- `includes/class-backyard-api-client.php`: gedeelde read-only WordPress HTTP-client.
+- `modules/<module>/<module>.php`: eigen modulecode en adminpaginabeschrijving.
+- Birds biedt alvast `backyard_birds_detections($limit = 50)` voor
+  `/api/birds/detections?limit=50` (1–100), met JSON of `WP_Error` als resultaat.
+  De placeholderpagina roept deze functie nog niet aan.
+- `admin/pages.php`: standaard WordPress-adminpagina's; hoofdmenu met
+  `dashicons-visibility`, zonder maatwerk voor submenu-iconen.
+- `includes/shortcodes.php`: documentatieregister via filter
+  `backyard_shortcode_docs`. Modules voegen entries toe met `module`, `shortcode`,
+  `parameters` (naam → toelichting) en `description`. Een toekomstige module
+  registreert de echte shortcode apart met `add_shortcode`; dit filter verzorgt
+  uitsluitend de handleiding. Alle velden worden als tekst ge-escaped.
+
+Volgende fase: netwerkbereikbaarheid/authenticatie afspreken en Birds-presentatie
+ontwerpen op het bestaande detectiecontract. Nog geen dashboard, synchronisatie,
+frontend, audio, grafieken, filters of functionele Bats/Weather/Garden-module.
+
+## Checks
+
+Vanuit de repository-root met PHP op PATH:
+
+```sh
+php wordpress/tests/test-backyard.php
+```
+
+De tests gebruiken WordPress-testdoubles en controleren API-contracten, fouten,
+URL-validatie, begrenzing, capability/nonce-gating en escaping. Ze vervangen geen
+test in een actieve WordPress-installatie. Alle plugin- en testbestanden zijn
+met PHP 8.4 gelint en de contracttests zijn uitgevoerd. Activatie/menuweergave
+in echte WordPress en bereikbaarheid vanaf de hosting zijn nog niet uitgevoerd.
