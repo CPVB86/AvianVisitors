@@ -20,7 +20,7 @@ add_action( 'admin_enqueue_scripts', function ( $hook ) {
 	if ( ! in_array( $hook, array( 'backyard_page_backyard-manual', 'toplevel_page_backyard' ), true ) ) {
 		return;
 	}
-	wp_enqueue_style( 'backyard-manual', plugins_url( 'manual.css', __FILE__ ), array(), '0.2.4' );
+	wp_enqueue_style( 'backyard-manual', plugins_url( 'manual.css', __FILE__ ), array(), '0.2.5' );
 	if ( 'backyard_page_backyard-manual' === $hook ) {
 		wp_enqueue_script( 'backyard-manual', plugins_url( 'manual.js', __FILE__ ), array(), '0.2.3', true );
 	}
@@ -80,11 +80,16 @@ function backyard_manual_page() {
 			echo '<button type="button" class="backyard-copy-shortcode" aria-label="' . esc_attr( 'Kopieer shortcode ' . $entry['shortcode'] ) . '"><code>' . esc_html( $entry['shortcode'] ) . '</code><span class="dashicons dashicons-admin-page" aria-hidden="true"></span></button>';
 			echo '<p class="backyard-copy-status screen-reader-text" role="status" aria-live="polite"></p>';
 			if ( $entry['parameters'] ) {
-				echo '<details class="backyard-parameters"><summary>Parameters</summary><dl>';
+				echo '<details class="backyard-parameters"><summary>Parameters</summary><table class="backyard-parameter-table"><thead><tr><th scope="col">Parameter</th><th scope="col">Toelichting</th></tr></thead><tbody>';
 				foreach ( $entry['parameters'] as $name => $description ) {
-					echo '<dt><code>' . esc_html( $name ) . '</code></dt><dd>' . esc_html( $description ) . '</dd>';
+					echo '<tr><th scope="row"><code>' . esc_html( $name ) . '</code></th><td>' . esc_html( $description );
+					if ( isset( $entry['parameter_examples'][ $name ] ) ) {
+						$example = $entry['parameter_examples'][ $name ];
+						echo '<div class="backyard-copy-item backyard-parameter-example"><span>Voorbeeld:</span> <button type="button" class="backyard-copy-shortcode" aria-label="' . esc_attr( 'Kopieer voorbeeld ' . $example ) . '"><code><em>' . esc_html( $example ) . '</em></code><span class="dashicons dashicons-admin-page" aria-hidden="true"></span></button><span class="backyard-copy-status screen-reader-text" role="status" aria-live="polite"></span></div>';
+					}
+					echo '</td></tr>';
 				}
-				echo '</dl></details>';
+				echo '</tbody></table></details>';
 			}
 			echo '</div>';
 		}

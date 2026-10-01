@@ -107,6 +107,55 @@
 	cursor: pointer;
 }
 
+.backyard-parameter-table {
+	width: 100%;
+	margin-top: 10px;
+	border-collapse: collapse;
+	text-align: left;
+}
+
+.backyard-parameter-table th,
+.backyard-parameter-table td {
+	padding: 10px 12px;
+	vertical-align: top;
+	border-bottom: 1px solid #dcdcde;
+}
+
+.backyard-parameter-table thead {
+	background: #f6f7f7;
+}
+
+.backyard-parameter-table tbody th {
+	width: 20%;
+	font-weight: normal;
+}
+
+.backyard-parameter-table td,
+.backyard-parameter-example code {
+	font-size: 12px;
+}
+
+.backyard-parameter-example {
+	margin-top: 8px;
+}
+
+.backyard-parameter-example .backyard-copy-shortcode {
+	display: inline-flex;
+	width: auto;
+	max-width: 100%;
+	margin-top: 4px;
+	padding: 6px 8px;
+}
+
+.backyard-shortcode-row + .backyard-shortcode-row {
+	border-top: 1px solid #dcdcde;
+}
+
+.backyard-shortcode-row {
+	border-bottom: 0;
+	padding: 16px 0;
+}
+
 .backyard-card .form-table input.regular-text {
 	width: 100%;
 	max-width: 520px;

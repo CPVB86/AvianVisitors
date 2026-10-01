@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Backyard
  * Description: Modulaire, alleen-lezen verbinding met de Backyard API.
- * Version: 0.2.4
+ * Version: 0.2.5
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Text Domain: backyard
