@@ -12,6 +12,7 @@ function backyard_manual_commands() {
 	echo '<div class="backyard-commands">';
 	foreach ( array(
 		array( 'SSH verbinden · Windows', $ssh ),
+		array( 'Naar Backyard-map · Pi na SSH', 'cd ~/Backyard' ),
 		array( 'Backyard status · Pi na SSH', $status ),
 		array( 'Live detectorlog · Pi na SSH', $logs ),
 		array( 'Publieke API-test · Windows', $public_test ),
