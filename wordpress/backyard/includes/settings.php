@@ -37,7 +37,6 @@ add_action( 'admin_init', 'backyard_register_settings' );
 
 function backyard_api_url_field() {
 	printf( '<input type="url" class="regular-text" id="backyard_api_base_url" name="backyard_api_base_url" value="%s" required>', esc_attr( get_option( 'backyard_api_base_url', BACKYARD_DEFAULT_API_URL ) ) );
-	echo '<p class="description">Base URL zonder /api/health. De WordPress-server moet dit adres kunnen bereiken.</p>';
 }
 
 function backyard_sanitize_api_token( $value ) {
