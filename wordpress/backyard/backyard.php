@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Backyard
  * Description: Modulaire, alleen-lezen verbinding met de Backyard API.
- * Version: 0.1.0
+ * Version: 0.2.0
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Text Domain: backyard
@@ -16,6 +16,7 @@ require_once __DIR__ . '/includes/shortcodes.php';
 
 function backyard_activate() {
 	add_option( 'backyard_api_base_url', BACKYARD_DEFAULT_API_URL );
+	add_option( 'backyard_api_token', '', '', false );
 }
 
 function backyard_deactivate() {

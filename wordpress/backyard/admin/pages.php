@@ -2,14 +2,16 @@
 defined( 'ABSPATH' ) || exit;
 
 add_action( 'admin_menu', function () {
-	add_menu_page( 'Backyard', 'Backyard', 'manage_options', 'backyard', 'backyard_settings_page', 'dashicons-visibility' );
-	add_submenu_page( 'backyard', 'Backyard instellingen', 'Instellingen', 'manage_options', 'backyard', 'backyard_settings_page' );
+	add_menu_page( 'Backyard', 'Backyard', 'manage_options', 'backyard', 'backyard_settings_page', 'dashicons-carrot' );
 	foreach ( backyard_modules() as $slug => $module ) {
 		add_submenu_page( 'backyard', $module['title'], $module['title'], 'manage_options', 'backyard-' . $slug, function () use ( $module ) {
 			backyard_require_admin();
 			echo '<div class="wrap"><h1>' . esc_html( $module['title'] ) . '</h1><p>' . esc_html( $module['description'] ) . '</p></div>';
 		} );
 	}
+	// Replace WordPress's automatically inserted parent entry, after the modules.
+	remove_submenu_page( 'backyard', 'backyard' );
+	add_submenu_page( 'backyard', 'Backyard instellingen', 'Instellingen', 'manage_options', 'backyard', 'backyard_settings_page' );
 	add_submenu_page( 'backyard', 'Backyard handleiding', 'Handleiding', 'manage_options', 'backyard-manual', 'backyard_manual_page' );
 } );
 

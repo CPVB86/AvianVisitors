@@ -1,8 +1,8 @@
-# Backyard WordPress-plugin — fase 1
+# Backyard WordPress-plugin
 
-Kleine adminplugin voor WordPress 6.0+ en PHP 7.4+. Geen Composer, buildstap,
-publieke shortcodes, cronjobs of lokale kopie van detecties. De API/Pi blijft
-de bron van waarheid. Alleen de base URL wordt als WordPress-optie opgeslagen.
+Kleine plugin voor WordPress 6.0+ en PHP 7.4+. Geen Composer, buildstap,
+cronjobs of lokale kopie van detecties. De API/Pi blijft de bron van waarheid.
+Alleen de base URL en het API-token worden als WordPress-opties opgeslagen.
 
 ## Installatie
 
@@ -20,7 +20,7 @@ stoppen, tabellen om te verwijderen of rewrite-regels om te vernieuwen.
 
 1. Open **Backyard → Instellingen** als beheerder (`manage_options`).
 2. Vul de base URL in, standaard `http://192.168.1.31:8010`, zonder `/api/health`.
-3. Klik **Instellingen opslaan**, daarna **Test verbinding**.
+3. Vul het API-token van de Pi in. Klik **Instellingen opslaan**, daarna **Test verbinding**.
 4. Een geldig antwoord `{"status":"ok","service":"backyard","database":"ok"}`
    toont **API bereikbaar — database ok**. Databasefalen (HTTP 503), HTTP-fouten,
    ongeldige antwoorden en verbindingsfouten worden afzonderlijk gemeld.
@@ -31,32 +31,61 @@ LAN-adressen zijn bewust toegestaan voor de Pi. Alleen beheerders kunnen de
 URL aanpassen/testen; beide formulieren gebruiken WordPress-noncecontrole.
 Gebruik geen inloggegevens of tokens in de URL.
 
+Het tokenveld blijft na opslaan leeg: leeg opslaan behoudt het bestaande token,
+een nieuw geldig token vervangt het. Het opgeslagen token wordt nooit terug in
+HTML gezet en wordt niet via REST aangeboden. De Settings API bewaart het in de
+WordPress-database: behandel databaseback-ups daarom als vertrouwelijk. De client
+stuurt de Bearer-header uitsluitend server-side en volgt geen redirects. Bij
+401/403 toont de verbindingstest een authenticatiefout, zonder response/debugdata.
+
 Een extern gehoste WordPress-server kan `192.168.1.31` niet vanzelf bereiken.
 Er is een netwerkroute nodig (bijvoorbeeld een privéverbinding), en de API moet
 op die interface luisteren. De backend luistert volgens zijn huidige README
 standaard alleen op loopback. Publiceer de API niet onbeveiligd om dit op te lossen.
 Browser-CORS is voor deze server-side verzoeken niet nodig.
+Gebruik HTTPS of een versleutelde privéverbinding (zoals Tailscale).
 
-## Uitbreiden in fase 2
+## Birds-shortcode
+
+Plaats in een WordPress-shortcodeblok:
+
+```text
+[backyard_birds_log]
+[backyard_birds_log limit="50"]
+```
+
+Standaard 25, minimaal 1 en maximaal 100 registraties. De tabel toont Tijd,
+Soort, Latijnse naam en Confidence als percentage, nieuwste bovenaan. Tijden
+volgen de WordPress-tijdzone. Er zijn nette lege- en foutmeldingen. De shortcode
+leest uitsluitend de bestaande Birds-detectietabel via `/api/birds/detections`;
+geen demo-data, nieuwe taxonomie/policy of databasekopie. In deze backend zijn
+nog geen ingest- of observation/status-endpoints aanwezig.
+
+Route: browser → WordPress/PHP → authenticated Backyard API. Bezoekers krijgen
+alleen HTML; geen token, privé-API-URL, JavaScript-fetch, audio of afbeeldingen.
+Er is geen caching of polling. Latere mediaweergave kan dezelfde server-side
+API-client gebruiken met afzonderlijke WordPress-presentatie/proxylogica.
+
+## Structuur
 
 - `backyard.php`: bootstrap, lifecycle en laden van vier onafhankelijke modules.
 - `includes/settings.php`: Settings API en URL-validatie.
 - `includes/class-backyard-api-client.php`: gedeelde read-only WordPress HTTP-client.
 - `modules/<module>/<module>.php`: eigen modulecode en adminpaginabeschrijving.
-- Birds biedt alvast `backyard_birds_detections($limit = 50)` voor
+- Birds biedt `backyard_birds_detections($limit = 50)` voor
   `/api/birds/detections?limit=50` (1–100), met JSON of `WP_Error` als resultaat.
-  De placeholderpagina roept deze functie nog niet aan.
+  De shortcode gebruikt deze functie; de adminpagina doet geen datarequest.
 - `admin/pages.php`: standaard WordPress-adminpagina's; hoofdmenu met
-  `dashicons-visibility`, zonder maatwerk voor submenu-iconen.
+  `dashicons-carrot`, zonder maatwerk voor submenu-iconen. Volgorde: Birds, Bats,
+  Weather, Garden, Instellingen, Handleiding.
 - `includes/shortcodes.php`: documentatieregister via filter
   `backyard_shortcode_docs`. Modules voegen entries toe met `module`, `shortcode`,
   `parameters` (naam → toelichting) en `description`. Een toekomstige module
   registreert de echte shortcode apart met `add_shortcode`; dit filter verzorgt
   uitsluitend de handleiding. Alle velden worden als tekst ge-escaped.
 
-Volgende fase: netwerkbereikbaarheid/authenticatie afspreken en Birds-presentatie
-ontwerpen op het bestaande detectiecontract. Nog geen dashboard, synchronisatie,
-frontend, audio, grafieken, filters of functionele Bats/Weather/Garden-module.
+Geen dashboard, synchronisatie, audio, afbeeldingen, grafieken, filters of
+functionele Bats/Weather/Garden-module.
 
 ## Checks
 
@@ -67,7 +96,8 @@ php wordpress/tests/test-backyard.php
 ```
 
 De tests gebruiken WordPress-testdoubles en controleren API-contracten, fouten,
-URL-validatie, begrenzing, capability/nonce-gating en escaping. Ze vervangen geen
+URL/token-validatie, Bearer-header, shortcode, menuvolgorde, begrenzing,
+capability/nonce-gating en escaping. Ze vervangen geen
 test in een actieve WordPress-installatie. Alle plugin- en testbestanden zijn
 met PHP 8.4 gelint en de contracttests zijn uitgevoerd. Activatie/menuweergave
 in echte WordPress en bereikbaarheid vanaf de hosting zijn nog niet uitgevoerd.

@@ -11,18 +11,25 @@ class Backyard_API_Client {
 		if ( $query ) {
 			$url = add_query_arg( $query, $url );
 		}
+		$token = get_option( 'backyard_api_token', '' );
+		if ( ! is_string( $token ) || ! preg_match( '/^[A-Za-z0-9_-]{43,128}$/D', $token ) ) {
+			return new WP_Error( 'backyard_token', 'Stel eerst een geldig API-token in bij Backyard.' );
+		}
 		// The administrator deliberately selects a LAN host. Do not follow redirects.
 		$response = wp_remote_get( $url, array(
 			'timeout' => 5,
 			'redirection' => 0,
 			'limit_response_size' => 1048576,
-			'headers' => array( 'Accept' => 'application/json' ),
+			'headers' => array( 'Accept' => 'application/json', 'Authorization' => 'Bearer ' . $token ),
 		) );
 		if ( is_wp_error( $response ) ) {
-			return new WP_Error( 'backyard_connection', 'API niet bereikbaar: ' . $response->get_error_message() );
+			return new WP_Error( 'backyard_connection', 'API niet bereikbaar. Controleer de URL en netwerkverbinding.' );
 		}
 		$code = wp_remote_retrieve_response_code( $response );
 		$data = json_decode( wp_remote_retrieve_body( $response ), true );
+		if ( 401 === $code || 403 === $code ) {
+			return new WP_Error( 'backyard_auth', 'API-authenticatie geweigerd. Controleer het ingestelde token.' );
+		}
 		if ( $code < 200 || $code >= 300 ) {
 			return new WP_Error( 'backyard_http', sprintf( 'API antwoordt met HTTP %d.', $code ), array( 'status' => $code, 'body' => $data ) );
 		}

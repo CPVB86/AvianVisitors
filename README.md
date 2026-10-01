@@ -1,6 +1,6 @@
 # AvianVisitors
 
-De WordPress-plugin **Backyard** (fase 1) staat in
+De WordPress-plugin **Backyard** (API-authenticatie en Birds-logshortcode) staat in
 [wordpress/backyard/](wordpress/backyard/README.md), met installatie- en API-testinstructies.
 
 *A live bird collage from your window.*

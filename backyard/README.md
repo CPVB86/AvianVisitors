@@ -26,6 +26,8 @@ Core importeert geen audio-, hardware- of AI-code.
 ## Local development / demo mode
 
 Python 3.11+; deze fase is uitgevoerd op Windows met Python 3.14.
+Stel eerst `BACKYARD_API_TOKEN` in zoals hieronder beschreven (environment of
+`backyard/.env`); zonder geldig token start de API niet.
 Vanaf de repository-root, PowerShell:
 
 ```powershell
@@ -48,13 +50,14 @@ Python met venv/pip moet beschikbaar zijn. Er worden geen OS-pakketten of
 services automatisch geïnstalleerd. Stop met Ctrl+C. Poort 8010 voorkomt
 conflict met de bestaande AvianVisitors-demo op 8000.
 
-Open http://127.0.0.1:8010/api/health of test in een tweede terminal:
+Test in een tweede terminal met hetzelfde token in de shellomgeving:
 
 ```powershell
-Invoke-RestMethod http://127.0.0.1:8010/api/health
+Invoke-RestMethod http://127.0.0.1:8010/api/health -Headers @{ Authorization = "Bearer $env:BACKYARD_API_TOKEN" }
 ```
 
-Op Linux: `curl --fail http://127.0.0.1:8010/api/health`.
+Op Linux: `curl --fail -H "Authorization: Bearer $BACKYARD_API_TOKEN" http://127.0.0.1:8010/api/health`.
+De shell laadt `.env` niet automatisch. Een browserbezoek zonder header geeft 401.
 
 Verwacht HTTP 200:
 ```json
@@ -64,12 +67,56 @@ Verwacht HTTP 200:
 De healthcheck voert werkelijk SELECT 1 uit; databasefalen geeft HTTP 503.
 `GET /api/birds/detections?limit=50` geeft aanvankelijk `[]`; maximum 100.
 Er is nog geen invoerendpoint, demo-seeding, statistiek of afbeeldingregistratie.
-Swagger staat op /docs (de Swagger-webinterface laadt CDN-assets; de API zelf
-heeft geen internet nodig). /openapi.json werkt lokaal.
+Swagger staat op /docs (laadt CDN-assets); /openapi.json beschrijft de API.
+Ook deze documentatie/schema-routes vereisen de Bearer-header; rechtstreeks
+openen in een browser zonder header geeft 401. Gebruik voor testen een HTTP-client.
+Alle `/api/*`-verzoeken, inclusief lokale clients, vereisen de Bearer-header.
+
+## API-token op de Pi / systemd
+
+Genereer eenmalig een sterk random token op de Pi:
+
+```bash
+python3 -c 'import secrets; print(secrets.token_urlsafe(32))'
+```
+
+Dit levert 32 random bytes (256 bits), URL-veilig gecodeerd. Zet het resultaat
+als `BACKYARD_API_TOKEN=<gegenereerd token>` in `backyard/.env`, of in het reeds
+gebruikte systemd `EnvironmentFile`. Kopieer `.env.example` alleen bij een nieuwe
+installatie; overschrijf geen bestaande configuratie. Bescherm het bestand met
+`chmod 600` en zorg dat de API-servicegebruiker het kan lezen. Commit het nooit.
+Windows: genereer met `python -c "import secrets; print(secrets.token_urlsafe(32))"`.
+
+Het token is verplicht, 43–128 tekens (`A–Z`, `a–z`, cijfers, `_`, `-`). Configuratie
+zonder token of met een ongeldig token stopt de start; er is geen open fallback.
+Elke `/api/*`-route vereist `Authorization: Bearer <token>`, inclusief health,
+lokale requests, onbekende routes en toekomstige modules. Vergelijking gebeurt
+constant-time. Foute/ontbrekende tokens geven een generieke 401 en worden niet
+gelogd. Gebruik HTTPS of een privé versleuteld netwerk zoals Tailscale voor
+server-to-server transport; Bearer-authenticatie versleutelt HTTP zelf niet.
+
+Herstart de API-service na configuratie/rotatie, bijvoorbeeld
+`sudo systemctl restart backyard-api.service` **als de bestaande unit zo heet**.
+Gebruik anders de werkelijk geïnstalleerde unitnaam. Alleen bij wijziging van
+het unitbestand is vooraf `sudo systemctl daemon-reload` nodig.
+
+Deze repository bevat nog geen Backyard-detectorclient, ingestendpoint of
+systemd-units. Er is dus geen bestaande detectorclient aangepast. Als de Pi
+aanvullende, niet ingecheckte detectorcode heeft, moet die hetzelfde token uit
+zijn environment lezen en bij ieder API-request de Bearer-header meesturen;
+herstart dan ook die detectorservice na het instellen/roteren. Er is bewust
+geen uitzondering voor localhost. Breng die code eerst onder versiebeheer om
+de volledige detector→API-keten hier te kunnen testen. Observation/policy-logica
+en de bestaande Birds-database zijn niet gewijzigd.
+
+Stel hetzelfde token in onder **WordPress → Backyard → Instellingen**.
+Rotatie: vervang het token op de API, herstart betrokken services en sla het
+nieuwe token in WordPress op. Er is geen overgangsperiode met twee tokens.
 
 ## Configuratie en opslag
 
-Een .env is optioneel: kopieer .env.example naar .env **in backyard/**.
+Een .env is optioneel als het verplichte token al via environment beschikbaar is.
+Anders: kopieer .env.example naar .env **in backyard/** en stel het token in.
 Omgevingsvariabelen hebben voorrang. De AvianVisitors-.env wordt niet geladen.
 BACKYARD_DATABASE_PATH is standaard data/backyard.sqlite3; relatieve paden
 zijn altijd relatief aan backyard/. BACKYARD_LOG_LEVEL is standaard INFO.
@@ -122,14 +169,19 @@ ExecStart, WorkingDirectory, EnvironmentFile en Restart=on-failure.
 De API moet onafhankelijk starten, zonder Requires op de detector.
 Consolelogs kunnen dan naar journald; retentie apart beoordelen voor de SD-kaart.
 Er zijn nu geen unitbestanden geïnstalleerd of systeeminstellingen aangepast.
-De API bindt standaard aan loopback, zonder authenticatie; LAN/publicatie en
-schrijftoegang vereisen een afzonderlijke bewuste configuratiefase.
+De API bindt standaard aan loopback en vereist Bearer-authenticatie; netwerk-
+bereikbaarheid en schrijftoegang vereisen afzonderlijke configuratie.
 
 Het eerdere docs/BIRDNET_BACKEND_ADVICE.md is historisch advies voor
 AvianVisitors. De nieuwe richting is Backyard als eigenaar, zonder Docker.
 ARM64, Raspberry Pi, audio en systemd zijn in deze Windows-ronde niet uitgevoerd.
 
 ## Uitgevoerde verificatie (29 september 2026)
+
+Aanvulling 1 oktober 2026: 18 backendtestcases slagen, inclusief centrale auth
+voor alle API-paden/methoden, ongeldige/dubbele headers, fail-closed configuratie,
+en het bestaande read-endpoint (volgorde, limiet, namen, tijd en confidence).
+De onderstaande HTTP-procescontrole is historisch, vóór authenticatie.
 
 - Nieuwe lokale venv, dependencies geïnstalleerd, pip check zonder conflicten.
 - Zes pytest-cases geslaagd: lege start, persistentie na herstart, UTC-conversie,
