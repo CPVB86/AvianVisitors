@@ -1,11 +1,7 @@
-.backyard-shortcode-grid {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
-	gap: 20px;
+.backyard-card {
+	box-sizing: border-box;
 	max-width: 1100px;
-}
-
-.backyard-shortcode-tile {
+	margin: 20px 0;
 	min-width: 0;
 	padding: 24px;
 	background: #fff;
@@ -14,7 +10,7 @@
 	overflow-wrap: anywhere;
 }
 
-.backyard-shortcode-tile h3 {
+.backyard-card > h2 {
 	margin-top: 0;
 }
 
@@ -47,8 +43,30 @@
 }
 
 .backyard-copy-status {
-	min-height: 1.5em;
-	margin: 6px 0;
+	margin: 0;
+}
+
+.backyard-copy-shortcode.is-copied {
+	animation: backyard-copy-glow 1.2s ease-out;
+}
+
+@keyframes backyard-copy-glow {
+	0%, 20% {
+		background-color: #d7f5df;
+		border-color: #218739;
+		outline-color: #218739;
+		box-shadow: 0 0 0 3px #21873940, 0 0 16px #21873950;
+	}
+	100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.backyard-copy-shortcode.is-copied {
+		animation: none;
+		background-color: #d7f5df;
+		border-color: #218739;
+		outline-color: #218739;
+	}
 }
 
 .backyard-commands,
@@ -67,6 +85,27 @@
 
 .backyard-command code {
 	overflow-wrap: anywhere;
+}
+
+.backyard-shortcode-row {
+	grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+}
+
+.backyard-command:last-child {
+	border-bottom: 0;
+}
+
+.backyard-command p {
+	margin: 6px 0;
+}
+
+.backyard-parameters summary {
+	cursor: pointer;
+}
+
+.backyard-card .form-table input.regular-text {
+	width: 100%;
+	max-width: 520px;
 }
 
 .backyard-command .backyard-copy-status {

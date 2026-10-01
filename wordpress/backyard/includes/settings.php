@@ -29,7 +29,7 @@ function backyard_register_settings() {
 		'sanitize_callback' => 'backyard_sanitize_api_url',
 		'show_in_rest' => false,
 	) );
-	add_settings_section( 'backyard_api', 'Backyard API', '__return_false', 'backyard' );
+	add_settings_section( 'backyard_api', '', '__return_false', 'backyard' );
 	add_settings_field( 'backyard_api_base_url', 'API base URL', 'backyard_api_url_field', 'backyard', 'backyard_api', array( 'label_for' => 'backyard_api_base_url' ) );
 	add_settings_field( 'backyard_api_token', 'API-token', 'backyard_api_token_field', 'backyard', 'backyard_api', array( 'label_for' => 'backyard_api_token' ) );
 }

@@ -8,7 +8,7 @@ function backyard_manual_commands() {
 	// Ask in the terminal, never embed the saved WordPress token in documentation.
 	$auth = ' -Headers @{ Authorization = "Bearer " + [System.Net.NetworkCredential]::new("", (Read-Host "API-token" -AsSecureString)).Password }';
 	$public_test = 'Invoke-RestMethod https://backyard.tail99c3bd.ts.net/api/health' . $auth;
-	echo '<h2>⭐ Meest gebruikt</h2><p>Klik om te kopiëren; plak en voer uit in de aangegeven terminal. De API-test vraagt je token verborgen op.</p>';
+	echo '<section class="backyard-card"><h2>Powershell en Pi CMD</h2>';
 	echo '<div class="backyard-commands">';
 	foreach ( array(
 		array( 'SSH verbinden · Windows', $ssh ),
@@ -48,11 +48,11 @@ function backyard_manual_commands() {
 	) as $label => $command ) {
 		backyard_manual_command( $label, $command );
 	}
-	echo '</div></details>';
+	echo '</div></details></section>';
 }
 
 function backyard_manual_command( $label, $command ) {
 	echo '<div class="backyard-command backyard-copy-item"><strong>' . esc_html( $label ) . '</strong>';
 	echo '<button type="button" class="backyard-copy-shortcode" aria-label="' . esc_attr( 'Kopieer: ' . $label ) . '"><code>' . esc_html( $command ) . '</code><span class="dashicons dashicons-admin-page" aria-hidden="true"></span></button>';
-	echo '<p class="backyard-copy-status" role="status" aria-live="polite"></p></div>';
+	echo '<p class="backyard-copy-status screen-reader-text" role="status" aria-live="polite"></p></div>';
 }

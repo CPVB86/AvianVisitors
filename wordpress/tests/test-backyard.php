@@ -40,7 +40,7 @@ function admin_url( $value ) { return '/wp-admin/' . $value; }
 function settings_errors() {}
 function settings_fields( $group ) {}
 function do_settings_sections( $page ) {}
-function submit_button( ...$args ) {}
+function submit_button( ...$args ) { $GLOBALS['submit_buttons'][] = $args; }
 function wp_nonce_field( $action ) {}
 function add_filter( $name, $callback ) { $GLOBALS['filter_callbacks'][ $name ][] = $callback; }
 function apply_filters( $name, $value ) { foreach ( $GLOBALS['filter_callbacks'][ $name ] ?? array() as $callback ) { $value = $callback( $value ); } return $GLOBALS['filters'][ $name ] ?? $value; }
@@ -91,7 +91,12 @@ check( backyard_birds_detections( 999 ) === array(), 'Empty detections valid' );
 check( substr( end( $requests )[0], -9 ) === 'limit=100', 'Limit bounded' );
 $_SERVER['REQUEST_METHOD'] = 'GET';
 $before = count( $requests );
-page();
+$GLOBALS['submit_buttons'] = array();
+$settings_html = page();
+check( $GLOBALS['submit_buttons'][0][4]['form'] === 'backyard-connection-test', 'Test button targets separate nonce form' );
+check( $GLOBALS['submit_buttons'][1][0] === 'Instellingen opslaan', 'General save button follows connection card' );
+check( strpos( $settings_html, 'id="backyard-connection-test"' ) > strpos( $settings_html, '</form>' ), 'Test form is not nested in settings form' );
+check( strpos( $settings_html, '<h2>PI Connection</h2>' ) !== false, 'Connection card' );
 check( count( $requests ) === $before, 'No health request on page load' );
 $_SERVER['REQUEST_METHOD'] = 'POST';
 $_POST['backyard_test_connection'] = '1';

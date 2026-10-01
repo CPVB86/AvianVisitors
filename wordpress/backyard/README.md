@@ -54,10 +54,13 @@ in deze commando’s terecht. Pi-paden/services volgen het aangeleverde spiekbri
 `operations.status` is niet in deze repository aanwezig. Git ophalen gebruikt
 de ingestelde trackingbranch, zonder een branchnaam vast te leggen.
 
-Onder **Handleiding → Shortcodes** staat elke geregistreerde shortcode in een
-eigen tegel met uitleg en parameters. Klik op de code om deze te kopiëren;
-een melding bevestigt het resultaat. Dit werkt ook met toetsenbordbediening.
-De bijbehorende CSS en JavaScript worden alleen op de adminhandleiding geladen.
+De Handleiding groepeert commando’s en shortcodes in kaarten. Shortcodes hebben
+links een titel, korte uitleg en uitklapbare parameters, rechts de kopieerbare code.
+Een groene gloed die uitdooft bevestigt het kopiëren; schermlezers ontvangen een
+tekstbevestiging. Dit werkt ook met toetsenbordbediening. CSS wordt op Handleiding
+en Instellingen geladen; kopieer-JavaScript alleen op Handleiding.
+Instellingen groepeert URL, token en testknop in **PI Connection**, met de algemene
+opslagknop buiten de kaart. De test blijft de opgeslagen verbinding gebruiken.
 
 Plaats in een WordPress-shortcodeblok:
 

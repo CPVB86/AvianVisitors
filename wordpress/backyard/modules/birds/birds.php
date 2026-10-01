@@ -43,9 +43,9 @@ function backyard_birds_log( $attributes = array() ) {
 add_shortcode( 'backyard_birds_log', 'backyard_birds_log' );
 add_filter( 'backyard_shortcode_docs', function ( $entries ) {
 	$entries[] = array(
-		'module' => 'Birds', 'shortcode' => '[backyard_birds_log]',
+		'module' => 'Birds', 'title' => 'Recente vogelregistraties', 'shortcode' => '[backyard_birds_log]',
 		'parameters' => array( 'limit' => 'Aantal recente registraties; standaard 25, minimaal 1, maximaal 100. Voorbeeld: [backyard_birds_log limit="50"].' ),
-		'description' => 'Toont echte vogelregistraties, nieuwste bovenaan. WordPress haalt de gegevens server-side op. Tijden volgen de WordPress-tijdzone.',
+		'description' => 'De laatste vogelregistraties met tijd, soort en confidence. Nieuwste bovenaan, in de WordPress-tijdzone.',
 	);
 	return $entries;
 } );
