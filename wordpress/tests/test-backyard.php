@@ -163,10 +163,10 @@ reply( 200, '{"unexpected":"object"}' );
 check( strpos( backyard_birds_log(), 'tijdelijk niet beschikbaar' ) !== false, 'Unexpected object is not a list' );
 $response = new WP_Error( 'transport', 'private ' . $token );
 check( backyard_birds_log() === '<p>Vogelregistraties zijn tijdelijk niet beschikbaar.</p>', 'Public error is generic' );
-$translated_bird = array_merge( $bird, array( 'common_name' => 'Great Tit', 'common_name_nl' => 'Koolmees' ) );
+$translated_bird = array_merge( $bird, array( 'common_name' => 'Great Tit', 'common_name_nl' => 'Koolmees', 'common_name_de' => 'Kohlmeise' ) );
 reply( 200, json_encode( array( $translated_bird ) ) );
 check( strpos( backyard_birds_log(), '<td>Koolmees</td>' ) !== false, 'Default language is Dutch' );
-foreach ( array( 'nl' => 'Koolmees', 'NL' => 'Koolmees', 'en' => 'Great Tit', 'EN' => 'Great Tit', 'unknown' => 'Great Tit' ) as $language => $name ) {
+foreach ( array( 'nl' => 'Koolmees', 'NL' => 'Koolmees', 'en' => 'Great Tit', 'EN' => 'Great Tit', 'de' => 'Kohlmeise', 'DE' => 'Kohlmeise', 'unknown' => 'Great Tit' ) as $language => $name ) {
 	check( strpos( backyard_birds_log( array( 'language' => $language, 'limit' => '50' ) ), '<td>' . $name . '</td>' ) !== false, 'Language selection and unknown-language fallback' );
 	check( substr( end( $requests )[0], -8 ) === 'limit=50', 'Language preserves limit' );
 }
@@ -175,7 +175,9 @@ foreach ( array( null, '', '   ', array() ) as $translation ) {
 	check( strpos( backyard_birds_log( array( 'language' => 'nl' ) ), '<td>Great Tit</td>' ) !== false, 'Unavailable translation falls back to common_name' );
 }
 unset( $translated_bird['common_name_nl'] );
+unset( $translated_bird['common_name_de'] );
 reply( 200, json_encode( array( $translated_bird ) ) );
+check( strpos( backyard_birds_log( array( 'language' => 'DE' ) ), '<td>Great Tit</td>' ) !== false, 'Missing German translation falls back' );
 check( strpos( backyard_birds_log(), '<td>Great Tit</td>' ) !== false, 'Missing translation field falls back' );
 $translated_bird['common_name_nl'] = '<script>translation</script>';
 reply( 200, json_encode( array( $translated_bird ) ) );
