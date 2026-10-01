@@ -15,6 +15,14 @@ add_action( 'admin_menu', function () {
 	add_submenu_page( 'backyard', 'Backyard handleiding', 'Handleiding', 'manage_options', 'backyard-manual', 'backyard_manual_page' );
 } );
 
+add_action( 'admin_enqueue_scripts', function ( $hook ) {
+	if ( 'backyard_page_backyard-manual' !== $hook ) {
+		return;
+	}
+	wp_enqueue_style( 'backyard-manual', plugins_url( 'manual.css', __FILE__ ), array(), '0.2.1' );
+	wp_enqueue_script( 'backyard-manual', plugins_url( 'manual.js', __FILE__ ), array(), '0.2.1', true );
+} );
+
 function backyard_require_admin() {
 	if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html( 'Je hebt geen toegang tot deze pagina.' ) );
@@ -50,14 +58,19 @@ function backyard_manual_page() {
 	$entries = backyard_shortcode_docs();
 	if ( ! $entries ) {
 		echo '<p>Er zijn nog geen publieke shortcodes beschikbaar.</p>';
+	} else {
+		echo '<p>Klik op een shortcode om deze naar het klembord te kopiëren.</p>';
 	}
+	echo '<div class="backyard-shortcode-grid">';
 	foreach ( $entries as $entry ) {
-		echo '<h3>' . esc_html( $entry['module'] ) . ': <code>' . esc_html( $entry['shortcode'] ) . '</code></h3>';
+		echo '<section class="backyard-shortcode-tile"><h3>' . esc_html( $entry['module'] ) . '</h3>';
+		echo '<button type="button" class="backyard-copy-shortcode" aria-label="' . esc_attr( 'Kopieer shortcode ' . $entry['shortcode'] ) . '"><code>' . esc_html( $entry['shortcode'] ) . '</code><span class="dashicons dashicons-admin-page" aria-hidden="true"></span></button>';
+		echo '<p class="backyard-copy-status" role="status" aria-live="polite"></p>';
 		echo '<p>' . esc_html( $entry['description'] ) . '</p><dl>';
 		foreach ( $entry['parameters'] as $name => $description ) {
 			echo '<dt><code>' . esc_html( $name ) . '</code></dt><dd>' . esc_html( $description ) . '</dd>';
 		}
-		echo '</dl>';
+		echo '</dl></section>';
 	}
-	echo '</div>';
+	echo '</div></div>';
 }

@@ -47,6 +47,11 @@ Gebruik HTTPS of een versleutelde privéverbinding (zoals Tailscale).
 
 ## Birds-shortcode
 
+Onder **Handleiding → Shortcodes** staat elke geregistreerde shortcode in een
+eigen tegel met uitleg en parameters. Klik op de code om deze te kopiëren;
+een melding bevestigt het resultaat. Dit werkt ook met toetsenbordbediening.
+De bijbehorende CSS en JavaScript worden alleen op de adminhandleiding geladen.
+
 Plaats in een WordPress-shortcodeblok:
 
 ```text
