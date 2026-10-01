@@ -19,7 +19,6 @@ function backyard_manual_commands() {
 		backyard_manual_command( $command[0], $command[1] );
 	}
 	echo '</div><details class="backyard-command-details"><summary>Meer commando’s · Windows en Raspberry Pi</summary>';
-	echo '<p>Pi-spiekbrief voor <code>cpvb86@192.168.1.31</code>, <code>~/Backyard</code> en de services <code>backyard-api</code>/<code>backyard-detector</code>. De statuscommando’s vereisen de op de Pi geïnstalleerde module <code>operations.status</code>; deze staat niet in deze repository.</p>';
 	echo '<h3>PowerShell (Windows)</h3><div class="backyard-commands">';
 	foreach ( array(
 		'Pi pingen' => 'ping 192.168.1.31',
