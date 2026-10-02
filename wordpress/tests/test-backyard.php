@@ -153,7 +153,7 @@ foreach ( array( '50' => 50, '999' => 100, '-3' => 1, 'nonsense' => 25 ) as $inp
 $bird = array( 'id' => '12345678-1234-4234-8234-123456789abc', 'domain' => 'bird', 'status' => 'auto_accepted', 'timestamp' => '2026-10-01T10:00:00Z', 'common_name' => '<script>alert(1)</script>', 'scientific_name' => 'Parus major', 'confidence' => 0.944 );
 reply( 200, json_encode( array( $bird ) ) );
 $html = backyard_birds_log();
-check( strpos( $html, '<table' ) !== false && strpos( $html, '94,4%' ) !== false && strpos( $html, '01-10-2026 10:00' ) !== false, 'Semantic table, time and percentage' );
+check( strpos( $html, '<table' ) !== false && strpos( $html, '94,4%' ) !== false && strpos( $html, '01-10-2026 10:00:00</time>' ) !== false, 'Semantic table, time including seconds and percentage' );
 check( strpos( $html, '<script>' ) === false && strpos( $html, '&lt;script&gt;' ) !== false, 'Species escaped' );
 check( strpos( $html, $token ) === false && strpos( $html, $option ) === false, 'No token or private URL in shortcode HTML' );
 reply( 200, json_encode( array( array_merge( $bird, array( 'common_name' => null, 'scientific_name' => null ) ) ) ) );

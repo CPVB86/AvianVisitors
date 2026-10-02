@@ -64,7 +64,7 @@ function backyard_birds_log( $attributes = array() ) {
 		if ( false === $timestamp ) {
 			return $error;
 		}
-		$html .= '<tr><td><time datetime="' . esc_attr( gmdate( 'c', $timestamp ) ) . '">' . esc_html( wp_date( 'd-m-Y H:i', $timestamp ) ) . '</time></td>';
+		$html .= '<tr><td><time datetime="' . esc_attr( gmdate( 'c', $timestamp ) ) . '">' . esc_html( wp_date( 'd-m-Y H:i:s', $timestamp ) ) . '</time></td>';
 		$name = $row[ $name_field ] ?? null;
 		if ( ! is_string( $name ) || '' === trim( $name ) ) {
 			$name = $row['common_name'] ?? '—';
