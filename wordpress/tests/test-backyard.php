@@ -26,13 +26,16 @@ function untrailingslashit( $value ) { return rtrim( $value, '/' ); }
 function esc_url_raw( $value, $protocols ) { return preg_match( '#^https?://#', $value ) ? $value : ''; }
 function wp_parse_url( $value ) { return parse_url( $value ); }
 function add_settings_error( ...$args ) { $GLOBALS['setting_error'] = true; }
-function add_query_arg( $query, $url ) { return $url . '?' . http_build_query( $query ); }
-function wp_remote_get( $url, $args ) { $GLOBALS['requests'][] = array( $url, $args ); return $GLOBALS['response']; }
+function add_query_arg( $query, $url, $target = null ) {
+	if ( null !== $target ) { $query = array( $query => $url ); $url = $target; }
+	return $url . ( false === strpos( $url, '?' ) ? '?' : '&' ) . http_build_query( $query );
+}
+function wp_remote_get( $url, $args ) { $GLOBALS['requests'][] = array( $url, $args ); return isset( $GLOBALS['http_handler'] ) ? call_user_func( $GLOBALS['http_handler'], $url, $args ) : $GLOBALS['response']; }
 function wp_remote_retrieve_response_code( $value ) { return $value['response']['code']; }
 function wp_remote_retrieve_body( $value ) { return $value['body']; }
 function current_user_can( $cap ) { return $GLOBALS['allowed'] && 'manage_options' === $cap; }
 function wp_die( $message ) { throw new RuntimeException( 'denied' ); }
-function check_admin_referer( $action ) { if ( ! $GLOBALS['nonce_ok'] || 'backyard_test_connection' !== $action ) { throw new RuntimeException( 'nonce' ); } }
+function check_admin_referer( $action ) { if ( ! $GLOBALS['nonce_ok'] || ( $GLOBALS['expected_nonce_action'] ?? 'backyard_test_connection' ) !== $action ) { throw new RuntimeException( 'nonce' ); } }
 function esc_html( $value ) { return htmlspecialchars( $value, ENT_QUOTES, 'UTF-8' ); }
 function esc_attr( $value ) { return esc_html( $value ); }
 function esc_url( $value ) { return esc_html( $value ); }
@@ -47,7 +50,7 @@ function apply_filters( $name, $value ) { foreach ( $GLOBALS['filter_callbacks']
 function add_shortcode( $name, $callback ) { $GLOBALS['shortcodes'][ $name ] = $callback; }
 function shortcode_atts( $defaults, $attributes, $name ) { return array_intersect_key( (array) $attributes, $defaults ) + $defaults; }
 function wp_date( $format, $time ) { return gmdate( $format, $time ); }
-function number_format_i18n( $number, $decimals ) { return number_format( $number, $decimals, ',', '.' ); }
+function number_format_i18n( $number, $decimals = 0 ) { return number_format( $number, $decimals, ',', '.' ); }
 function add_menu_page( $title, $label, $cap, $slug, $callback, $icon ) { $GLOBALS['menu_icon'] = $icon; }
 function add_submenu_page( $parent, $title, $label, $cap, $slug, $callback ) { if ( empty( $GLOBALS['menu'] ) ) { $GLOBALS['menu'][ $parent ] = 'Backyard'; } $GLOBALS['menu'][ $slug ] = $label; }
 function remove_submenu_page( $parent, $slug ) { unset( $GLOBALS['menu'][ $slug ] ); }
@@ -119,7 +122,7 @@ check( strpos( $manual, '[example]' ) !== false && strpos( $manual, '&lt;count&g
 
 foreach ( $GLOBALS['actions']['admin_menu'] as $callback ) { $callback(); }
 check( $GLOBALS['menu_icon'] === 'dashicons-carrot', 'Carrot icon' );
-check( array_values( $GLOBALS['menu'] ) === array( 'Birds', 'Bats', 'Weather', 'Garden', 'Instellingen', 'Handleiding' ), 'Menu order' );
+check( array_values( $GLOBALS['menu'] ) === array( 'Overzicht', 'Birds', 'Bats', 'Weather', 'Garden', 'Instellingen', 'Handleiding' ), 'Menu order' );
 check( $GLOBALS['shortcodes']['backyard_birds_log'] === 'backyard_birds_log', 'Shortcode registered' );
 check( backyard_sanitize_api_token( '' ) === $token, 'Blank token retains secret' );
 check( backyard_sanitize_api_token( $token ) === $token, 'Valid token accepted' );

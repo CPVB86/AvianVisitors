@@ -1,5 +1,8 @@
 <?php
 defined( 'ABSPATH' ) || exit;
+if ( is_admin() ) {
+	require_once __DIR__ . '/review.php';
+}
 
 /** Birds consumers share this read-only adapter. No requests on module load. */
 function backyard_birds_detections( $limit = 50 ) {
@@ -62,4 +65,9 @@ add_filter( 'backyard_shortcode_docs', function ( $entries ) {
 	return $entries;
 } );
 
-return array( 'title' => 'Birds', 'description' => 'Gebruik [backyard_birds_log] op een pagina om recente vogelregistraties te tonen. Zie Handleiding voor parameters.' );
+return array(
+	'title' => 'Birds',
+	'description' => 'Review van vogelwaarnemingen.',
+	'admin_page' => 'backyard_birds_admin_page',
+	'summary' => 'backyard_birds_summary',
+);

@@ -1,26 +1,30 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 require_once __DIR__ . '/commands.php';
+require_once __DIR__ . '/index.php';
 
 add_action( 'admin_menu', function () {
-	add_menu_page( 'Backyard', 'Backyard', 'manage_options', 'backyard', 'backyard_settings_page', 'dashicons-carrot' );
+	add_menu_page( 'Backyard', 'Backyard', 'manage_options', 'backyard', 'backyard_index_page', 'dashicons-carrot' );
+	add_submenu_page( 'backyard', 'Backyard overzicht', 'Overzicht', 'manage_options', 'backyard', 'backyard_index_page' );
 	foreach ( backyard_modules() as $slug => $module ) {
 		add_submenu_page( 'backyard', $module['title'], $module['title'], 'manage_options', 'backyard-' . $slug, function () use ( $module ) {
 			backyard_require_admin();
+			if ( ! empty( $module['admin_page'] ) && is_callable( $module['admin_page'] ) ) {
+				call_user_func( $module['admin_page'] );
+				return;
+			}
 			echo '<div class="wrap"><h1>' . esc_html( $module['title'] ) . '</h1><p>' . esc_html( $module['description'] ) . '</p></div>';
 		} );
 	}
-	// Replace WordPress's automatically inserted parent entry, after the modules.
-	remove_submenu_page( 'backyard', 'backyard' );
-	add_submenu_page( 'backyard', 'Backyard instellingen', 'Instellingen', 'manage_options', 'backyard', 'backyard_settings_page' );
+	add_submenu_page( 'backyard', 'Backyard instellingen', 'Instellingen', 'manage_options', 'backyard-settings', 'backyard_settings_page' );
 	add_submenu_page( 'backyard', 'Backyard handleiding', 'Handleiding', 'manage_options', 'backyard-manual', 'backyard_manual_page' );
 } );
 
 add_action( 'admin_enqueue_scripts', function ( $hook ) {
-	if ( ! in_array( $hook, array( 'backyard_page_backyard-manual', 'toplevel_page_backyard' ), true ) ) {
+	if ( ! in_array( $hook, array( 'backyard_page_backyard-manual', 'toplevel_page_backyard', 'backyard_page_backyard-settings', 'backyard_page_backyard-birds' ), true ) ) {
 		return;
 	}
-	wp_enqueue_style( 'backyard-manual', plugins_url( 'manual.css', __FILE__ ), array(), '0.2.5' );
+	wp_enqueue_style( 'backyard-manual', plugins_url( 'manual.css', __FILE__ ), array(), '0.3.0' );
 	if ( 'backyard_page_backyard-manual' === $hook ) {
 		wp_enqueue_script( 'backyard-manual', plugins_url( 'manual.js', __FILE__ ), array(), '0.2.3', true );
 	}
@@ -56,7 +60,7 @@ function backyard_settings_page() {
 	submit_button( 'Instellingen opslaan' );
 	echo '</form>';
 	// Separate form keeps testing independent of unsaved settings and their nonce.
-	echo '<form id="backyard-connection-test" method="post" action="' . esc_url( admin_url( 'admin.php?page=backyard' ) ) . '">';
+	echo '<form id="backyard-connection-test" method="post" action="' . esc_url( admin_url( 'admin.php?page=backyard-settings' ) ) . '">';
 	wp_nonce_field( 'backyard_test_connection' );
 	echo '</form></div>';
 }
