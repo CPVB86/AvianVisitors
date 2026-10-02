@@ -13,6 +13,7 @@ class ReviewRedirect extends RuntimeException {}
 function wp_safe_redirect( $url ) { throw new ReviewRedirect( $url ); }
 function render_review() { ob_start(); try { backyard_birds_admin_page(); return ob_get_contents(); } finally { ob_end_clean(); } }
 function render_index() { ob_start(); try { backyard_index_page(); return ob_get_contents(); } finally { ob_end_clean(); } }
+function wp_add_dashboard_widget( $id, $title, $callback ) { $GLOBALS['dashboard_widgets'][ $id ] = array( $title, $callback ); }
 function review_response( $code, $data ) { return array( 'response' => array( 'code' => $code ), 'body' => json_encode( $data ) ); }
 function submit_review( $decision ) {
 	$_SERVER['REQUEST_METHOD'] = 'POST';
@@ -72,6 +73,14 @@ $http_handler = function ( $url, $args ) use ( &$record, &$forced_post_code, &$c
 	return review_response( 200, $record );
 };
 
+$before = count( $requests );
+$allowed = false;
+foreach ( $GLOBALS['actions']['wp_dashboard_setup'] as $callback ) { $callback(); }
+check( empty( $GLOBALS['dashboard_widgets'] ), 'Dashboard widget only available to administrators' );
+$allowed = true;
+foreach ( $GLOBALS['actions']['wp_dashboard_setup'] as $callback ) { $callback(); }
+check( $GLOBALS['dashboard_widgets']['backyard_status'] === array( 'Backyard', 'backyard_index_page' ), 'Native dashboard widget registered for Screen Options' );
+check( count( $requests ) === $before, 'Dashboard registration does not fetch data' );
 $html = render_index();
 check( strpos( $html, '152 te reviewen waarnemingen' ) !== false && strpos( $html, 'page=backyard-birds' ) !== false, 'Uncapped linked summary count' );
 $html = render_review();

@@ -47,8 +47,10 @@ Gebruik HTTPS of een versleutelde privéverbinding (zoals Tailscale).
 
 ## Backyard-overzicht en Birds-review
 
-**Backyard → Overzicht** toont een compacte Birds-kaart met een klikbare,
-ongecapte teller van `pending_review` vogelwaarnemingen. **Backyard → Birds**
+Het WordPress **Dashboard** (`wp-admin/index.php`) toont voor beheerders de widget
+**Backyard**, zichtbaar/verbergbaar via **Scherminstellingen** en verplaatsbaar
+zoals andere dashboardwidgets. De Birds-regel bevat een klikbare, ongecapte
+teller van `pending_review` vogelwaarnemingen. **Backyard → Birds**
 toont Review: maximaal 50 meest recente waarnemingen met datum/tijd (WordPress-
 tijdzone), Nederlandse naam (fallback `common_name`), Latijnse naam, confidence,
 aantal supports, beschikbare audio en Bevestigen/Afwijzen. Na een actie volgt
@@ -73,7 +75,7 @@ Alle API-verzoeken gebruiken dezelfde server-side Bearer-client. Beheer vereist
 `manage_options`. Reviewacties gebruiken POST en een observation-specifieke nonce.
 Alleen `bird` wordt geaccepteerd, ook bij handmatig gemanipuleerde requests.
 Conflicten, ontbrekende audio en storingen krijgen vaste meldingen zonder API-
-debugdata. De bestaande publieke logshortcode en taalkeuze blijven ongewijzigd.
+debugdata. De publieke logshortcode gebruikt uitsluitend geaccepteerde observations.
 
 De audioplayer gebruikt uitsluitend een WordPress `admin-post.php`-URL met nonce.
 De proxy controleert login/rechten, nonce, UUID en bird-domein; hij construeert het
@@ -85,7 +87,7 @@ Alleen gecontroleerde audioheaders worden teruggestuurd; geen token of privé-UR
 Er zijn geen publieke audio-proxyroutes. Bij verlopen nonce de Birds-pagina herladen.
 
 Modules kunnen een `summary`-callback (tekst + admin-URL) en een `admin_page`-
-callback aanbieden. De hoofdpagina hoeft daardoor niet te wijzigen bij toekomstige
+callback aanbieden. De dashboardwidget hoeft daardoor niet te wijzigen bij toekomstige
 modulestatussen. Birds heeft nu uitsluitend Review; Overzicht/Waarnemingen als
 Birds-subonderdelen worden nog niet gebouwd.
 
@@ -104,7 +106,7 @@ staan op een aparte rij over beide kolommen, zodat de code op zijn plek blijft.
 De parametertabel toont naam en kleinere toelichting; cursieve voorbeelden zijn
 ook kopieerbaar. Meerdere shortcodeblokken worden door horizontale lijnen gescheiden.
 Een groene gloed die uitdooft bevestigt het kopiëren; schermlezers ontvangen een
-tekstbevestiging. Dit werkt ook met toetsenbordbediening. CSS wordt op Overzicht,
+tekstbevestiging. Dit werkt ook met toetsenbordbediening. CSS wordt op
 Birds, Handleiding en Instellingen geladen; kopieer-JavaScript alleen op Handleiding.
 Instellingen groepeert URL, token en testknop in **Pi Connection**, met de algemene
 opslagknop buiten de kaart. De test blijft de opgeslagen verbinding gebruiken.
@@ -114,14 +116,19 @@ Plaats in een WordPress-shortcodeblok:
 ```text
 [backyard_birds_log]
 [backyard_birds_log limit="50"]
+[backyard_birds_log language="nl" limit="50"]
 ```
 
 Standaard 25, minimaal 1 en maximaal 100 registraties. De tabel toont Tijd,
 Soort, Latijnse naam en Confidence als percentage, nieuwste bovenaan. Tijden
 volgen de WordPress-tijdzone. Er zijn nette lege- en foutmeldingen. De shortcode
-leest uitsluitend de bestaande Birds-detectietabel via `/api/birds/detections`;
-geen demo-data, nieuwe taxonomie/policy of databasekopie. De logshortcode gebruikt
-historische detecties; de adminreview gebruikt de afzonderlijke observations.
+leest `/api/observations` met `domain=bird` en uitsluitend `auto_accepted` of
+`human_confirmed`. Omdat het endpoint één status per verzoek ondersteunt, worden
+twee begrensde lijsten samengevoegd, gesorteerd en op de gezamenlijke limiet begrensd.
+`pending_review`, `human_rejected`, andere statussen en legacy detections worden
+nooit publiek getoond. Geen demo-data, nieuwe taxonomie/policy of databasekopie.
+`language` ondersteunt NL (standaard), EN en DE, hoofdletterongevoelig, via de
+bestaande API-velden. Ontbrekende vertalingen vallen terug op `common_name`.
 
 Route: browser → WordPress/PHP → authenticated Backyard API. Bezoekers krijgen
 alleen HTML; geen token, privé-API-URL, JavaScript-fetch, audio of afbeeldingen.
@@ -134,13 +141,12 @@ beschikbaar; publieke mediaweergave is geen onderdeel van deze fase.
 - `includes/settings.php`: Settings API en URL-validatie.
 - `includes/class-backyard-api-client.php`: gedeelde WordPress HTTP-client (JSON GET/POST en WAV-transport).
 - `modules/<module>/<module>.php`: eigen modulecode en adminpaginabeschrijving.
-- Birds biedt `backyard_birds_detections($limit = 50)` voor
-  `/api/birds/detections?limit=50` (1–100), met JSON of `WP_Error` als resultaat.
-  De shortcode gebruikt deze functie; de adminreview gebruikt observations.
+- Birds biedt `backyard_birds_public_observations($limit = 25)` voor geaccepteerde
+  observations (1–100), met een lijst of `WP_Error` als resultaat.
 - `modules/birds/review.php`: reviewlijst, teller, acties en afgeschermde audioproxy.
-- `admin/index.php`: modulaire samenvatting van beschikbare modulestatussen.
+- `admin/index.php`: native dashboardwidget met modulaire statusregels.
 - `admin/pages.php`: standaard WordPress-adminpagina's; hoofdmenu met
-  `dashicons-carrot`, zonder maatwerk voor submenu-iconen. Volgorde: Overzicht, Birds, Bats,
+  `dashicons-carrot`, zonder maatwerk voor submenu-iconen. Volgorde: Birds, Bats,
   Weather, Garden, Instellingen, Handleiding.
 - `includes/shortcodes.php`: documentatieregister via filter
   `backyard_shortcode_docs`. Modules voegen entries toe met `module`, `shortcode`,
@@ -158,6 +164,7 @@ Vanuit de repository-root met PHP op PATH:
 ```sh
 php wordpress/tests/test-backyard.php
 php wordpress/tests/test-review.php
+php wordpress/tests/test-public-observations.php
 ```
 
 De tests gebruiken WordPress-testdoubles en controleren API-contracten, fouten,

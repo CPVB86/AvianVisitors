@@ -4,8 +4,7 @@ require_once __DIR__ . '/commands.php';
 require_once __DIR__ . '/index.php';
 
 add_action( 'admin_menu', function () {
-	add_menu_page( 'Backyard', 'Backyard', 'manage_options', 'backyard', 'backyard_index_page', 'dashicons-carrot' );
-	add_submenu_page( 'backyard', 'Backyard overzicht', 'Overzicht', 'manage_options', 'backyard', 'backyard_index_page' );
+	add_menu_page( 'Backyard', 'Backyard', 'manage_options', 'backyard', 'backyard_birds_admin_page', 'dashicons-carrot' );
 	foreach ( backyard_modules() as $slug => $module ) {
 		add_submenu_page( 'backyard', $module['title'], $module['title'], 'manage_options', 'backyard-' . $slug, function () use ( $module ) {
 			backyard_require_admin();
@@ -18,13 +17,14 @@ add_action( 'admin_menu', function () {
 	}
 	add_submenu_page( 'backyard', 'Backyard instellingen', 'Instellingen', 'manage_options', 'backyard-settings', 'backyard_settings_page' );
 	add_submenu_page( 'backyard', 'Backyard handleiding', 'Handleiding', 'manage_options', 'backyard-manual', 'backyard_manual_page' );
+	remove_submenu_page( 'backyard', 'backyard' );
 } );
 
 add_action( 'admin_enqueue_scripts', function ( $hook ) {
 	if ( ! in_array( $hook, array( 'backyard_page_backyard-manual', 'toplevel_page_backyard', 'backyard_page_backyard-settings', 'backyard_page_backyard-birds' ), true ) ) {
 		return;
 	}
-	wp_enqueue_style( 'backyard-manual', plugins_url( 'manual.css', __FILE__ ), array(), '0.3.0' );
+	wp_enqueue_style( 'backyard-manual', plugins_url( 'manual.css', __FILE__ ), array(), '0.3.1' );
 	if ( 'backyard_page_backyard-manual' === $hook ) {
 		wp_enqueue_script( 'backyard-manual', plugins_url( 'manual.js', __FILE__ ), array(), '0.2.3', true );
 	}

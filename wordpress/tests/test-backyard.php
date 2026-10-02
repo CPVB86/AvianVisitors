@@ -90,7 +90,7 @@ check( $client->health()->get_error_code() === 'backyard_connection', 'Transport
 $before = count( $requests );
 check( is_wp_error( $client->get( '//external.test' ) ) && count( $requests ) === $before, 'Absolute target rejected' );
 reply( 200, '[]' );
-check( backyard_birds_detections( 999 ) === array(), 'Empty detections valid' );
+check( backyard_birds_public_observations( 999 ) === array(), 'Empty observations valid' );
 check( substr( end( $requests )[0], -9 ) === 'limit=100', 'Limit bounded' );
 $_SERVER['REQUEST_METHOD'] = 'GET';
 $before = count( $requests );
@@ -122,7 +122,7 @@ check( strpos( $manual, '[example]' ) !== false && strpos( $manual, '&lt;count&g
 
 foreach ( $GLOBALS['actions']['admin_menu'] as $callback ) { $callback(); }
 check( $GLOBALS['menu_icon'] === 'dashicons-carrot', 'Carrot icon' );
-check( array_values( $GLOBALS['menu'] ) === array( 'Overzicht', 'Birds', 'Bats', 'Weather', 'Garden', 'Instellingen', 'Handleiding' ), 'Menu order' );
+check( array_values( $GLOBALS['menu'] ) === array( 'Birds', 'Bats', 'Weather', 'Garden', 'Instellingen', 'Handleiding' ), 'Menu order without Overview' );
 check( $GLOBALS['shortcodes']['backyard_birds_log'] === 'backyard_birds_log', 'Shortcode registered' );
 check( backyard_sanitize_api_token( '' ) === $token, 'Blank token retains secret' );
 check( backyard_sanitize_api_token( $token ) === $token, 'Valid token accepted' );
@@ -150,7 +150,7 @@ foreach ( array( '50' => 50, '999' => 100, '-3' => 1, 'nonsense' => 25 ) as $inp
 	backyard_birds_log( array( 'limit' => $input ) );
 	check( substr( end( $requests )[0], -strlen( 'limit=' . $expected ) ) === 'limit=' . $expected, 'Shortcode limit sanitized' );
 }
-$bird = array( 'timestamp' => '2026-10-01T10:00:00Z', 'common_name' => '<script>alert(1)</script>', 'scientific_name' => 'Parus major', 'confidence' => 0.944 );
+$bird = array( 'id' => '12345678-1234-4234-8234-123456789abc', 'domain' => 'bird', 'status' => 'auto_accepted', 'timestamp' => '2026-10-01T10:00:00Z', 'common_name' => '<script>alert(1)</script>', 'scientific_name' => 'Parus major', 'confidence' => 0.944 );
 reply( 200, json_encode( array( $bird ) ) );
 $html = backyard_birds_log();
 check( strpos( $html, '<table' ) !== false && strpos( $html, '94,4%' ) !== false && strpos( $html, '01-10-2026 10:00' ) !== false, 'Semantic table, time and percentage' );

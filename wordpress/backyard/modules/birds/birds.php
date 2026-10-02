@@ -5,9 +5,33 @@ if ( is_admin() ) {
 }
 
 /** Birds consumers share this read-only adapter. No requests on module load. */
-function backyard_birds_detections( $limit = 50 ) {
+function backyard_birds_public_observations( $limit = 25 ) {
 	$client = new Backyard_API_Client();
-	return $client->get( '/api/birds/detections', array( 'limit' => max( 1, min( 100, (int) $limit ) ) ) );
+	$limit = max( 1, min( 100, (int) $limit ) );
+	$rows = array();
+	// The API accepts one status per request. Merge both bounded result sets.
+	foreach ( array( 'auto_accepted', 'human_confirmed' ) as $status ) {
+		$result = $client->get( '/api/observations', array( 'domain' => 'bird', 'status' => $status, 'limit' => $limit ) );
+		if ( is_wp_error( $result ) || ! is_array( $result ) || array_values( $result ) !== $result ) {
+			return new WP_Error( 'backyard_observations', 'Vogelregistraties zijn tijdelijk niet beschikbaar.' );
+		}
+		foreach ( $result as $row ) {
+			// Fail closed for private statuses, other domains and legacy records.
+			if ( ! is_array( $row ) || ( $row['domain'] ?? null ) !== 'bird' || ( $row['status'] ?? null ) !== $status ) {
+				continue;
+			}
+			if ( ! isset( $row['id'], $row['timestamp'] ) || ! is_string( $row['id'] ) || '' === $row['id']
+				|| ! is_string( $row['timestamp'] ) || false === strtotime( $row['timestamp'] ) ) {
+				return new WP_Error( 'backyard_observations', 'Vogelregistraties zijn tijdelijk niet beschikbaar.' );
+			}
+			$rows[ $row['id'] ] = $row;
+		}
+	}
+	$rows = array_values( $rows );
+	usort( $rows, function ( $a, $b ) {
+		return ( new DateTimeImmutable( $b['timestamp'] ) <=> new DateTimeImmutable( $a['timestamp'] ) ) ?: strcmp( $b['id'], $a['id'] );
+	} );
+	return array_slice( $rows, 0, $limit );
 }
 
 function backyard_birds_log( $attributes = array() ) {
@@ -18,7 +42,7 @@ function backyard_birds_log( $attributes = array() ) {
 	$name_field = $name_fields[ $language ] ?? 'common_name';
 	$limit = filter_var( $attributes['limit'], FILTER_VALIDATE_INT );
 	$limit = false === $limit ? 25 : max( 1, min( 100, $limit ) );
-	$rows = backyard_birds_detections( $limit );
+	$rows = backyard_birds_public_observations( $limit );
 	$error = '<p>Vogelregistraties zijn tijdelijk niet beschikbaar.</p>';
 	if ( is_wp_error( $rows ) || ! is_array( $rows ) || array_values( $rows ) !== $rows ) {
 		return $error;
@@ -27,7 +51,7 @@ function backyard_birds_log( $attributes = array() ) {
 		return '<p>Er zijn nog geen vogelregistraties.</p>';
 	}
 	$html = '<table class="backyard-birds-log"><caption>Recente vogelregistraties</caption><thead><tr><th scope="col">Tijd</th><th scope="col">Soort</th><th scope="col">Latijnse naam</th><th scope="col">Confidence</th></tr></thead><tbody>';
-	// The existing birds endpoint orders by timestamp descending, then ID.
+	// Public observations are ordered by timestamp descending, then ID.
 	foreach ( array_slice( $rows, 0, $limit ) as $row ) {
 		if ( ! is_array( $row ) || ! isset( $row['timestamp'], $row['confidence'] )
 			|| ! is_string( $row['timestamp'] ) || ! is_numeric( $row['confidence'] )
