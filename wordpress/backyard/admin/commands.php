@@ -15,7 +15,7 @@ function backyard_manual_commands() {
 		array( 'Naar Backyard-map · Pi na SSH', 'cd ~/Backyard' ),
 		array( 'Backyard status · Pi na SSH', $status ),
 		array( 'Live detectorlog · Pi na SSH', $logs ),
-		array( 'API-token tonen · Pi na SSH', "sudo sed -n 's/^BACKYARD_API_TOKEN=//p' /etc/backyard/backyard.env" ),
+		array( 'Backyard- en OpenAI-tokens tonen · Pi na SSH', "sudo sed -n -e '/^BACKYARD_API_TOKEN=/p' -e '/^OPENAI_API_KEY=/p' /etc/backyard/backyard.env" ),
 		array( 'Publieke API-test · Windows', $public_test ),
 	) as $command ) {
 		backyard_manual_command( $command[0], $command[1] );
