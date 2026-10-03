@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Backyard
  * Description: Modulaire presentatie en beheer via de Backyard API.
- * Version: 0.3.1
+ * Version: 0.3.2
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Text Domain: backyard
@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 
 require_once __DIR__ . '/includes/settings.php';
 require_once __DIR__ . '/includes/class-backyard-api-client.php';
+require_once __DIR__ . '/includes/class-backyard-generator.php';
 require_once __DIR__ . '/includes/shortcodes.php';
 
 function backyard_activate() {

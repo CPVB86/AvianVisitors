@@ -50,7 +50,8 @@ function backyard_birds_log( $attributes = array() ) {
 	if ( ! $rows ) {
 		return '<p>Er zijn nog geen vogelregistraties.</p>';
 	}
-	$html = '<table class="backyard-birds-log"><caption>Recente vogelregistraties</caption><thead><tr><th scope="col">Tijd</th><th scope="col">Soort</th><th scope="col">Latijnse naam</th><th scope="col">Confidence</th></tr></thead><tbody>';
+	$html = '<table class="backyard-birds-log"><caption>Recente vogelregistraties</caption><thead><tr><th scope="col">Tijd</th><th scope="col">Vogel</th><th scope="col">Soort</th><th scope="col">Latijnse naam</th><th scope="col">Confidence</th></tr></thead><tbody>';
+	$generator = new Backyard_Generator();
 	// Public observations are ordered by timestamp descending, then ID.
 	foreach ( array_slice( $rows, 0, $limit ) as $row ) {
 		if ( ! is_array( $row ) || ! isset( $row['timestamp'], $row['confidence'] )
@@ -65,6 +66,8 @@ function backyard_birds_log( $attributes = array() ) {
 			return $error;
 		}
 		$html .= '<tr><td><time datetime="' . esc_attr( gmdate( 'c', $timestamp ) ) . '">' . esc_html( wp_date( 'd-m-Y H:i:s', $timestamp ) ) . '</time></td>';
+		$image = $generator->thumbnail( 'bird', $row['scientific_name'] ?? '', array( 'perched', 'flight', 'photo_cutout' ) );
+		$html .= '<td>' . ( $image ? '<img src="' . esc_url( $image ) . '" alt="" width="64" height="64" loading="lazy" style="width:64px;height:64px;object-fit:contain;background:transparent">' : '' ) . '</td>';
 		$name = $row[ $name_field ] ?? null;
 		if ( ! is_string( $name ) || '' === trim( $name ) ) {
 			$name = $row['common_name'] ?? '—';
@@ -84,7 +87,7 @@ add_filter( 'backyard_shortcode_docs', function ( $entries ) {
 			'language' => 'Taal van de soortnaam: NL (standaard), EN of DE, ongeacht hoofdletters. Ontbrekende vertalingen of onbekende talen vallen terug op common_name.',
 		),
 		'parameter_examples' => array( 'limit' => '[backyard_birds_log limit="50"]', 'language' => '[backyard_birds_log language="nl" limit="50"]' ),
-		'description' => 'De laatste vogelregistraties met tijd, soort en confidence. Nieuwste bovenaan, in de WordPress-tijdzone.',
+		'description' => 'De laatste vogelregistraties met tijd, vogelafbeelding indien beschikbaar, soort en confidence. Nieuwste bovenaan, in de WordPress-tijdzone.',
 	);
 	return $entries;
 } );

@@ -16,6 +16,9 @@ class WP_Error {
 	function get_error_data() { return $this->data; }
 }
 function is_wp_error( $value ) { return $value instanceof WP_Error; }
+function get_transient( $key ) { return $GLOBALS['transients'][ $key ] ?? false; }
+function set_transient( $key, $value, $ttl ) { $GLOBALS['transients'][ $key ] = $value; $GLOBALS['transient_ttls'][ $key ] = $ttl; }
+function wp_salt( $scheme ) { return 'test-only-signing-secret'; }
 function get_option( $name, $default = false ) { return 'backyard_api_token' === $name ? $GLOBALS['token'] : $GLOBALS['option']; }
 function add_option( $name, $value ) { $GLOBALS['added'][ $name ] = $value; }
 function add_action( $name, $callback ) { $GLOBALS['actions'][ $name ][] = $callback; }

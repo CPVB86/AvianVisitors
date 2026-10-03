@@ -6,7 +6,7 @@ function wp_remote_post( $url, $args ) { return wp_remote_get( $url, $args ); }
 function wp_json_encode( $value ) { return json_encode( $value ); }
 function wp_nonce_url( $url, $action ) { return add_query_arg( '_wpnonce', 'test-nonce', $url ); }
 function wp_verify_nonce( $nonce, $action ) { return $GLOBALS['nonce_ok'] && 'test-nonce' === $nonce && $action === 'backyard_birds_audio_' . $GLOBALS['review_id']; }
-function wp_tempnam( $name, $directory ) { check( $directory === sys_get_temp_dir(), 'Audio uses system temporary storage' ); $file = tempnam( $directory, 'backyard-test-' ); $GLOBALS['audio_files'][] = $file; return $file; }
+function wp_tempnam( $name, $directory = '' ) { check( '' === $directory ? 'backyard-audio.wav' === $name : $directory === sys_get_temp_dir(), 'Recognized audio tempfile call' ); $file = tempnam( sys_get_temp_dir(), 'backyard-test-' ); $GLOBALS['audio_files'][] = $file; return $file; }
 function wp_delete_file( $file ) { if ( file_exists( $file ) ) { unlink( $file ); } }
 function wp_remote_retrieve_header( $response, $name ) { return $response['headers'][ $name ] ?? ''; }
 class ReviewRedirect extends RuntimeException {}

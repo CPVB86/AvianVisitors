@@ -131,9 +131,34 @@ nooit publiek getoond. Geen demo-data, nieuwe taxonomie/policy of databasekopie.
 bestaande API-velden. Ontbrekende vertalingen vallen terug op `common_name`.
 
 Route: browser → WordPress/PHP → authenticated Backyard API. Bezoekers krijgen
-alleen HTML; geen token, privé-API-URL, JavaScript-fetch, audio of afbeeldingen.
-Er is geen caching of polling. Audio is nu alleen in de afgeschermde adminreview
-beschikbaar; publieke mediaweergave is geen onderdeel van deze fase.
+alleen HTML en afbeeldingen via WordPress; geen token, privé-API-URL of JavaScript-fetch.
+Observations worden niet gecachet; er is geen polling. Audio is alleen in de afgeschermde adminreview
+beschikbaar.
+
+### Vogelafbeeldingen uit Generator
+
+De kolom **Vogel** vóór **Soort** toont een transparante thumbnail van 64 × 64 px.
+De bestaande authenticated `GET /api/generator/bird/species?scientific_name=...`
+levert de assets; voorkeur is `perched`, `flight`, `photo_cutout`, anders een lege cel.
+WordPress start nooit generatie. Een Generator-storing laat de observation-tabel intact.
+Per render is er maximaal één lookup per wetenschappelijke soortnaam. Resultaten
+worden 5 minuten in transients bewaard, ontbrekende assets/fouten 1 minuut.
+Wijziging van API-URL/token maakt de oude lookupcache ongeldig.
+
+Een ondertekende publieke `admin-post.php?action=backyard_generator_asset`-URL
+haalt alleen het geselecteerde Generator-asset server-side op via Bearer-auth.
+De proxy accepteert uitsluitend PNG/WebP/JPEG-rasterdata (maximaal 8 MiB), volgt
+geen redirects en geeft geen upstream URLs, tokens of foutdetails door. De
+afbeeldingbytes blijven ongewijzigd, inclusief transparantie; browsercache 5 minuten.
+Deze route vereist geen beheerderslogin, omdat de shortcode openbaar is.
+De afzonderlijke productie-audioproxy is niet aangepast.
+
+Test op Pi/WP: controleer met de bestaande authenticated Generator-lookup dat een
+soort uit publieke observations een asset heeft. Upload de bijgewerkte plugin en
+open `[backyard_birds_log]` uitgelogd. Controleer de nieuwe kolom, herhaalde soorten,
+een soort zonder asset en NL/EN/DE. In browser Network hoort de afbeeldings-URL
+uitsluitend naar WordPress te wijzen; wacht maximaal 5 minuten na een assetwijziging.
+Controleer ook dat Birds-reviewaudio nog afspeelt en zoeken in audio blijft werken.
 
 ## Structuur
 
@@ -154,7 +179,7 @@ beschikbaar; publieke mediaweergave is geen onderdeel van deze fase.
   registreert de echte shortcode apart met `add_shortcode`; dit filter verzorgt
   uitsluitend de handleiding. Alle velden worden als tekst ge-escaped.
 
-Geen publiek dashboard, synchronisatie, publieke audio, afbeeldingen, grafieken of
+Geen publiek dashboard, synchronisatie, publieke audio, grafieken of
 functionele Bats/Weather/Garden-module.
 
 ## Checks
@@ -165,6 +190,7 @@ Vanuit de repository-root met PHP op PATH:
 php wordpress/tests/test-backyard.php
 php wordpress/tests/test-review.php
 php wordpress/tests/test-public-observations.php
+php wordpress/tests/test-generator.php
 ```
 
 De tests gebruiken WordPress-testdoubles en controleren API-contracten, fouten,
