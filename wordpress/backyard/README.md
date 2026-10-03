@@ -93,7 +93,7 @@ Birds-subonderdelen worden nog niet gebouwd.
 
 ## Birds-shortcode
 
-De Handleiding heeft ook vijf veelgebruikte, kopieerbare beheercommando’s en
+De Handleiding heeft ook zes veelgebruikte, kopieerbare beheercommando’s en
 een standaard ingeklapt overzicht voor PowerShell en de Pi na SSH. API-tests
 vragen het token verborgen in PowerShell op; het WordPress-token komt nooit
 in deze commando’s terecht. Pi-paden/services volgen het aangeleverde spiekbriefje;
