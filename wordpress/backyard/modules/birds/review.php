@@ -2,7 +2,7 @@
 defined( 'ABSPATH' ) || exit;
 
 function backyard_birds_review_count() {
-	$result = ( new Backyard_API_Client() )->get( '/api/observations/count', array( 'domain' => 'bird', 'status' => 'pending_review' ) );
+	$result = ( new Backyard_API_Client() )->get( '/api/observations/count', array( 'domain' => 'bird', 'review_only' => 'true' ) );
 	if ( is_wp_error( $result ) ) {
 		return $result;
 	}
@@ -25,7 +25,7 @@ function backyard_birds_observation_id( $value ) {
 }
 
 function backyard_birds_pending_observations() {
-	$rows = ( new Backyard_API_Client() )->get( '/api/observations', array( 'domain' => 'bird', 'status' => 'pending_review', 'limit' => 50 ) );
+	$rows = ( new Backyard_API_Client() )->get( '/api/observations/review', array( 'domain' => 'bird', 'limit' => 50 ) );
 	if ( is_wp_error( $rows ) ) {
 		return $rows;
 	}
@@ -34,7 +34,7 @@ function backyard_birds_pending_observations() {
 	}
 	foreach ( $rows as $row ) {
 		if ( ! is_array( $row ) || ! backyard_birds_observation_id( $row['id'] ?? null )
-			|| 'bird' !== ( $row['domain'] ?? null ) || 'pending_review' !== ( $row['status'] ?? null )
+			|| 'bird' !== ( $row['domain'] ?? null ) || ( 'human_review' !== ( $row['classification'] ?? null ) || ! in_array( $row['status'] ?? null, array( 'pending_review', 'review_recommended' ), true ) )
 			|| ! isset( $row['timestamp'], $row['scientific_name'], $row['confidence'], $row['supports'], $row['audio_available'] )
 			|| ! is_string( $row['timestamp'] ) || false === strtotime( $row['timestamp'] )
 			|| ! is_string( $row['scientific_name'] ) || ! is_numeric( $row['confidence'] )
@@ -113,12 +113,12 @@ function backyard_birds_handle_review() {
 	$record = $client->get( '/api/observations/' . $id );
 	$result = 'failed';
 	if ( ! is_wp_error( $record ) && ( $record['id'] ?? null ) === $id && 'bird' === ( $record['domain'] ?? null ) ) {
-		if ( 'pending_review' !== ( $record['status'] ?? null ) ) {
+		if ( ( 'human_review' !== ( $record['classification'] ?? null ) || ! in_array( $record['status'] ?? null, array( 'pending_review', 'review_recommended' ), true ) ) ) {
 			$result = 'conflict';
 		} elseif ( 'confirm' === $decision && true !== ( $record['audio_available'] ?? false ) ) {
 			$result = 'audio_missing';
 		} else {
-			$response = $client->post( '/api/observations/' . $id . '/' . $decision, array( 'expected_status' => 'pending_review' ) );
+			$response = $client->post( '/api/observations/' . $id . '/' . $decision, array( 'expected_status' => $record['status'] ) );
 			if ( is_wp_error( $response ) ) {
 				$details = $response->get_error_data();
 				$result = is_array( $details ) && 409 === ( $details['status'] ?? null ) ? 'conflict' : 'failed';

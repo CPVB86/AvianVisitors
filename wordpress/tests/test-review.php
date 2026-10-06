@@ -31,7 +31,7 @@ $allowed = true;
 $nonce_ok = true;
 $_GET = array();
 $pending = array(
-	'id' => $review_id, 'domain' => 'bird', 'status' => 'pending_review',
+	'id' => $review_id, 'domain' => 'bird', 'status' => 'pending_review', 'classification' => 'human_review',
 	'timestamp' => '2026-10-02T08:30:00Z', 'common_name_nl' => 'Koolmees',
 	'common_name' => 'Great Tit', 'scientific_name' => 'Parus major',
 	'confidence' => .78, 'supports' => 3, 'audio_available' => true,
@@ -49,16 +49,16 @@ $http_handler = function ( $url, $args ) use ( &$record, &$forced_post_code, &$c
 	check( $args['redirection'] === 0, 'Never follow private API redirects' );
 	$path = parse_url( $url, PHP_URL_PATH );
 	parse_str( parse_url( $url, PHP_URL_QUERY ) ?? '', $query );
-	if ( '/api/observations/count' === $path || '/api/observations' === $path ) {
-		check( $query['domain'] === 'bird' && $query['status'] === 'pending_review', 'Only pending birds requested' );
+	if ( '/api/observations/count' === $path || '/api/observations/review' === $path ) {
+		check( $query['domain'] === 'bird' && ( '/api/observations/review' === $path || $query['review_only'] === 'true' ), 'Only human review birds requested' );
 		if ( '/api/observations/count' === $path ) { return review_response( 200, array( 'count' => $count_total ) ); }
 		check( $query['limit'] === '50', 'Bounded review list' );
-		return review_response( 200, 'pending_review' === $record['status'] ? array( $record ) : array() );
+		return review_response( 200, in_array( $record['status'], array( 'pending_review', 'review_recommended' ), true ) ? array( $record ) : array() );
 	}
 	if ( 'POST' === $args['method'] ) {
 		check( in_array( $path, array( '/api/observations/' . $record['id'] . '/confirm', '/api/observations/' . $record['id'] . '/reject' ), true ), 'Only explicit review actions' );
 		check( $args['headers']['Content-Type'] === 'application/json', 'JSON mutation' );
-		check( json_decode( $args['body'], true ) === array( 'expected_status' => 'pending_review' ), 'Optimistic status precondition' );
+		check( json_decode( $args['body'], true ) === array( 'expected_status' => $record['status'] ), 'Optimistic status precondition' );
 		if ( 200 !== $forced_post_code ) { return review_response( $forced_post_code, array( 'detail' => 'private debug ' . $GLOBALS['token'] ) ); }
 		$record['status'] = substr( $path, -8 ) === '/confirm' ? 'human_confirmed' : 'human_rejected';
 		$count_total = 151;
@@ -178,6 +178,18 @@ check( is_wp_error( backyard_birds_audio_response( $review_id, 'test-nonce' ) ),
 $audio_code = 206; $audio_headers = array( 'content-type' => 'audio/wav', 'content-range' => "bytes 0-11/44\r\nInjected: yes" );
 check( is_wp_error( backyard_birds_audio_response( $review_id, 'test-nonce', 'bytes=0-11' ) ), 'Upstream header injection refused' );
 check_no_temp_files();
+
+$allowed = true; $nonce_ok = true; $forced_post_code = 200;
+
+$record = $pending;
+$record['classification'] = 'unknown';
+check( is_wp_error( backyard_birds_pending_observations() ), 'Unknown must not enter review list' );
+check( strpos( submit_review( 'confirm' ), 'conflict' ) !== false, 'Unknown is not a review action' );
+$record = $pending;
+$record['status'] = 'review_recommended';
+check( count( backyard_birds_pending_observations() ) === 1, 'Recommended belongs in human review' );
+check( strpos( submit_review( 'confirm' ), 'confirmed' ) !== false, 'Recommended confirms with its real expected status' );
+echo "Human review classification tests passed.\n";
 
 $http_handler = function () { return new WP_Error( 'private', 'secret ' . $GLOBALS['token'] ); };
 $_GET = array( 'review_result' => 'failed' );
