@@ -1,5 +1,6 @@
 <?php
 defined( 'ABSPATH' ) || exit;
+require_once __DIR__ . '/identity.php';
 
 function backyard_birds_review_count() {
 	$result = ( new Backyard_API_Client() )->get( '/api/observations/count', array( 'domain' => 'bird', 'review_only' => 'true' ) );
@@ -48,6 +49,8 @@ function backyard_birds_pending_observations() {
 
 function backyard_birds_review_notice( $key ) {
 	$messages = array(
+		'otje' => array( 'success', 'Waarneming bevestigd met menselijke identiteit Otje; BirdNET-evidence behouden.' ),
+		'identity_unavailable' => array( 'error', 'Otje niet opgeslagen: deze waarneming of API ondersteunt de identity override niet.' ),
 		'confirmed' => array( 'success', 'Waarneming bevestigd.' ),
 		'rejected' => array( 'success', 'Waarneming afgewezen.' ),
 		'conflict' => array( 'warning', 'Deze waarneming is inmiddels gewijzigd. De lijst is opnieuw geladen.' ),
@@ -96,7 +99,9 @@ function backyard_birds_admin_page() {
 		echo '</td><td><form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 		echo '<input type="hidden" name="action" value="backyard_birds_review"><input type="hidden" name="observation_id" value="' . esc_attr( $row['id'] ) . '">';
 		wp_nonce_field( 'backyard_birds_review_' . $row['id'] );
-		echo '<button type="submit" class="button button-primary" name="decision" value="confirm">Bevestigen</button> <button type="submit" class="button" name="decision" value="reject">Afwijzen</button></form></td></tr>';
+		echo '<button type="submit" class="button button-primary" name="decision" value="confirm">Bevestigen</button> <button type="submit" class="button" name="decision" value="reject">Afwijzen</button>';
+		backyard_birds_otje_button( $row );
+		echo '</form></td></tr>';
 	}
 	echo '</tbody></table></div></section></div>';
 }
@@ -105,26 +110,35 @@ function backyard_birds_handle_review() {
 	backyard_require_admin();
 	$id = $_POST['observation_id'] ?? null;
 	$decision = $_POST['decision'] ?? null;
-	if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) || ! backyard_birds_observation_id( $id ) || ! in_array( $decision, array( 'confirm', 'reject' ), true ) ) {
+	if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) || ! backyard_birds_observation_id( $id ) || ! in_array( $decision, array( 'confirm', 'reject', 'otje' ), true ) ) {
 		wp_die( 'Ongeldige reviewaanvraag.', '', array( 'response' => 400 ) );
 	}
 	check_admin_referer( 'backyard_birds_review_' . $id );
 	$client = new Backyard_API_Client();
 	$record = $client->get( '/api/observations/' . $id );
+	$otje = 'otje' === $decision;
+	$decision = $otje ? 'confirm' : $decision;
 	$result = 'failed';
 	if ( ! is_wp_error( $record ) && ( $record['id'] ?? null ) === $id && 'bird' === ( $record['domain'] ?? null ) ) {
 		if ( ( 'human_review' !== ( $record['classification'] ?? null ) || ! in_array( $record['status'] ?? null, array( 'pending_review', 'review_recommended' ), true ) ) ) {
 			$result = 'conflict';
+		} elseif ( $otje && ( ! backyard_birds_otje_candidate( $record ) || ! backyard_birds_otje_supported( $record ) ) ) {
+			$result = 'identity_unavailable';
 		} elseif ( 'confirm' === $decision && true !== ( $record['audio_available'] ?? false ) ) {
 			$result = 'audio_missing';
 		} else {
-			$response = $client->post( '/api/observations/' . $id . '/' . $decision, array( 'expected_status' => $record['status'] ) );
+			$payload = array( 'expected_status' => $record['status'] );
+			if ( $otje ) {
+				$payload['identity_override'] = 'otje';
+			}
+			$response = $client->post( '/api/observations/' . $id . '/' . $decision, $payload );
 			if ( is_wp_error( $response ) ) {
 				$details = $response->get_error_data();
 				$result = is_array( $details ) && 409 === ( $details['status'] ?? null ) ? 'conflict' : 'failed';
 			} elseif ( ( $response['id'] ?? null ) === $id && 'bird' === ( $response['domain'] ?? null )
-				&& ( 'confirm' === $decision ? 'human_confirmed' : 'human_rejected' ) === ( $response['status'] ?? null ) ) {
-				$result = 'confirm' === $decision ? 'confirmed' : 'rejected';
+				&& ( 'confirm' === $decision ? 'human_confirmed' : 'human_rejected' ) === ( $response['status'] ?? null )
+				&& ( ! $otje || ( 'otje' === ( $response['review']['identity_override'] ?? null ) && 'confirm' === ( $response['review']['action'] ?? null ) ) ) ) {
+				$result = $otje ? 'otje' : ( 'confirm' === $decision ? 'confirmed' : 'rejected' );
 			}
 		}
 	}

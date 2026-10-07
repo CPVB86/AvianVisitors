@@ -93,6 +93,15 @@ Birds-subonderdelen worden nog niet gebouwd.
 
 ## Birds-shortcode
 
+### Menselijke identiteit Otje in Birds-review
+
+Bij Gallus/kip-herkenningen is naast Bevestigen/Afwijzen een expliciete 🐔 Otje-keuze
+voorbereid. Deze bevestigt via dezelfde reviewactie met `identity_override: "otje"`;
+de oorspronkelijke soort/evidence wordt nooit vervangen. De knop blijft uitgeschakeld
+tot de API hiervoor ondersteuning adverteert. De huidige geïnspecteerde backend
+ondersteunt dit nog niet: zie [het exacte API-contract](OTJE_API_CONTRACT.md).
+Er is geen automatische aliasing en de publieke shortcodepresentatie blijft ongewijzigd.
+
 De Handleiding heeft ook zes veelgebruikte, kopieerbare beheercommando’s en
 een standaard ingeklapt overzicht voor PowerShell en de Pi na SSH. API-tests
 vragen het token verborgen in PowerShell op; het WordPress-token komt nooit
@@ -191,6 +200,7 @@ php wordpress/tests/test-backyard.php
 php wordpress/tests/test-review.php
 php wordpress/tests/test-public-observations.php
 php wordpress/tests/test-generator.php
+php wordpress/tests/test-otje.php
 ```
 
 De tests gebruiken WordPress-testdoubles en controleren API-contracten, fouten,
