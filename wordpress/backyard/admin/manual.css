@@ -12,6 +12,13 @@
 
 .backyard-card > h2 {
 	margin-top: 0;
+	text-align: left;
+}
+
+#backyard_status .hndle,
+#backyard_otje .hndle {
+	text-align: left;
+	justify-content: flex-start;
 }
 
 .backyard-review-scroll {

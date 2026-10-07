@@ -24,7 +24,7 @@ $http_handler = function ( $url, $args ) use ( &$record ) {
 	if ( '/api/observations/count' === $path || '/api/observations/review' === $path ) {
 		check( ( $query['identity_override'] ?? '' ) === 'otje', 'API filters before limiting/counting' );
 		$open = backyard_birds_otje_candidate( $record );
-		return review_response( 200, '/api/observations/count' === $path ? array( 'count' => $open ? 151 : 0 ) : ( $open ? array( $record ) : array() ) );
+		return review_response( 200, '/api/observations/count' === $path ? array( 'count' => $open ? 151 : 0, 'identity_override' => 'otje' ) : ( $open ? array( $record ) : array() ) );
 	}
 	return review_response( 200, $record );
 };
@@ -41,3 +41,8 @@ ob_start(); backyard_birds_otje_dashboard(); $card = ob_get_clean();
 check( strpos( $location ?? '', 'review_result=otje' ) !== false && strpos( $location, 'view=otje' ) !== false
 	&& backyard_birds_pending_observations( true ) === array() && strpos( $card, 'Geen kandidaten' ) !== false, 'Successful confirm removes candidate and refreshes count in same view' );
 echo "Three focused Otje view/dashboard checks passed.\n";
+$http_handler = function ( $url ) use ( $record ) {
+	return review_response( 200, strpos( $url, '/count?' ) !== false ? array( 'count' => 48 ) : array_fill( 0, 48, array_merge( $record, array( 'status' => 'pending_review', 'review_capabilities' => array() ) ) ) );
+};
+check( backyard_birds_review_count( true ) === 0 && backyard_birds_review_count() === 48, 'Older API total must not become Otje count' );
+echo "48 ordinary reviews, zero Otje candidates: passed.\n";

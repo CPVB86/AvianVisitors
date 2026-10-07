@@ -9,6 +9,17 @@ function backyard_birds_review_count( $otje = false ) {
 	if ( is_wp_error( $result ) ) {
 		return $result;
 	}
+	// Older APIs silently ignore unknown query parameters; never trust their total.
+	if ( $otje && 'otje' !== ( $result['identity_override'] ?? null ) ) {
+		$rows = ( new Backyard_API_Client() )->get( '/api/observations/review', array( 'domain' => 'bird', 'limit' => 100, 'identity_override' => 'otje' ) );
+		if ( is_wp_error( $rows ) || ! is_array( $rows ) || array_values( $rows ) !== $rows || count( $rows ) >= 100 ) {
+			return new WP_Error( 'backyard_review', 'Werk de Backyard API bij voor een betrouwbare Otje-teller.' );
+		}
+		foreach ( $rows as $row ) {
+			if ( ! is_array( $row ) ) { return new WP_Error( 'backyard_review', 'Ongeldig reviewantwoord.' ); }
+		}
+		return count( array_filter( $rows, 'backyard_birds_otje_candidate' ) );
+	}
 	if ( ! isset( $result['count'] ) || ! is_int( $result['count'] ) || $result['count'] < 0 ) {
 		return new WP_Error( 'backyard_review', 'Reviewteller tijdelijk niet beschikbaar.' );
 	}
@@ -72,8 +83,8 @@ function backyard_birds_admin_page() {
 	echo '<div class="wrap"><h1>Birds</h1>';
 	backyard_birds_review_notice( $_GET['review_result'] ?? '' );
 	$otje_view = backyard_birds_otje_view();
-	echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=backyard-birds' ) ) . '">Review</a> | <a href="' . esc_url( admin_url( 'admin.php?page=backyard-birds&view=otje' ) ) . '">🐔 Potentiële Otjes</a></p>';
-	echo '<section class="backyard-card"><h2>' . ( $otje_view ? '🐔 Potentiële Otjes' : 'Review' ) . '</h2>';
+	echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=backyard-birds' ) ) . '">Review</a> | <a href="' . esc_url( admin_url( 'admin.php?page=backyard-birds&view=otje' ) ) . '">' . backyard_otje_icon() . 'Potentiële Otjes</a></p>';
+	echo '<section class="backyard-card"><h2>' . ( $otje_view ? backyard_otje_icon() . 'Potentiële Otjes' : 'Review' ) . '</h2>';
 	$count = backyard_birds_review_count( $otje_view );
 	echo '<p>' . esc_html( is_wp_error( $count ) ? 'Reviewteller tijdelijk niet beschikbaar.' : sprintf( '%s te reviewen waarnemingen', number_format_i18n( $count ) ) ) . '</p>';
 	$rows = backyard_birds_pending_observations( $otje_view );

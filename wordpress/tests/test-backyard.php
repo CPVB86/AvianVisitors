@@ -43,6 +43,7 @@ function esc_html( $value ) { return htmlspecialchars( $value, ENT_QUOTES, 'UTF-
 function esc_attr( $value ) { return esc_html( $value ); }
 function esc_url( $value ) { return esc_html( $value ); }
 function admin_url( $value ) { return '/wp-admin/' . $value; }
+function plugins_url( $path, $file ) { return '/wp-content/plugins/backyard/' . $path; }
 function settings_errors() {}
 function settings_fields( $group ) {}
 function do_settings_sections( $page ) {}

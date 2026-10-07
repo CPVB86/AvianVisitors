@@ -1,6 +1,10 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
+function backyard_otje_icon() {
+	return '<img src="' . esc_url( plugins_url( 'assets/otje.png', dirname( __DIR__, 2 ) . '/backyard.php' ) ) . '" alt="" width="20" height="20" style="width:20px;height:20px;object-fit:contain;vertical-align:middle;margin-right:5px;background:transparent">';
+}
+
 function backyard_birds_otje_view() {
 	return 'otje' === ( $_GET['view'] ?? '' );
 }
@@ -28,5 +32,5 @@ function backyard_birds_otje_button( $row ) {
 	if ( ! backyard_birds_otje_candidate( $row ) ) {
 		return;
 	}
-	echo ' <button type="submit" class="button" name="decision" value="otje">🐔 Otje</button>';
+	echo ' <button type="submit" class="button" name="decision" value="otje">' . backyard_otje_icon() . 'Otje</button>';
 }
