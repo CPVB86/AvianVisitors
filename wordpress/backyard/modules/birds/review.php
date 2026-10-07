@@ -2,8 +2,10 @@
 defined( 'ABSPATH' ) || exit;
 require_once __DIR__ . '/identity.php';
 
-function backyard_birds_review_count() {
-	$result = ( new Backyard_API_Client() )->get( '/api/observations/count', array( 'domain' => 'bird', 'review_only' => 'true' ) );
+function backyard_birds_review_count( $otje = false ) {
+	$query = array( 'domain' => 'bird', 'review_only' => 'true' );
+	if ( $otje ) { $query['identity_override'] = 'otje'; }
+	$result = ( new Backyard_API_Client() )->get( '/api/observations/count', $query );
 	if ( is_wp_error( $result ) ) {
 		return $result;
 	}
@@ -25,8 +27,10 @@ function backyard_birds_observation_id( $value ) {
 	return is_string( $value ) && 1 === preg_match( '/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iD', $value );
 }
 
-function backyard_birds_pending_observations() {
-	$rows = ( new Backyard_API_Client() )->get( '/api/observations/review', array( 'domain' => 'bird', 'limit' => 50 ) );
+function backyard_birds_pending_observations( $otje = false ) {
+	$query = array( 'domain' => 'bird', 'limit' => 50 );
+	if ( $otje ) { $query['identity_override'] = 'otje'; }
+	$rows = ( new Backyard_API_Client() )->get( '/api/observations/review', $query );
 	if ( is_wp_error( $rows ) ) {
 		return $rows;
 	}
@@ -35,7 +39,7 @@ function backyard_birds_pending_observations() {
 	}
 	foreach ( $rows as $row ) {
 		if ( ! is_array( $row ) || ! backyard_birds_observation_id( $row['id'] ?? null )
-			|| 'bird' !== ( $row['domain'] ?? null ) || ( 'human_review' !== ( $row['classification'] ?? null ) || ! in_array( $row['status'] ?? null, array( 'pending_review', 'review_recommended' ), true ) )
+			|| 'bird' !== ( $row['domain'] ?? null ) || ( ( ! $otje && 'human_review' !== ( $row['classification'] ?? null ) ) || ! in_array( $row['status'] ?? null, array( 'pending_review', 'review_recommended' ), true ) )
 			|| ! isset( $row['timestamp'], $row['scientific_name'], $row['confidence'], $row['supports'], $row['audio_available'] )
 			|| ! is_string( $row['timestamp'] ) || false === strtotime( $row['timestamp'] )
 			|| ! is_string( $row['scientific_name'] ) || ! is_numeric( $row['confidence'] )
@@ -44,7 +48,7 @@ function backyard_birds_pending_observations() {
 			return new WP_Error( 'backyard_review', 'Waarnemingen tijdelijk niet beschikbaar.' );
 		}
 	}
-	return $rows;
+	return $otje ? array_values( array_filter( $rows, 'backyard_birds_otje_candidate' ) ) : $rows;
 }
 
 function backyard_birds_review_notice( $key ) {
@@ -67,10 +71,12 @@ function backyard_birds_admin_page() {
 	backyard_require_admin();
 	echo '<div class="wrap"><h1>Birds</h1>';
 	backyard_birds_review_notice( $_GET['review_result'] ?? '' );
-	echo '<section class="backyard-card"><h2>Review</h2>';
-	$count = backyard_birds_review_count();
+	$otje_view = backyard_birds_otje_view();
+	echo '<p><a href="' . esc_url( admin_url( 'admin.php?page=backyard-birds' ) ) . '">Review</a> | <a href="' . esc_url( admin_url( 'admin.php?page=backyard-birds&view=otje' ) ) . '">🐔 Potentiële Otjes</a></p>';
+	echo '<section class="backyard-card"><h2>' . ( $otje_view ? '🐔 Potentiële Otjes' : 'Review' ) . '</h2>';
+	$count = backyard_birds_review_count( $otje_view );
 	echo '<p>' . esc_html( is_wp_error( $count ) ? 'Reviewteller tijdelijk niet beschikbaar.' : sprintf( '%s te reviewen waarnemingen', number_format_i18n( $count ) ) ) . '</p>';
-	$rows = backyard_birds_pending_observations();
+	$rows = backyard_birds_pending_observations( $otje_view );
 	if ( is_wp_error( $rows ) ) {
 		echo '<p>Waarnemingen tijdelijk niet beschikbaar. Probeer het later opnieuw.</p></section></div>';
 		return;
@@ -98,6 +104,7 @@ function backyard_birds_admin_page() {
 		}
 		echo '</td><td><form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 		echo '<input type="hidden" name="action" value="backyard_birds_review"><input type="hidden" name="observation_id" value="' . esc_attr( $row['id'] ) . '">';
+		if ( $otje_view ) { echo '<input type="hidden" name="review_view" value="otje">'; }
 		wp_nonce_field( 'backyard_birds_review_' . $row['id'] );
 		echo '<button type="submit" class="button button-primary" name="decision" value="confirm">Bevestigen</button> <button type="submit" class="button" name="decision" value="reject">Afwijzen</button>';
 		backyard_birds_otje_button( $row );
@@ -120,7 +127,8 @@ function backyard_birds_handle_review() {
 	$decision = $otje ? 'confirm' : $decision;
 	$result = 'failed';
 	if ( ! is_wp_error( $record ) && ( $record['id'] ?? null ) === $id && 'bird' === ( $record['domain'] ?? null ) ) {
-		if ( ( 'human_review' !== ( $record['classification'] ?? null ) || ! in_array( $record['status'] ?? null, array( 'pending_review', 'review_recommended' ), true ) ) ) {
+		$identity_review = $otje || ( 'otje' === ( $_POST['review_view'] ?? '' ) && backyard_birds_otje_candidate( $record ) );
+		if ( ( ( ! $identity_review && 'human_review' !== ( $record['classification'] ?? null ) ) || ! in_array( $record['status'] ?? null, array( 'pending_review', 'review_recommended' ), true ) ) ) {
 			$result = 'conflict';
 		} elseif ( $otje && ( ! backyard_birds_otje_candidate( $record ) || ! backyard_birds_otje_supported( $record ) ) ) {
 			$result = 'identity_unavailable';
@@ -143,7 +151,9 @@ function backyard_birds_handle_review() {
 		}
 	}
 	// Post/redirect/get prevents a browser refresh from repeating the mutation.
-	wp_safe_redirect( add_query_arg( 'review_result', $result, admin_url( 'admin.php?page=backyard-birds' ) ) );
+	$query = array( 'review_result' => $result );
+	if ( 'otje' === ( $_POST['review_view'] ?? '' ) ) { $query['view'] = 'otje'; }
+	wp_safe_redirect( add_query_arg( $query, admin_url( 'admin.php?page=backyard-birds' ) ) );
 	exit;
 }
 

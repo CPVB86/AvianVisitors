@@ -95,11 +95,17 @@ Birds-subonderdelen worden nog niet gebouwd.
 
 ### Menselijke identiteit Otje in Birds-review
 
-Bij Gallus/kip-herkenningen is naast Bevestigen/Afwijzen een expliciete 🐔 Otje-keuze
+Bij observations met backend-capability `otje` is naast Bevestigen/Afwijzen een expliciete 🐔 Otje-keuze
 voorbereid. Deze bevestigt via dezelfde reviewactie met `identity_override: "otje"`;
-de oorspronkelijke soort/evidence wordt nooit vervangen. De knop blijft uitgeschakeld
-tot de API hiervoor ondersteuning adverteert. De huidige geïnspecteerde backend
-ondersteunt dit nog niet: zie [het exacte API-contract](OTJE_API_CONTRACT.md).
+de oorspronkelijke soort/evidence wordt nooit vervangen. Zonder deze capability
+verschijnt de knop niet. Alleen de backend bepaalt de geschiktheid, zonder
+soortenlijst in WordPress: zie [het API-contract](OTJE_API_CONTRACT.md).
+De view **🐔 Potentiële Otjes** filtert uitsluitend op openstaande observations met
+deze capability. De gelijknamige dashboardwidget toont het volledige actuele aantal
+en linkt direct naar deze view. Na elke reviewactie wordt dezelfde view opnieuw geladen.
+Vereist de bijgewerkte backend met `identity_override=otje` op `/api/observations/review`
+en `/api/observations/count?review_only=true`; update de Pi en herstart `backyard-api`
+vóór de WordPress-upload. Er is geen lokale identity-opslag of automatische mapping.
 Er is geen automatische aliasing en de publieke shortcodepresentatie blijft ongewijzigd.
 
 De Handleiding heeft ook zes veelgebruikte, kopieerbare beheercommando’s en
@@ -202,6 +208,9 @@ php wordpress/tests/test-public-observations.php
 php wordpress/tests/test-generator.php
 php wordpress/tests/test-otje.php
 ```
+
+Alleen de compacte view/dashboard-checks draaien (zonder andere suites):
+`php wordpress/tests/test-otje-view.php`.
 
 De tests gebruiken WordPress-testdoubles en controleren API-contracten, fouten,
 URL/token-validatie, Bearer-header, shortcode, menuvolgorde, begrenzing,

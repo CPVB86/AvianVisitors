@@ -62,6 +62,7 @@ function check( $condition, $message ) { if ( ! $condition ) { throw new Runtime
 function reply( $code, $body ) { $GLOBALS['response'] = array( 'response' => array( 'code' => $code ), 'body' => $body ); }
 function page() { ob_start(); try { backyard_settings_page(); return ob_get_contents(); } finally { ob_end_clean(); } }
 
+if ( defined( 'BACKYARD_TEST_BOOTSTRAP_ONLY' ) ) { backyard_modules(); return; }
 check( count( backyard_modules() ) === 4 && count( $requests ) === 0, 'Modules must not fetch data on load' );
 backyard_activate();
 check( $GLOBALS['added']['backyard_api_base_url'] === BACKYARD_DEFAULT_API_URL, 'Activation default' );

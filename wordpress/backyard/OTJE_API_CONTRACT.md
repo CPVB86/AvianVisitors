@@ -1,8 +1,13 @@
 # Otje: vereiste uitbreiding van de bestaande Backyard-review
 
-Status: WordPress is voorbereid; de geïnspecteerde Backyard API ondersteunt dit
-nog niet. Geen identiteit wordt in WordPress gesimuleerd of opgeslagen. Tot de
-API onderstaande capability levert, staat de Otje-knop uitgeschakeld.
+Status: de Backyard API ondersteunt de expliciete override. WordPress gebruikt
+uitsluitend de capability en slaat geen identiteit lokaal op. Zonder capability
+verschijnt geen Otje-knop.
+
+De aparte view gebruikt `GET /api/observations/review?domain=bird&identity_override=otje&limit=50`.
+De teller gebruikt `GET /api/observations/count?domain=bird&review_only=true&identity_override=otje`.
+De backend selecteert open records via dezelfde capabilityfunctie vóór de lijstlimiet;
+de telling is onbeperkt. De normale review zonder filter blijft ongewijzigd.
 
 ## Bestaande structuur en minimale uitbreiding
 
@@ -61,11 +66,9 @@ Voeg via `serialize()` aan de bestaande reviewlijst en detailresponse toe:
 ```
 
 Lever dit alleen voor reviewbare bird-observations waarvoor de backend de
-override accepteert. Conservatieve WP-keuzelijst (geen automatische mapping):
-`Gallus gallus`, `Gallus gallus domesticus`, `Gallus domesticus`,
-`Gallus sonneratii`, `Gallus lafayettii`, `Gallus varius`.
-De backend moet dezelfde domein/soortvalidatie afdwingen; andere soorten: 422.
-Deze lijst bepaalt alleen waar de reviewer de knop krijgt, nooit automatisch Otje.
+override accepteert. Alleen de backend bepaalt de toegestane soorten; WordPress
+bevat geen soortenlijst en gebruikt uitsluitend deze capability voor de keuze.
+De backend moet de geldigheid van de override bij confirm opnieuw controleren.
 
 Bewaar en retourneer `review.identity_override` via confirm, detail en alle
 observation-lijsten. WordPress meldt uitsluitend succes na een response met het

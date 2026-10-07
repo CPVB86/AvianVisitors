@@ -25,6 +25,7 @@ function check_no_temp_files() {
 	foreach ( $GLOBALS['audio_files'] ?? array() as $file ) { check( ! file_exists( $file ), 'Transport files must be removed' ); }
 }
 
+if ( defined( 'BACKYARD_TEST_BOOTSTRAP_ONLY' ) ) { return; }
 $review_id = '12345678-1234-4234-8234-123456789abc';
 $expected_nonce_action = 'backyard_birds_review_' . $review_id;
 $allowed = true;
