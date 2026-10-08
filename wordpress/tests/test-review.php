@@ -49,6 +49,7 @@ $http_handler = function ( $url, $args ) use ( &$record, &$forced_post_code, &$c
 	check( $args['headers']['Authorization'] === 'Bearer ' . $GLOBALS['token'], 'All review requests must authenticate' );
 	check( $args['redirection'] === 0, 'Never follow private API redirects' );
 	$path = parse_url( $url, PHP_URL_PATH );
+	if ( strpos( $path, '/api/generator/' ) === 0 ) { return review_response( 200, array( 'assets' => array() ) ); }
 	parse_str( parse_url( $url, PHP_URL_QUERY ) ?? '', $query );
 	if ( '/api/observations/count' === $path || '/api/observations/review' === $path ) {
 		check( $query['domain'] === 'bird' && ( '/api/observations/review' === $path || $query['review_only'] === 'true' ), 'Only human review birds requested' );

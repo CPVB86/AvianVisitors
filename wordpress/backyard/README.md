@@ -47,6 +47,27 @@ Gebruik HTTPS of een versleutelde privéverbinding (zoals Tailscale).
 
 ## Backyard-overzicht en Birds-review
 
+Birds heeft tabs **Review | Otje | Bevestigd**. Review en Otje gebruiken één set
+knoppen voor geselecteerde rijen: Bevestigen, Afwijzen en (indien beschikbaar) Otje.
+De kopcheckbox selecteert alle zichtbare rijen (maximaal 50); shift-click selecteert
+een reeks. Otje is alleen beschikbaar wanneer alle geselecteerde rijen die capability
+hebben. Elke actie controleert opnieuw de actuele API-status en de bestaande regels.
+De feedback vermeldt apart hoeveel acties verwerkt, niet bevestigd of niet uitgevoerd
+zijn. Langzame batches worden begrensd; controleer de vernieuwde lijst voordat je
+resterende rijen opnieuw selecteert. Er is geen nieuwe bulk-API of lokale opslag.
+
+Elke rij toont een Generator-afbeelding, met de bestaande lege `nest.webp` als
+fallback (ook bij een downloadfout). De authenticated audioproxy is ongewijzigd.
+
+**Bevestigd** is alleen-lezen en toont de status (automatisch geaccepteerd of
+handmatig bevestigd), met filters voor het laatste uur, 12 uur, 24 uur, 7 dagen of
+alle tijden. De periode gaat over de observation-timestamp, niet de reviewtijd.
+Standaard: 24 uur, beide statussen. Iedere selectie toont maximaal de 50 nieuwste
+resultaten; ‘Alle’ verwijdert de tijdsgrens, niet deze weergavelimiet.
+
+Gerichte checks: `php wordpress/tests/test-birds-bulk.php`,
+`php wordpress/tests/test-otje-view.php` en `node wordpress/tests/test-review-selection.js`.
+
 Het WordPress **Dashboard** (`wp-admin/index.php`) toont voor beheerders de widget
 **Backyard**, zichtbaar/verbergbaar via **Scherminstellingen** en verplaatsbaar
 zoals andere dashboardwidgets. De Birds-regel bevat een klikbare, ongecapte
