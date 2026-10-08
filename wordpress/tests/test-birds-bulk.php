@@ -47,3 +47,12 @@ $_GET['status'] = 'human_confirmed';
 $html = render_review();
 check( strpos( $html, 'Handmatig bevestigd' ) !== false && strpos( $html, 'name="observation_ids[]"' ) === false && strpos( $html, 'name="decision"' ) === false, 'Confirmed tab is filtered and read-only' );
 echo "Focused bulk review, image fallback and confirmed-tab checks passed.\n";
+$_GET = array( 'view' => 'rejected', 'period' => 'all', 'status' => 'human_rejected' );
+$html = render_review();
+check( count( backyard_birds_confirmed_observations( true ) ) === 1 && strpos( $html, 'Handmatig afgewezen' ) !== false
+	&& strpos( $html, 'value="rejected"' ) !== false && strpos( $html, 'niet door de API opgeslagen' ) !== false
+	&& strpos( $html, 'name="decision"' ) === false, 'Rejected tab uses real stored status and explains unavailable automatic discards' );
+$records[ $ids[2] ]['timestamp'] = gmdate( 'c', time() - 7200 );
+$_GET['period'] = '1h';
+check( backyard_birds_confirmed_observations( true ) === array(), 'Rejected time filter' );
+echo "Rejected-tab status and time-filter checks passed.\n";

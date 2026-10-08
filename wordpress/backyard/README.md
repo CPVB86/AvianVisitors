@@ -47,7 +47,7 @@ Gebruik HTTPS of een versleutelde privéverbinding (zoals Tailscale).
 
 ## Backyard-overzicht en Birds-review
 
-Birds heeft tabs **Review | Otje | Bevestigd**. Review en Otje gebruiken één set
+Birds heeft tabs **Review | Otje | Bevestigd | Afgewezen**. Review en Otje gebruiken één set
 knoppen voor geselecteerde rijen: Bevestigen, Afwijzen en (indien beschikbaar) Otje.
 De kopcheckbox selecteert alle zichtbare rijen (maximaal 50); shift-click selecteert
 een reeks. Otje is alleen beschikbaar wanneer alle geselecteerde rijen die capability
@@ -64,6 +64,11 @@ handmatig bevestigd), met filters voor het laatste uur, 12 uur, 24 uur, 7 dagen 
 alle tijden. De periode gaat over de observation-timestamp, niet de reviewtijd.
 Standaard: 24 uur, beide statussen. Iedere selectie toont maximaal de 50 nieuwste
 resultaten; ‘Alle’ verwijdert de tijdsgrens, niet deze weergavelimiet.
+
+**Afgewezen** gebruikt dezelfde tijd-/statusfilters en toont opgeslagen
+`human_rejected` observations. Automatische `discarded` detecties worden door de
+huidige backend niet opgeslagen en zijn niet op te vragen. De tab vermeldt dit;
+automatische afwijzingen worden niet verzonnen of afgeleid uit confidence.
 
 Gerichte checks: `php wordpress/tests/test-birds-bulk.php`,
 `php wordpress/tests/test-otje-view.php` en `node wordpress/tests/test-review-selection.js`.
