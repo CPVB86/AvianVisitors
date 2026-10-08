@@ -27,7 +27,7 @@ add_action( 'admin_enqueue_scripts', function ( $hook ) {
 	wp_enqueue_style( 'backyard-manual', plugins_url( 'manual.css', __FILE__ ), array(), '0.4.0' );
 	if ( in_array( $hook, array( 'toplevel_page_backyard', 'backyard_page_backyard-birds' ), true ) ) {
 		wp_enqueue_script( 'backyard-review', plugins_url( 'review.js', __FILE__ ), array(), '0.4.0', true );
-		wp_enqueue_script( 'backyard-corrections', plugins_url( 'corrections.js', __FILE__ ), array( 'backyard-review' ), '0.4.0', true );
+		wp_enqueue_script( 'backyard-corrections', plugins_url( 'corrections.js', __FILE__ ), array( 'backyard-review' ), '0.4.1', true );
 		wp_localize_script( 'backyard-corrections', 'backyardCorrections', array( 'url' => admin_url( 'admin-ajax.php' ), 'nonce' => wp_create_nonce( 'backyard_corrections' ) ) );
 	}
 	if ( 'backyard_page_backyard-manual' === $hook ) {

@@ -1,4 +1,4 @@
-(() => {
+function backyardInitCorrections() {
     const dialog = document.querySelector('#backyard-correction');
     if (!dialog) return;
     const form = dialog.querySelector('form'), fields = form.elements;
@@ -109,4 +109,12 @@
             if (!saved && error.status === 409) current = null;
         } finally { busy = false; }
     });
-})();
+}
+
+// WordPress can print footer scripts before the page-specific admin_footer hook.
+// Wait until that hook's dialog markup has been parsed before attaching handlers.
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', backyardInitCorrections, { once: true });
+} else {
+    backyardInitCorrections();
+}
