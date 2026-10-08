@@ -23,6 +23,15 @@ Weather, Garden en Bats krijgen later eigen packages onder modules met eigen
 routers en modellen; nu zijn daarvoor geen lege services of tabellen nodig.
 Core importeert geen audio-, hardware- of AI-code.
 
+## Samsung The Frame (handmatige module)
+
+De zelfstandige `app/modules/samsung_frame/` CLI uploadt een 3840 × 2160 PNG
+via Wi-Fi, vereist `matte="none"`, activeert en verifieert het nieuwe artwork,
+en verwijdert pas daarna uitsluitend het vorige eigen artwork.
+Zie [installatie en exacte handmatige commando's](docs/SAMSUNG_FRAME.md).
+Geen Avian-koppeling, timer of automatische synchronisatie. De API importeert
+de optionele Samsung/Pillow-dependencies niet.
+
 ## Local development / demo mode
 
 Python 3.11+; deze fase is uitgevoerd op Windows met Python 3.14.
