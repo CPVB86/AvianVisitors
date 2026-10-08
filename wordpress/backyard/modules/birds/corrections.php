@@ -28,7 +28,8 @@ function backyard_birds_correction_projection( $row ) {
 		'confidence' => $row['confidence'] ?? null,
 		'date' => wp_date( 'd-m-Y H:i:s', strtotime( $row['timestamp'] ) ),
 		'actions' => $row['correction_capabilities']['actions'] ?? array(),
-		'audio' => ! empty( $row['audio_available'] ) ? wp_nonce_url( add_query_arg( array( 'action' => 'backyard_birds_audio', 'observation_id' => $row['id'] ), admin_url( 'admin-post.php' ) ), 'backyard_birds_audio_' . $row['id'] ) : '',
+		// JSON/DOM URLs need raw query separators; wp_nonce_url() escapes them for HTML.
+		'audio' => ! empty( $row['audio_available'] ) ? add_query_arg( array( 'action' => 'backyard_birds_audio', 'observation_id' => $row['id'], '_wpnonce' => wp_create_nonce( 'backyard_birds_audio_' . $row['id'] ) ), admin_url( 'admin-post.php' ) ) : '',
 	);
 }
 
