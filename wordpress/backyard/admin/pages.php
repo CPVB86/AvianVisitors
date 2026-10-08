@@ -24,9 +24,11 @@ add_action( 'admin_enqueue_scripts', function ( $hook ) {
 	if ( ! in_array( $hook, array( 'index.php', 'backyard_page_backyard-manual', 'toplevel_page_backyard', 'backyard_page_backyard-settings', 'backyard_page_backyard-birds' ), true ) ) {
 		return;
 	}
-	wp_enqueue_style( 'backyard-manual', plugins_url( 'manual.css', __FILE__ ), array(), '0.3.3' );
+	wp_enqueue_style( 'backyard-manual', plugins_url( 'manual.css', __FILE__ ), array(), '0.4.0' );
 	if ( in_array( $hook, array( 'toplevel_page_backyard', 'backyard_page_backyard-birds' ), true ) ) {
-		wp_enqueue_script( 'backyard-review', plugins_url( 'review.js', __FILE__ ), array(), '0.3.4', true );
+		wp_enqueue_script( 'backyard-review', plugins_url( 'review.js', __FILE__ ), array(), '0.4.0', true );
+		wp_enqueue_script( 'backyard-corrections', plugins_url( 'corrections.js', __FILE__ ), array( 'backyard-review' ), '0.4.0', true );
+		wp_localize_script( 'backyard-corrections', 'backyardCorrections', array( 'url' => admin_url( 'admin-ajax.php' ), 'nonce' => wp_create_nonce( 'backyard_corrections' ) ) );
 	}
 	if ( 'backyard_page_backyard-manual' === $hook ) {
 		wp_enqueue_script( 'backyard-manual', plugins_url( 'manual.js', __FILE__ ), array(), '0.2.3', true );

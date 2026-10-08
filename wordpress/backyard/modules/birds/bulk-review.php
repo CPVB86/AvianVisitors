@@ -3,7 +3,7 @@ defined( 'ABSPATH' ) || exit;
 
 function backyard_birds_review_image( $generator, $row ) {
 	$fallback = plugins_url( 'assets/nest.webp', dirname( __DIR__, 2 ) . '/backyard.php' );
-	$url = $generator->thumbnail( 'bird', $row['scientific_name'], array( 'perched', 'flight', 'photo_cutout' ) );
+	$url = $generator->thumbnail( 'bird', ( $row['effective_identity']['scientific_name'] ?? $row['scientific_name'] ), array( 'perched', 'flight', 'photo_cutout' ) );
 	return '<img class="backyard-review-image" src="' . esc_url( $url ?: $fallback ) . '" data-fallback="' . esc_url( $fallback ) . '" width="64" height="64" alt="" loading="lazy" style="width:64px;height:64px;object-fit:contain;background:transparent">';
 }
 

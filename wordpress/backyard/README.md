@@ -47,6 +47,36 @@ Gebruik HTTPS of een versleutelde privéverbinding (zoals Tailscale).
 
 ## Backyard-overzicht en Birds-review
 
+### Correcties achteraf
+
+In Bevestigd en Afgewezen opent **Bewerken** een editor met de oorspronkelijke
+BirdNET-soort, effectieve soort/identiteit, confidence, tijd, status en beveiligde
+audio. Afgewezen records zijn ook via het statusfilter van Bevestigd bereikbaar.
+Soortkeuze zoekt in `GET /api/avian-visitors/search`; een geselecteerde catalogusnaam
+gaat als `scientific_name_override` naar het bestaande `/api/observations/{id}/correct`.
+Soort behouden laat het veld weg; oorspronkelijke soort herstellen stuurt null.
+Identity null verwijdert Otje. Backendvalidatie bepaalt welke doelsoort Otje toestaat.
+
+Opslaan gebruikt de gelezen status/versie, een UUID per actie en de WordPress-user-ID
+als actor. Bij onzekere netwerkuitkomst blijft exact dezelfde payload/UUID beschikbaar
+voor retry. Bij 409 moet de beheerder expliciet de actuele waarneming ophalen.
+Er wordt nooit stilzwijgend met een nieuwere versie overschreven. De API blijft
+verantwoordelijk voor audit, evidencebehoud en alle statistische herberekeningen.
+
+Na opslag wordt alleen de Birds-inhoud vernieuwd, niet de volledige pagina. Detail,
+reviewtellers, `/api/avian-visitors/stats` (24-uursvenster plus API-all-time-totalen)
+en `/api/avian-visitors/lifelist` worden opnieuw opgehaald. `backyard:observations-updated`
+publiceert de gefilterde API-snapshot voor eventuele WP-statistiek/Atlascomponenten.
+De plugin bewaart of berekent geen eigen tellingen. Een afzonderlijk open
+AvianVisitors-venster op een andere origin houdt zijn bestaande eigen refreshflow;
+WordPress kan dat venster niet rechtstreeks herladen. Dag/maand/jaar/soortgegevens
+blijven afkomstig uit de bijgewerkte backendprojectie.
+
+Vereist het definitieve correctiecontract inclusief `scientific_name_override`,
+`review_version` en `effective_identity`. Geen backendwijzigingen in deze pluginstap.
+Alleen technische smokechecks zijn uitgevoerd; volledige functionele test op hosting
+moet nog plaatsvinden. De bestaande lokale productie-audiofix is niet gewijzigd.
+
 Birds heeft tabs **Review | Otje | Bevestigd | Afgewezen**. Review en Otje gebruiken één set
 knoppen voor geselecteerde rijen: Bevestigen, Afwijzen en (indien beschikbaar) Otje.
 De kopcheckbox selecteert alle zichtbare rijen (maximaal 50); shift-click selecteert

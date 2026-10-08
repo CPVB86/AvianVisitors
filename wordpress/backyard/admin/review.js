@@ -1,4 +1,5 @@
-document.querySelectorAll('.backyard-bulk-review').forEach((form) => {
+window.backyardReviewInit = (root = document) => {
+root.querySelectorAll('.backyard-bulk-review').forEach((form) => {
     const rows = Array.from(form.querySelectorAll('input[name="observation_ids[]"]'));
     const all = form.querySelector('.backyard-select-all');
     const buttons = Array.from(form.querySelectorAll('button[name="decision"]'));
@@ -33,7 +34,7 @@ document.querySelectorAll('.backyard-bulk-review').forEach((form) => {
     update();
 });
 
-document.querySelectorAll('.backyard-review-image').forEach((img) => {
+root.querySelectorAll('.backyard-review-image').forEach((img) => {
         const fallback = () => {
             if (!img.dataset.fallback) return;
             const url = img.dataset.fallback;
@@ -43,3 +44,6 @@ document.querySelectorAll('.backyard-review-image').forEach((img) => {
         img.addEventListener('error', fallback);
         if (img.complete && img.naturalWidth === 0) fallback();
     });
+
+};
+window.backyardReviewInit();

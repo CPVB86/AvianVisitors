@@ -3,6 +3,7 @@ defined( 'ABSPATH' ) || exit;
 require_once __DIR__ . '/identity.php';
 require_once __DIR__ . '/bulk-review.php';
 require_once __DIR__ . '/confirmed.php';
+require_once __DIR__ . '/corrections.php';
 
 function backyard_birds_review_count( $otje = false ) {
 	$query = array( 'domain' => 'bird', 'review_only' => 'true' );
@@ -120,12 +121,15 @@ function backyard_birds_admin_page() {
 	backyard_birds_bulk_buttons( $rows );
 	}
 	$generator = new Backyard_Generator();
-	echo '<div class="backyard-review-scroll"><table class="widefat striped backyard-review-table"><thead><tr>' . ( $confirmed ? '<th scope="col">Status</th>' : '<th scope="col"><input type="checkbox" class="backyard-select-all" aria-label="Selecteer alle waarnemingen op deze pagina"></th>' ) . '<th scope="col">Vogel</th><th scope="col">Datum/tijd</th><th scope="col">Soort</th><th scope="col">Latijnse naam</th><th scope="col">Confidence</th><th scope="col">Supports</th><th scope="col">Audio</th></tr></thead><tbody>';
+	echo '<div class="backyard-review-scroll"><table class="widefat striped backyard-review-table"><thead><tr>' . ( $confirmed ? '<th scope="col">Status</th>' : '<th scope="col"><input type="checkbox" class="backyard-select-all" aria-label="Selecteer alle waarnemingen op deze pagina"></th>' ) . '<th scope="col">Vogel</th><th scope="col">Datum/tijd</th><th scope="col">Soort</th><th scope="col">Latijnse naam</th><th scope="col">Confidence</th><th scope="col">Supports</th><th scope="col">Audio</th>' . ( $confirmed ? '<th scope="col">Actie</th>' : '' ) . '</tr></thead><tbody>';
 	foreach ( $rows as $row ) {
 		$name = $row['common_name_nl'] ?? '';
 		if ( ! is_string( $name ) || '' === trim( $name ) ) {
 			$name = isset( $row['common_name'] ) && is_string( $row['common_name'] ) ? $row['common_name'] : '—';
 		}
+		$effective_name = $row['effective_identity']['scientific_name'] ?? $row['scientific_name'];
+		if ( $effective_name !== $row['scientific_name'] ) { $name = $effective_name; }
+		if ( 'otje' === ( $row['effective_identity']['identity_override'] ?? null ) ) { $name = 'Otje'; }
 		$time = strtotime( $row['timestamp'] );
 		if ( $confirmed ) {
 			echo '<tr><td>' . esc_html( backyard_birds_confirmed_statuses( $rejected )[ $row['status'] ] ) . '</td>';
@@ -133,7 +137,7 @@ function backyard_birds_admin_page() {
 		echo '<tr><td><input type="checkbox" name="observation_ids[]" value="' . esc_attr( $row['id'] ) . '" data-otje="' . ( backyard_birds_otje_candidate( $row ) ? '1' : '0' ) . '" aria-label="' . esc_attr( 'Selecteer ' . $name . ' ' . wp_date( 'd-m-Y H:i:s', $time ) ) . '"></td>';
 		}
 		echo '<td>' . backyard_birds_review_image( $generator, $row ) . '</td><td><time datetime="' . esc_attr( gmdate( 'c', $time ) ) . '">' . esc_html( wp_date( 'd-m-Y H:i:s', $time ) ) . '</time></td>';
-		echo '<td>' . esc_html( $name ) . '</td><td>' . esc_html( $row['scientific_name'] ) . '</td><td>' . esc_html( number_format_i18n( (float) $row['confidence'] * 100, 1 ) . '%' ) . '</td><td>' . esc_html( $row['supports'] ) . '</td><td>';
+		echo '<td>' . esc_html( $name ) . '</td><td>' . esc_html( $effective_name ) . '</td><td>' . esc_html( number_format_i18n( (float) $row['confidence'] * 100, 1 ) . '%' ) . '</td><td>' . esc_html( $row['supports'] ) . '</td><td>';
 		if ( $row['audio_available'] ) {
 			// Never use audio_url supplied by the API: only an authenticated WP route.
 			$url = wp_nonce_url( add_query_arg( array( 'action' => 'backyard_birds_audio', 'observation_id' => $row['id'] ), admin_url( 'admin-post.php' ) ), 'backyard_birds_audio_' . $row['id'] );
@@ -141,7 +145,9 @@ function backyard_birds_admin_page() {
 		} else {
 			echo 'Geen audio beschikbaar';
 		}
-		echo '</td></tr>';
+		echo '</td>';
+		if ( $confirmed ) { echo '<td><button type="button" class="button backyard-edit" data-id="' . esc_attr( $row['id'] ) . '">Bewerken</button></td>'; }
+		echo '</tr>';
 	}
 	echo '</tbody></table></div>' . ( $confirmed ? '' : '</form>' ) . '</section></div>';
 }

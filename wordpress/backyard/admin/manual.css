@@ -10,6 +10,19 @@
 	overflow-wrap: anywhere;
 }
 
+#backyard-correction {
+	width: min(680px, 90vw);
+	max-height: 85vh;
+	overflow: auto;
+	border: 1px solid #c3c4c7;
+	border-radius: 8px;
+	padding: 24px;
+	text-align: left;
+}
+#backyard-correction::backdrop { background: rgba(0, 0, 0, .4); }
+#backyard-correction textarea { width: 100%; }
+#backyard-correction .correction-message { font-weight: 600; }
+
 .backyard-card > h2 {
 	margin-top: 0;
 	text-align: left;

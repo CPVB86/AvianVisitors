@@ -7,7 +7,7 @@ function backyard_birds_confirmed_options() {
 
 function backyard_birds_confirmed_statuses( $rejected = false ) {
 	if ( $rejected ) { return array( 'human_rejected' => 'Handmatig afgewezen' ); }
-	return array( 'auto_accepted' => 'Automatisch geaccepteerd', 'human_confirmed' => 'Handmatig bevestigd' );
+	return array( 'auto_accepted' => 'Automatisch geaccepteerd', 'human_confirmed' => 'Handmatig bevestigd', 'human_rejected' => 'Handmatig afgewezen' );
 }
 
 function backyard_birds_confirmed_filters( $rejected = false ) {
@@ -38,7 +38,7 @@ function backyard_birds_confirmed_observations( $rejected = false ) {
 	$cutoff = isset( $durations[ $period ] ) ? time() - $durations[ $period ] : 0;
 	$rows = array();
 	$client = new Backyard_API_Client();
-	foreach ( 'all' === $status ? array_keys( backyard_birds_confirmed_statuses( $rejected ) ) : array( $status ) as $wanted ) {
+	foreach ( 'all' === $status ? ( $rejected ? array( 'human_rejected' ) : array( 'auto_accepted', 'human_confirmed' ) ) : array( $status ) as $wanted ) {
 		$result = $client->get( '/api/observations', array( 'domain' => 'bird', 'status' => $wanted, 'limit' => 50 ) );
 		if ( is_wp_error( $result ) ) { return $result; }
 		if ( ! is_array( $result ) || array_values( $result ) !== $result ) { return new WP_Error( 'backyard_review', 'Ongeldig antwoord.' ); }
