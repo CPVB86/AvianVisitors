@@ -47,6 +47,16 @@ Gebruik HTTPS of een versleutelde privéverbinding (zoals Tailscale).
 
 ## Backyard-overzicht en Birds-review
 
+### AvianVisitors embed
+
+Plaats `[backyard_avian]` op een pagina. Het iframe toont
+`https://backyard.tail99c3bd.ts.net:8443/avian-visitors/` op schermbreedte
+en schermhoogte, zonder interne scrollbalken. Gebruik een lege paginatemplate
+zonder header, footer en paginamarges voor een schermvullende pagina zonder
+extra paginascroll. De shortcode past de rest van het thema niet aan.
+De bezoeker moet deze presentatie-URL kunnen bereiken; de bronserver moet
+embedding door de WordPress-site toestaan. Er wordt geen API-token meegestuurd.
+
 ### Correcties achteraf
 
 In Bevestigd en Afgewezen opent **Bewerken** een editor met de oorspronkelijke

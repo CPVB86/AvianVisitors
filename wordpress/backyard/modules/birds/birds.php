@@ -1,5 +1,6 @@
 <?php
 defined( 'ABSPATH' ) || exit;
+require_once __DIR__ . '/avian.php';
 if ( is_admin() ) {
 	require_once __DIR__ . '/review.php';
 }
