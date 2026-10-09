@@ -46,9 +46,11 @@ function backyard_settings_page() {
 	echo '<div class="wrap"><h1>Instellingen</h1>';
 	settings_errors();
 	$result = null;
+	$data_status = null;
 	if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['backyard_test_connection'] ) ) {
 		check_admin_referer( 'backyard_test_connection' );
 		$result = ( new Backyard_API_Client() )->health();
+		$data_status = backyard_data_connection_status();
 	}
 	echo '<form id="backyard-settings" method="post" action="' . esc_url( admin_url( 'options.php' ) ) . '">';
 	settings_fields( 'backyard' );
@@ -58,6 +60,7 @@ function backyard_settings_page() {
 		$text   = is_wp_error( $result ) ? $result->get_error_message() : 'API bereikbaar — database ok.';
 		echo '<div class="' . esc_attr( $class ) . '"><p>' . esc_html( $text ) . '</p></div>';
 	}
+	if ( null !== $data_status ) { echo '<p role="status">' . esc_html( $data_status ) . '</p>'; }
 	do_settings_sections( 'backyard' );
 	echo '<p>Sla wijzigingen eerst op. De test gebruikt de opgeslagen verbinding.</p>';
 	submit_button( 'Test verbinding', 'secondary', 'backyard_test_connection', true, array( 'form' => 'backyard-connection-test' ) );

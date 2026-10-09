@@ -13,9 +13,32 @@ function backyard_data_snapshot( $module, $period = 'all', $identity = '' ) {
 		$cache[ $key ] = ! is_wp_error( $result ) && is_array( $result ) && ( $result['module'] ?? null ) === $module
 			&& ( '' === $identity || ( $result['identity'] ?? null ) === $identity )
 			&& ( $result['period'] ?? null ) === $period && is_array( $result['species'] ?? null ) && is_array( $result['stats'] ?? null ) && is_array( $result['rankings'] ?? null )
-			? $result : new WP_Error( 'backyard_data', 'Gegevens zijn tijdelijk niet beschikbaar.' );
+			? $result : ( is_wp_error( $result ) ? $result : new WP_Error( 'backyard_data', 'Gegevens zijn tijdelijk niet beschikbaar.' ) );
 	}
 	return $cache[ $key ];
+}
+
+/** Admin-only diagnostic: never return response bodies, URLs or credentials. */
+function backyard_data_connection_status() {
+	backyard_require_admin();
+	$data = backyard_data_snapshot( 'birds' );
+	if ( ! is_wp_error( $data ) ) {
+		return 'Shortcode-data bereikbaar: ' . (int) ( $data['stats']['total_observations'] ?? 0 ) . ' geaccepteerde waarnemingen.';
+	}
+	$code = $data->get_error_code();
+	$detail = $data->get_error_data();
+	if ( 'backyard_http' === $code && is_array( $detail ) && isset( $detail['status'] ) ) {
+		$status = (int) $detail['status'];
+		return 'Shortcode-data: HTTP ' . $status . '. ' . ( 404 === $status ? 'Endpoint ontbreekt. Controleer de Pi-update, API-herstart en eventuele reverse proxy.' : ( $status >= 500 ? 'De API meldt een serverfout. Controleer het backyard-api-log direct na deze test.' : 'Het endpoint weigert de aanvraag. Controleer de API-configuratie en WordPress-tijdzone.' ) );
+	}
+	$messages = array(
+		'backyard_auth' => 'Authenticatie geweigerd. Controleer het API-token.',
+		'backyard_token' => 'Geen geldig API-token ingesteld.',
+		'backyard_connection' => 'Verbindingsfout of time-out bij het ophalen van de shortcode-data.',
+		'backyard_json' => 'Geen geldig JSON-antwoord. Controleer de API en eventuele reverse proxy.',
+		'backyard_data' => 'Het antwoord voldoet niet aan het presentatiecontract. Controleer de API-versie.',
+	);
+	return 'Shortcode-data: ' . ( $messages[ $code ] ?? 'Onbekende API-fout.' );
 }
 
 function backyard_data_fields() {
