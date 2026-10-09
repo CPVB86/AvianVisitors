@@ -31,7 +31,7 @@ function wp_parse_url( $value ) { return parse_url( $value ); }
 function add_settings_error( ...$args ) { $GLOBALS['setting_error'] = true; }
 function add_query_arg( $query, $url, $target = null ) {
 	if ( null !== $target ) { $query = array( $query => $url ); $url = $target; }
-	return $url . ( false === strpos( $url, '?' ) ? '?' : '&' ) . http_build_query( $query );
+	return $url . ( false === strpos( $url, '?' ) ? '?' : '&' ) . ( defined( 'BACKYARD_TEST_RAW_QUERY' ) ? implode( '&', array_map( function ( $key, $value ) { return $key . '=' . $value; }, array_keys( $query ), $query ) ) : http_build_query( $query ) );
 }
 function wp_remote_get( $url, $args ) { $GLOBALS['requests'][] = array( $url, $args ); return isset( $GLOBALS['http_handler'] ) ? call_user_func( $GLOBALS['http_handler'], $url, $args ) : $GLOBALS['response']; }
 function wp_remote_retrieve_response_code( $value ) { return $value['response']['code']; }
@@ -53,7 +53,7 @@ function add_filter( $name, $callback ) { $GLOBALS['filter_callbacks'][ $name ][
 function apply_filters( $name, $value ) { foreach ( $GLOBALS['filter_callbacks'][ $name ] ?? array() as $callback ) { $value = $callback( $value ); } return $GLOBALS['filters'][ $name ] ?? $value; }
 function add_shortcode( $name, $callback ) { $GLOBALS['shortcodes'][ $name ] = $callback; }
 function shortcode_atts( $defaults, $attributes, $name ) { return array_intersect_key( (array) $attributes, $defaults ) + $defaults; }
-function wp_timezone_string() { return 'Europe/Amsterdam'; }
+function wp_timezone_string() { return $GLOBALS['test_timezone'] ?? 'Europe/Amsterdam'; }
 function wp_date( $format, $time ) { return gmdate( $format, $time ); }
 function number_format_i18n( $number, $decimals = 0 ) { return number_format( $number, $decimals, ',', '.' ); }
 function add_menu_page( $title, $label, $cap, $slug, $callback, $icon ) { $GLOBALS['menu_icon'] = $icon; }

@@ -7,7 +7,8 @@ function backyard_data_snapshot( $module, $period = 'all', $identity = '' ) {
 	$timezone = wp_timezone_string();
 	$key = hash( 'sha256', get_option( 'backyard_api_base_url', BACKYARD_DEFAULT_API_URL ) . '|' . get_option( 'backyard_api_token', '' ) ) . '|' . $module . '|' . $period . '|' . $timezone . '|' . $identity;
 	if ( ! array_key_exists( $key, $cache ) ) {
-		$query = array( 'period' => $period, 'timezone' => $timezone );
+		// add_query_arg expects new values to be encoded; a bare + becomes a space.
+		$query = array( 'period' => $period, 'timezone' => rawurlencode( $timezone ) );
 		if ( '' !== $identity ) { $query['identity'] = $identity; }
 		$result = ( new Backyard_API_Client() )->get( '/api/presentation/' . $module, $query );
 		$cache[ $key ] = ! is_wp_error( $result ) && is_array( $result ) && ( $result['module'] ?? null ) === $module
