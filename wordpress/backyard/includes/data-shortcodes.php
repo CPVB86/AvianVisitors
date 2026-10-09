@@ -2,13 +2,16 @@
 defined( 'ABSPATH' ) || exit;
 
 /** Request-scoped snapshots: shared selections, no stale counts after corrections. */
-function backyard_data_snapshot( $module, $period = 'all' ) {
+function backyard_data_snapshot( $module, $period = 'all', $identity = '' ) {
 	static $cache = array();
 	$timezone = wp_timezone_string();
-	$key = hash( 'sha256', get_option( 'backyard_api_base_url', BACKYARD_DEFAULT_API_URL ) . '|' . get_option( 'backyard_api_token', '' ) ) . '|' . $module . '|' . $period . '|' . $timezone;
+	$key = hash( 'sha256', get_option( 'backyard_api_base_url', BACKYARD_DEFAULT_API_URL ) . '|' . get_option( 'backyard_api_token', '' ) ) . '|' . $module . '|' . $period . '|' . $timezone . '|' . $identity;
 	if ( ! array_key_exists( $key, $cache ) ) {
-		$result = ( new Backyard_API_Client() )->get( '/api/presentation/' . $module, array( 'period' => $period, 'timezone' => $timezone ) );
+		$query = array( 'period' => $period, 'timezone' => $timezone );
+		if ( '' !== $identity ) { $query['identity'] = $identity; }
+		$result = ( new Backyard_API_Client() )->get( '/api/presentation/' . $module, $query );
 		$cache[ $key ] = ! is_wp_error( $result ) && is_array( $result ) && ( $result['module'] ?? null ) === $module
+			&& ( '' === $identity || ( $result['identity'] ?? null ) === $identity )
 			&& ( $result['period'] ?? null ) === $period && is_array( $result['species'] ?? null ) && is_array( $result['stats'] ?? null ) && is_array( $result['rankings'] ?? null )
 			? $result : new WP_Error( 'backyard_data', 'Gegevens zijn tijdelijk niet beschikbaar.' );
 	}
@@ -23,7 +26,7 @@ function backyard_data_stat_fields() {
 }
 
 function backyard_data_shortcode( $attributes = array(), $content = null, $tag = 'backyard_data' ) {
-	$a = shortcode_atts( array( 'module' => 'birds', 'type' => 'last', 'field' => 'name', 'period' => 'all', 'rank' => '1', 'species' => '', 'output' => 'text', 'fallback' => '', 'format' => '' ), $attributes, $tag );
+	$a = shortcode_atts( array( 'module' => 'birds', 'type' => 'last', 'field' => 'name', 'period' => 'all', 'rank' => '1', 'species' => '', 'identity' => '', 'output' => 'text', 'fallback' => '', 'format' => '' ), $attributes, $tag );
 	foreach ( $a as $value ) { if ( ! is_scalar( $value ) ) { return ''; } }
 	if ( 'bird_data' === $tag ) { $a['module'] = 'birds'; }
 	if ( 'bat_data' === $tag ) { $a['module'] = 'bats'; }
@@ -31,19 +34,22 @@ function backyard_data_shortcode( $attributes = array(), $content = null, $tag =
 	$rank = filter_var( $a['rank'], FILTER_VALIDATE_INT );
 	if ( ! in_array( $a['module'], array( 'birds', 'bats' ), true )
 		|| ! in_array( $a['type'], array( 'last', 'most', 'first', 'rarest', 'random', 'species', 'stats' ), true )
+		|| ! in_array( $a['identity'], array( '', 'otje' ), true )
+		|| ( '' !== $a['identity'] && ( 'birds' !== $a['module'] || '' !== trim( $a['species'] ) ) )
 		|| ! in_array( $a['period'], array( 'today', '24h', '7d', '30d', 'all' ), true )
 		|| ! in_array( $a['output'], array( 'text', 'url', 'image', 'link' ), true )
 		|| false === $rank || $rank < 1 || $rank > 10 || strlen( $a['format'] ) > 100
 		|| ! in_array( $a['field'], 'stats' === $a['type'] ? backyard_data_stat_fields() : backyard_data_fields(), true ) ) { return $fallback; }
-	$data = backyard_data_snapshot( $a['module'], $a['period'] );
+	$data = backyard_data_snapshot( $a['module'], $a['period'], $a['identity'] );
 	if ( is_wp_error( $data ) ) { return $fallback; }
 	$row = null;
 	if ( 'stats' === $a['type'] ) {
 		$value = $data['stats'][ $a['field'] ] ?? null;
 	} else {
-		$id = $data['rankings'][ $a['type'] ][ $rank - 1 ] ?? null;
+		$selection = 'species' === $a['type'] && '' !== $a['identity'] ? 'last' : $a['type'];
+		$id = $data['rankings'][ $selection ][ $rank - 1 ] ?? null;
 		foreach ( $data['species'] as $candidate ) {
-			if ( 'species' === $a['type'] ? ( $candidate['scientific_name'] ?? null ) === trim( $a['species'] ) : null !== $id && ( $candidate['species_id'] ?? null ) === $id ) {
+			if ( 'species' === $selection ? ( $candidate['scientific_name'] ?? null ) === trim( $a['species'] ) : null !== $id && ( $candidate['species_id'] ?? null ) === $id ) {
 				$row = $candidate; break;
 			}
 		}
@@ -88,6 +94,7 @@ add_filter( 'backyard_shortcode_docs', function ( $entries ) {
 		'period' => 'today, 24h, 7d, 30d of all (standaard). Selecties, count en eerste/laatste waarneming gelden binnen deze periode.',
 		'rank' => 'Positie 1 t/m 10 (standaard 1). Bij gelijke waarden sorteert de Pi op wetenschappelijke naam en identiteit.',
 		'species' => 'Wetenschappelijke naam bij type="species". Bij meerdere identiteiten krijgt de gewone soort voorrang.',
+		'identity' => 'otje: uitsluitend expliciet als Otje bevestigde waarnemingen, over alle oorspronkelijke herkenningen heen. Alleen birds; niet combineren met species. Werkt met count, datums, afbeeldingen en stats. Zonder Otje-waarnemingen geldt fallback; statistieken geven nul.',
 		'output' => 'text (standaard), url, image of link. Afbeeldingen: perched/flying met image of url. Links: wikipedia_url/observations_url met link of url. Geen styling.',
 		'format' => 'Optioneel PHP-datumformaat, bijvoorbeeld d-m-Y of j F Y. Standaard d-m-Y H:i:s, d-m-Y of H:i:s; WordPress-tijdzone en sitetaal gelden.',
 		'fallback' => 'Tekst wanneer gegevens ontbreken of de API onbereikbaar is; standaard leeg. Nul is een geldige statistiek.',
@@ -98,7 +105,12 @@ add_filter( 'backyard_shortcode_docs', function ( $entries ) {
 		$entries[] = array( 'module' => 'Elementor / gedeelde gegevens', 'title' => array( 'Backyard data', 'Birds data', 'Bats data' )[ $index ], 'shortcode' => $code,
 			'description' => 'Eén veld voor een Elementor Shortcode-widget of ondersteunde dynamische Shortcode-tag. Afbeeldingen lopen via WordPress; er worden geen API-geheimen meegestuurd.',
 			'parameters' => 0 === $index ? $parameters : array(),
-			'parameter_examples' => array( 'rank' => '[bird_data type="most" rank="2" field="count" period="7d"]', 'species' => '[backyard_data module="birds" type="species" species="Erithacus rubecula" field="count" period="30d"]', 'field' => '[bird_data type="stats" field="unique_species"]', 'format' => '[bird_data type="last" field="first_date" format="j F Y"]', 'fallback' => '[bat_data field="name" fallback="Nog geen waarnemingen"]' ) );
+			'parameter_examples' => array( 'identity' => '[bird_data identity="otje" field="perched" output="image"]', 'rank' => '[bird_data type="most" rank="2" field="count" period="7d"]', 'species' => '[backyard_data module="birds" type="species" species="Erithacus rubecula" field="count" period="30d"]', 'field' => '[bird_data type="stats" field="unique_species"]', 'format' => '[bird_data type="last" field="first_date" format="j F Y"]', 'fallback' => '[bat_data field="name" fallback="Nog geen waarnemingen"]' ) );
+	}
+	foreach ( array( 'perched' => 'Otje: afbeelding', 'last_seen' => 'Otje: laatste waarneming', 'count' => 'Otje: aantal waarnemingen' ) as $field => $title ) {
+		$entries[] = array( 'module' => 'Elementor / gedeelde gegevens', 'title' => $title,
+			'shortcode' => '[bird_data identity="otje" field="' . $field . '"' . ( 'perched' === $field ? ' output="image"' : '' ) . ']',
+			'description' => 'Alleen Otje, standaard alle perioden. Voeg period="7d" toe voor de laatste zeven dagen.', 'parameters' => array() );
 	}
 	return $entries;
 }, 20 );

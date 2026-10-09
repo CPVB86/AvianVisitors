@@ -365,3 +365,24 @@ Werk eerst Backyard op de Pi bij en herstart `backyard-api`. Upload vervolgens d
 gewijzigde bestanden `backyard.php`, `admin/pages.php`, `modules/bats/bats.php` en
 het nieuwe `includes/data-shortcodes.php` naar de bestaande pluginmap. Instellingen
 blijven behouden. Geen databasekopie, detectorwijziging of generatie vanuit WordPress.
+
+### Otje rechtstreeks selecteren
+
+```text
+[bird_data identity="otje" field="perched" output="image"]
+[bird_data identity="otje" field="last_seen"]
+[bird_data identity="otje" field="count"]
+[bird_data identity="otje" field="count" period="7d"]
+```
+
+`identity="otje"` selecteert uitsluitend expliciet gemarkeerde, geaccepteerde
+Otje-waarnemingen. De Pi telt haar herkenningen onder verschillende oorspronkelijke
+soorten samen; gewone kippen tellen niet mee. De afbeelding gebruikt Otjes bestaande
+Generator-asset. Datums en count volgen de gekozen periode. De effectieve soort
+van de laatste Otje-waarneming levert scientific_name en soortlinks; species_id
+blijft voor Otje gelijk. Ondersteunt ook type="species" zonder species-parameter,
+en type="stats" voor gefilterde statistieken. Combineer identity niet met species.
+Bats/andere identities geven fallback. Zonder waarnemingen geldt fallback, terwijl
+statistieken nul geven. Een oude API die identity niet ondersteunt wordt geweigerd.
+Werk daarom ook de Pi bij en herstart backyard-api. Voor WordPress volstaat het
+bijwerken van includes/data-shortcodes.php. Voorbeelden staan in de Handleiding.
