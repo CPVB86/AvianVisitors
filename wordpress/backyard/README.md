@@ -297,3 +297,71 @@ in echte WordPress en bereikbaarheid vanaf de hosting zijn nog niet uitgevoerd.
 De reviewtests omvatten teller/list-filtering, confirm/reject, vernieuwde data,
 conflicten, domeincontrole, ontbrekende audio, rechten/nonces, veilige HTML,
 WAV/range-transport, headerfouten, redirects en opruimen van tijdelijke bestanden.
+
+## Bats en gedeelde Elementor-shortcodes
+
+Bats biedt **Overzicht**, **Waarnemingen** (laatste 50 geaccepteerde), **Soorten**
+en **Statistieken**, met lege statussen zolang er geen gegevens zijn. Birds-review
+blijft ongewijzigd. De Dashboard-samenvatting bevat ook Bats.
+
+Gebruik een Elementor Shortcode-widget voor tekst/HTML of de dynamische
+Shortcode-tag waar het Elementor-veld deze ondersteunt. De plugin registreert
+gewone WordPress-shortcodes en vereist geen Elementor-afhankelijkheid.
+
+- `[backyard_data module="birds" type="last" field="name"]`
+- `[bird_data type="last" field="perched" output="image"]`
+- `[bat_data type="most" field="scientific_name" fallback="Nog geen waarnemingen"]`
+
+| Parameter | Waarden / betekenis |
+|---|---|
+| module | `birds` (standaard), `bats`; aliassen vullen deze vast in |
+| type | `last` (standaard), `most`, `first`, `rarest`, `random`, `species`, `stats` |
+| field | Eén veld uit onderstaande lijsten; standaard `name` |
+| period | `today`, `24h`, `7d`, `30d`, `all` (standaard) |
+| rank | 1 t/m 10; standaard 1; niet gebruikt bij species/stats |
+| species | Wetenschappelijke naam bij type species |
+| output | `text` (standaard), `url`, `image`, `link` |
+| fallback | Ontbrekende data/API-fout: deze tekst; standaard leeg |
+| format | PHP-datumformaat; standaard Nederlandse numerieke notatie |
+
+Soortvelden: `name` (NL, met bestaande naam als fallback), `scientific_name`,
+`species_id` (stabiele soort/presentatie-identificatie), `count`, `perched`, `flying`,
+`wikipedia_url`, `observations_url`, `first_seen`, `first_date`, `first_time`,
+`last_seen`, `last_date`, `last_time`. De eerste/laatste waarneming en count gelden
+binnen de geselecteerde periode. `species` kiest de gewone soort als meerdere
+lokale identiteiten dezelfde wetenschappelijke naam hebben; anders de beschikbare
+identiteit. Otje gebruikt de bestaande eigen naam en Generator-assets.
+
+Statistiekvelden: `total_observations`, `unique_species`, `today_observations`,
+`today_species`, `last_activity`, `new_species`, `active_days`. Statistieken gelden
+voor de periode, behalve `today_*` (altijd vandaag). `new_species` telt biologische
+soorten waarvan de eerste geaccepteerde waarneming ooit in de periode valt.
+Otje voegt geen biologische soort toe. Dagen volgen de WordPress-tijdzone.
+
+Datums: `d-m-Y H:i:s`, `d-m-Y` of `H:i:s`; `format="j F Y"` gebruikt de WordPress-sitetaal
+voor maandnamen. Ranglijsten worden door de Pi bepaald; bij gelijke waarden geldt
+wetenschappelijke naam/identiteit als vaste volgorde. Random blijft gelijk binnen
+één paginarender. Alle velden delen één API-snapshot per module/periode/tijdzone;
+er is geen blijvende statistiekcache. Correcties zijn zichtbaar bij de volgende
+render. Een externe Elementor/WordPress-paginacache moet zo nodig worden geleegd.
+
+Afbeeldingen: `output="image"` geeft een toegankelijk img-element zonder styling,
+`output="url"` alleen de WordPress-proxy-URL. Ontbrekende poses leveren fallback;
+er wordt nooit gegenereerd. Links ondersteunen `url` en `link` (soortnaam als label).
+`observations_url` is de bestaande cataloguslink naar waarneming.nl, geen privé-API
+of beheerlink. `wikipedia_url` gebruikt de bestaande NL-link, anders EN-link.
+
+Voorbeelden staan met kopieerknoppen onder Handleiding → Elementor / gedeelde gegevens:
+
+```text
+[bird_data type="last" field="first_date"]
+[bird_data type="last" field="last_time"]
+[bird_data type="most" rank="2" field="count" period="7d"]
+[backyard_data module="birds" type="species" species="Erithacus rubecula" field="count" period="30d"]
+[backyard_data module="birds" type="stats" field="unique_species" period="all"]
+```
+
+Werk eerst Backyard op de Pi bij en herstart `backyard-api`. Upload vervolgens de
+gewijzigde bestanden `backyard.php`, `admin/pages.php`, `modules/bats/bats.php` en
+het nieuwe `includes/data-shortcodes.php` naar de bestaande pluginmap. Instellingen
+blijven behouden. Geen databasekopie, detectorwijziging of generatie vanuit WordPress.

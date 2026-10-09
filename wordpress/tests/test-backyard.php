@@ -53,6 +53,7 @@ function add_filter( $name, $callback ) { $GLOBALS['filter_callbacks'][ $name ][
 function apply_filters( $name, $value ) { foreach ( $GLOBALS['filter_callbacks'][ $name ] ?? array() as $callback ) { $value = $callback( $value ); } return $GLOBALS['filters'][ $name ] ?? $value; }
 function add_shortcode( $name, $callback ) { $GLOBALS['shortcodes'][ $name ] = $callback; }
 function shortcode_atts( $defaults, $attributes, $name ) { return array_intersect_key( (array) $attributes, $defaults ) + $defaults; }
+function wp_timezone_string() { return 'Europe/Amsterdam'; }
 function wp_date( $format, $time ) { return gmdate( $format, $time ); }
 function number_format_i18n( $number, $decimals = 0 ) { return number_format( $number, $decimals, ',', '.' ); }
 function add_menu_page( $title, $label, $cap, $slug, $callback, $icon ) { $GLOBALS['menu_icon'] = $icon; }
@@ -105,7 +106,8 @@ check( $GLOBALS['submit_buttons'][0][4]['form'] === 'backyard-connection-test', 
 check( $GLOBALS['submit_buttons'][1][0] === 'Instellingen opslaan', 'General save button follows connection card' );
 check( strpos( $settings_html, 'id="backyard-connection-test"' ) > strpos( $settings_html, '</form>' ), 'Test form is not nested in settings form' );
 check( strpos( $settings_html, '<h2>Pi Connection</h2>' ) !== false, 'Connection card' );
-check( count( $requests ) === $before, 'No health request on page load' );
+check( count( $requests ) === $before + 1 && strpos( end( $requests )[0], '/api/avian-collage/settings' ) !== false, 'Page loads Pi period but does not test health' );
+$before = count( $requests );
 $_SERVER['REQUEST_METHOD'] = 'POST';
 $_POST['backyard_test_connection'] = '1';
 $allowed = false;
@@ -116,7 +118,7 @@ try { page(); throw new RuntimeException( 'Missing nonce check' ); } catch ( Run
 check( count( $requests ) === $before, 'Unauthorized requests never fetch' );
 $nonce_ok = true;
 $response = new WP_Error( 'timeout', '<script>timeout</script>' );
-check( strpos( page(), 'script' ) === false, 'Do not expose transport debug output' );
+check( strpos( page(), 'timeout' ) === false, 'Do not expose transport debug output' );
 reply( 200, '{"status":"ok","service":"backyard","database":"ok"}' );
 check( strpos( page(), 'database ok' ) !== false, 'Render healthy result' );
 ob_start(); backyard_manual_page(); $manual = ob_get_clean();
