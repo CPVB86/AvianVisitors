@@ -377,8 +377,9 @@ blijven behouden. Geen databasekopie, detectorwijziging of generatie vanuit Word
 
 `identity="otje"` selecteert uitsluitend expliciet gemarkeerde, geaccepteerde
 Otje-waarnemingen. De Pi telt haar herkenningen onder verschillende oorspronkelijke
-soorten samen; gewone kippen tellen niet mee. De afbeelding gebruikt Otjes bestaande
-Generator-asset. Datums en count volgen de gekozen periode. De effectieve soort
+soorten samen; gewone kippen tellen niet mee. De afbeelding gebruikt de meegeleverde `assets/otje.png` (perched) of
+`assets/otje-2.png` (flying), zonder Generator-lookup. Bij expliciet identity="otje"
+werkt de foto ook zonder waarnemingen of API-verbinding. Datums en count volgen de gekozen periode. De effectieve soort
 van de laatste Otje-waarneming levert scientific_name en soortlinks; species_id
 blijft voor Otje gelijk. Ondersteunt ook type="species" zonder species-parameter,
 en type="stats" voor gefilterde statistieken. Combineer identity niet met species.

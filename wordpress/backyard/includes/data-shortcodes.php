@@ -25,6 +25,19 @@ function backyard_data_stat_fields() {
 	return array( 'total_observations', 'unique_species', 'today_observations', 'today_species', 'last_activity', 'new_species', 'active_days' );
 }
 
+/** Bundled presentation assets, independent of species Generator availability. */
+function backyard_data_otje_image( $field ) {
+	$file = 'flying' === $field ? 'otje-2.png' : 'otje.png';
+	return plugins_url( 'assets/' . $file, dirname( __DIR__ ) . '/backyard.php' );
+}
+
+function backyard_data_image_output( $url, $name, $output ) {
+	$url = esc_url( $url, array( 'http', 'https' ) );
+	if ( 'image' === $output ) { return '<img src="' . $url . '" alt="' . esc_attr( $name ) . '" loading="lazy">'; }
+	if ( 'link' === $output ) { return '<a href="' . $url . '">' . esc_html( $name ) . '</a>'; }
+	return $url;
+}
+
 function backyard_data_shortcode( $attributes = array(), $content = null, $tag = 'backyard_data' ) {
 	$a = shortcode_atts( array( 'module' => 'birds', 'type' => 'last', 'field' => 'name', 'period' => 'all', 'rank' => '1', 'species' => '', 'identity' => '', 'output' => 'text', 'fallback' => '', 'format' => '' ), $attributes, $tag );
 	foreach ( $a as $value ) { if ( ! is_scalar( $value ) ) { return ''; } }
@@ -40,6 +53,10 @@ function backyard_data_shortcode( $attributes = array(), $content = null, $tag =
 		|| ! in_array( $a['output'], array( 'text', 'url', 'image', 'link' ), true )
 		|| false === $rank || $rank < 1 || $rank > 10 || strlen( $a['format'] ) > 100
 		|| ! in_array( $a['field'], 'stats' === $a['type'] ? backyard_data_stat_fields() : backyard_data_fields(), true ) ) { return $fallback; }
+	// An explicitly requested known portrait does not require an observation or API call.
+	if ( 'otje' === $a['identity'] && 1 === $rank && in_array( $a['field'], array( 'perched', 'flying' ), true ) ) {
+		return backyard_data_image_output( backyard_data_otje_image( $a['field'] ), 'Otje', $a['output'] );
+	}
 	$data = backyard_data_snapshot( $a['module'], $a['period'], $a['identity'] );
 	if ( is_wp_error( $data ) ) { return $fallback; }
 	$row = null;
@@ -58,6 +75,9 @@ function backyard_data_shortcode( $attributes = array(), $content = null, $tag =
 	}
 	$is_image = in_array( $a['field'], array( 'perched', 'flying' ), true );
 	$is_url = $is_image || in_array( $a['field'], array( 'wikipedia_url', 'observations_url' ), true );
+	if ( $is_image && 'birds' === $a['module'] && 'otje' === ( $row['identity'] ?? null ) ) {
+		return backyard_data_image_output( backyard_data_otje_image( $a['field'] ), 'Otje', $a['output'] );
+	}
 	if ( $is_image ) {
 		static $generator = null;
 		if ( null === $generator ) { $generator = new Backyard_Generator(); }
@@ -89,7 +109,7 @@ add_filter( 'backyard_shortcode_docs', function ( $entries ) {
 		'type' => 'last (standaard), most, first, rarest, random, species of stats. Alleen geaccepteerde waarnemingen; correcties tellen mee.',
 		'field' => 'Soort: ' . implode( ', ', backyard_data_fields() ) . '. Statistieken: ' . implode( ', ', backyard_data_stat_fields() ) . '.',
 		'Naamvelden' => 'name: Nederlandse catalogusnaam (anders bestaande naam), scientific_name: actuele wetenschappelijke naam, species_id: stabiele identificatie van soort en eventuele lokale identiteit.',
-		'Afbeeldingsvelden' => 'perched: zittend; flying: vliegend. Bestaande Generator-afbeeldingen, bij Otje haar eigen assets. Ontbrekend betekent fallback, nooit generatie.',
+		'Afbeeldingsvelden' => 'perched: zittend; flying: vliegend. Bestaande Generator-afbeeldingen; Otje gebruikt de meegeleverde otje.png en otje-2.png. Met identity="otje" is haar foto ook zonder waarnemingen beschikbaar. Ontbrekend betekent fallback, nooit generatie.',
 		'Tijdvelden' => 'first_seen/last_seen: volledige datum en tijd; first_date/last_date: alleen datum; first_time/last_time: alleen tijd. count: aantal geaccepteerde waarnemingen.',
 		'period' => 'today, 24h, 7d, 30d of all (standaard). Selecties, count en eerste/laatste waarneming gelden binnen deze periode.',
 		'rank' => 'Positie 1 t/m 10 (standaard 1). Bij gelijke waarden sorteert de Pi op wetenschappelijke naam en identiteit.',

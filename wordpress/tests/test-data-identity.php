@@ -15,13 +15,15 @@ $GLOBALS['http_handler'] = function ( $url, $args ) {
 	return array( 'response' => array( 'code' => 200 ), 'body' => json_encode( $value ) );
 };
 function otje_code( $args = array(), $tag = 'bird_data' ) { return backyard_data_shortcode( $args + array( 'identity' => 'otje' ), null, $tag ); }
+check( strpos( otje_code( array( 'field' => 'perched', 'output' => 'image' ) ), '/assets/otje.png' ) !== false && ! $requests, 'Explicit portrait needs no API or observation' );
+check( strpos( otje_code( array( 'field' => 'flying', 'output' => 'url' ) ), '/assets/otje-2.png' ) !== false && ! $requests, 'Second portrait URL without API' );
 check( otje_code() === 'Otje', 'Explicit identity with default type' );
 check( otje_code( array( 'field' => 'count' ) ) === '9', 'Pi-combined count' );
 check( otje_code( array( 'type' => 'species', 'field' => 'count' ) ) === '9', 'Identity selects without scientific name' );
 check( otje_code( array( 'field' => 'last_seen' ) ) === '09-10-2026 12:13:14', 'Latest marked observation' );
 check( otje_code( array( 'type' => 'stats', 'field' => 'total_observations' ) ) === '9' && count( $requests ) === 1, 'Shared identity snapshot and filtered stats' );
 $image = otje_code( array( 'field' => 'perched', 'output' => 'image' ) );
-check( strpos( $image, 'asset=otje_perched' ) !== false && strpos( $image, 'alt="Otje"' ) !== false, 'Otje image uses existing proxy and profile asset' );
+check( strpos( $image, '/assets/otje.png' ) !== false && strpos( $image, 'alt="Otje"' ) !== false, 'Otje image uses bundled public portrait' );
 check( otje_code( array( 'period' => '24h', 'fallback' => 'Geen Otje' ) ) === 'Geen Otje', 'No marked observations fallback' );
 check( otje_code( array( 'period' => '24h', 'type' => 'stats', 'field' => 'total_observations' ) ) === '0', 'Empty identity stats remain zero' );
 check( otje_code( array( 'period' => '7d', 'fallback' => 'Werk API bij' ) ) === 'Werk API bij', 'Fail closed if old API ignores identity' );
