@@ -47,6 +47,16 @@ Gebruik HTTPS of een versleutelde privéverbinding (zoals Tailscale).
 
 ## Backyard-overzicht en Birds-review
 
+### Samsung Frame-periode
+
+Kies onder **Backyard → Instellingen → Samsung Frame** uit 1 uur, 12 uur,
+24 uur (standaard), 7 dagen of alle waarnemingen en klik **Instellingen opslaan**.
+WordPress verstuurt de keuze via Bearer-auth naar `/api/avian-collage/settings`.
+De Pi bewaart deze persistent en leest haar lokaal bij iedere export. Het veld
+toont de actuele Pi-instelling; een verbindingsfout wordt gemeld en bevestigt
+geen opslag. Werk eerst Backyard op de Pi bij en herstart `backyard-api`.
+De bestaande export- en uploadtimers hoeven niet te worden gewijzigd.
+
 ### AvianVisitors embed
 
 Plaats `[backyard_avian]` op een pagina. Het iframe toont

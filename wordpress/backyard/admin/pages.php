@@ -62,6 +62,9 @@ function backyard_settings_page() {
 	echo '<p>Sla wijzigingen eerst op. De test gebruikt de opgeslagen verbinding.</p>';
 	submit_button( 'Test verbinding', 'secondary', 'backyard_test_connection', true, array( 'form' => 'backyard-connection-test' ) );
 	echo '</section>';
+	echo '<section class="backyard-card"><h2>Samsung Frame</h2>';
+	backyard_frame_period_field();
+	echo '</section>';
 	submit_button( 'Instellingen opslaan' );
 	echo '</form>';
 	// Separate form keeps testing independent of unsaved settings and their nonce.
