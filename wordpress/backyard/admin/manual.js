@@ -3,6 +3,7 @@ document.querySelectorAll('.backyard-copy-shortcode').forEach((button) => {
 	let highlightTimer;
 	button.addEventListener('click', async () => {
 		const code = button.querySelector('code');
+		const copyText = button.dataset.copy ?? code.textContent;
 		const status = button.closest('.backyard-copy-item').querySelector('.backyard-copy-status');
 		status.textContent = '';
 		status.classList.add('screen-reader-text');
@@ -10,12 +11,12 @@ document.querySelectorAll('.backyard-copy-shortcode').forEach((button) => {
 		button.classList.remove('is-copied');
 		let copied = false;
 		try {
-			await navigator.clipboard.writeText(code.textContent);
+			await navigator.clipboard.writeText(copyText);
 			copied = true;
 		} catch (error) {
 			// Fallback for HTTP admin pages or browsers without Clipboard API access.
 			const input = document.createElement('textarea');
-			input.value = code.textContent;
+			input.value = copyText;
 			input.readOnly = true;
 			input.style.position = 'fixed';
 			input.style.opacity = '0';

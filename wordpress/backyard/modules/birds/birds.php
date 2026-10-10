@@ -87,6 +87,7 @@ add_filter( 'backyard_shortcode_docs', function ( $entries ) {
 			'limit' => 'Aantal recente registraties; standaard 25, minimaal 1, maximaal 100.',
 			'language' => 'Taal van de soortnaam: NL (standaard), EN of DE, ongeacht hoofdletters. Ontbrekende vertalingen of onbekende talen vallen terug op common_name.',
 		),
+		'parameter_choices' => array( 'limit' => backyard_parameter_choices( 'limit', array( 25, 1, 100, 50 ) ), 'language' => backyard_parameter_choices( 'language', array( 'NL', 'EN', 'DE' ) ) ),
 		'parameter_examples' => array( 'limit' => '[backyard_birds_log limit="50"]', 'language' => '[backyard_birds_log language="nl" limit="50"]' ),
 		'description' => 'De laatste vogelregistraties met tijd, vogelafbeelding indien beschikbaar, soort en confidence. Nieuwste bovenaan, in de WordPress-tijdzone.',
 	);

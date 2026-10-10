@@ -145,10 +145,33 @@ add_filter( 'backyard_shortcode_docs', function ( $entries ) {
 		'Statistieken' => 'total_observations, unique_species, last_activity en active_days binnen de periode. today_* altijd vandaag. new_species: soorten die voor het eerst ooit binnen de periode verschenen. Otje is geen extra biologische soort.',
 		'Links en consistentie' => 'observations_url gebruikt de bestaande cataloguslink (waarneming.nl); wikipedia_url de bestaande Wikipedia-link. Eén API-snapshot per module/periode/tijdzone per paginarender, ook voor random. Geen blijvende tellingencache. Externe paginacaches kunnen wel oudere HTML tonen.',
 	);
+	$choices = array();
+	foreach ( array(
+		'module' => array( 'birds', 'bats' ),
+		'type' => array( 'last', 'most', 'first', 'rarest', 'random', 'species', 'stats' ),
+		'field' => array_merge( backyard_data_fields(), backyard_data_stat_fields() ),
+		'period' => array( 'today', '24h', '7d', '30d', 'all' ),
+		'rank' => range( 1, 10 ),
+		'species' => array( 'Erithacus rubecula' ),
+		'identity' => array( 'otje' ),
+		'output' => array( 'text', 'url', 'image', 'link' ),
+		'format' => array( 'd-m-Y H:i:s', 'd-m-Y', 'H:i:s', 'j F Y' ),
+		'fallback' => array( 'Nog geen waarnemingen' ),
+	) as $parameter => $values ) { $choices[ $parameter ] = backyard_parameter_choices( $parameter, $values ); }
+	$choices['fallback']['leeg'] = 'fallback=""';
+	foreach ( array(
+		'Naamvelden' => array( 'name', 'scientific_name', 'species_id' ),
+		'Afbeeldingsvelden' => array( 'perched', 'flying' ),
+		'Tijdvelden' => array( 'first_seen', 'last_seen', 'first_date', 'last_date', 'first_time', 'last_time', 'count' ),
+		'Statistieken' => backyard_data_stat_fields(),
+		'Links en consistentie' => array( 'observations_url', 'wikipedia_url' ),
+	) as $row => $fields ) { $choices[ $row ] = backyard_parameter_choices( 'field', $fields ); }
+	$choices['output'] += backyard_parameter_choices( 'field', array( 'perched', 'flying', 'wikipedia_url', 'observations_url' ) );
 	foreach ( array( '[backyard_data module="birds" type="last" field="name"]', '[bird_data type="last" field="perched" output="image"]', '[bat_data type="most" field="scientific_name"]' ) as $index => $code ) {
 		$entries[] = array( 'module' => 'Elementor / gedeelde gegevens', 'title' => array( 'Backyard data', 'Birds data', 'Bats data' )[ $index ], 'shortcode' => $code,
 			'description' => 'Eén veld voor een Elementor Shortcode-widget of ondersteunde dynamische Shortcode-tag. Afbeeldingen lopen via WordPress; er worden geen API-geheimen meegestuurd.',
 			'parameters' => 0 === $index ? $parameters : array(),
+			'parameter_choices' => 0 === $index ? $choices : array(),
 			'parameter_examples' => array( 'identity' => '[bird_data identity="otje" field="perched" output="image"]', 'rank' => '[bird_data type="most" rank="2" field="count" period="7d"]', 'species' => '[backyard_data module="birds" type="species" species="Erithacus rubecula" field="count" period="30d"]', 'field' => '[bird_data type="stats" field="unique_species"]', 'format' => '[bird_data type="last" field="first_date" format="j F Y"]', 'fallback' => '[bat_data field="name" fallback="Nog geen waarnemingen"]' ) );
 	}
 	foreach ( array( 'perched' => 'Otje: afbeelding', 'last_seen' => 'Otje: laatste waarneming', 'count' => 'Otje: aantal waarnemingen' ) as $field => $title ) {

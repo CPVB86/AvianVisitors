@@ -218,3 +218,23 @@
 		grid-column: 1;
 	}
 }
+
+/* Compact copyable attribute values within the parameter explanations. */
+.backyard-copy-shortcode.backyard-copy-value {
+	display: inline-flex;
+	width: auto;
+	gap: 3px;
+	padding: 1px 4px;
+	margin: 1px 2px;
+	vertical-align: baseline;
+	font: inherit;
+}
+.backyard-copy-value code { font-size: inherit; font-weight: 600; }
+.backyard-copy-value sup.dashicons {
+	font-size: 10px;
+	width: 10px;
+	height: 10px;
+	align-self: flex-start;
+	line-height: 1;
+}
+.backyard-parameter-choices { margin-top: 6px; }

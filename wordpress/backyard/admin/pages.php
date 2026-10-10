@@ -1,6 +1,7 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 require_once __DIR__ . '/commands.php';
+require_once __DIR__ . '/manual-parameters.php';
 require_once __DIR__ . '/index.php';
 
 add_action( 'admin_menu', function () {
@@ -24,14 +25,14 @@ add_action( 'admin_enqueue_scripts', function ( $hook ) {
 	if ( ! in_array( $hook, array( 'index.php', 'backyard_page_backyard-manual', 'toplevel_page_backyard', 'backyard_page_backyard-settings', 'backyard_page_backyard-birds', 'backyard_page_backyard-bats' ), true ) ) {
 		return;
 	}
-	wp_enqueue_style( 'backyard-manual', plugins_url( 'manual.css', __FILE__ ), array(), '0.4.0' );
+	wp_enqueue_style( 'backyard-manual', plugins_url( 'manual.css', __FILE__ ), array(), '0.5.1' );
 	if ( in_array( $hook, array( 'toplevel_page_backyard', 'backyard_page_backyard-birds' ), true ) ) {
 		wp_enqueue_script( 'backyard-review', plugins_url( 'review.js', __FILE__ ), array(), '0.4.0', true );
 		wp_enqueue_script( 'backyard-corrections', plugins_url( 'corrections.js', __FILE__ ), array( 'backyard-review' ), '0.4.1', true );
 		wp_localize_script( 'backyard-corrections', 'backyardCorrections', array( 'url' => admin_url( 'admin-ajax.php' ), 'nonce' => wp_create_nonce( 'backyard_corrections' ) ) );
 	}
 	if ( 'backyard_page_backyard-manual' === $hook ) {
-		wp_enqueue_script( 'backyard-manual', plugins_url( 'manual.js', __FILE__ ), array(), '0.2.3', true );
+		wp_enqueue_script( 'backyard-manual', plugins_url( 'manual.js', __FILE__ ), array(), '0.5.1', true );
 	}
 } );
 
@@ -97,7 +98,7 @@ function backyard_manual_page() {
 			if ( $entry['parameters'] ) {
 				echo '<details class="backyard-parameters"><summary>Parameters</summary><table class="backyard-parameter-table"><thead><tr><th scope="col">Parameter</th><th scope="col">Toelichting</th></tr></thead><tbody>';
 				foreach ( $entry['parameters'] as $name => $description ) {
-					echo '<tr><th scope="row"><code>' . esc_html( $name ) . '</code></th><td>' . esc_html( $description );
+					echo '<tr><th scope="row"><code>' . esc_html( $name ) . '</code></th><td>' . backyard_manual_parameter_text( $description, $entry['parameter_choices'][ $name ] ?? array() );
 					if ( isset( $entry['parameter_examples'][ $name ] ) ) {
 						$example = $entry['parameter_examples'][ $name ];
 						echo '<div class="backyard-copy-item backyard-parameter-example"><span>Voorbeeld:</span> <button type="button" class="backyard-copy-shortcode" aria-label="' . esc_attr( 'Kopieer voorbeeld ' . $example ) . '"><code><em>' . esc_html( $example ) . '</em></code><span class="dashicons dashicons-admin-page" aria-hidden="true"></span></button><span class="backyard-copy-status screen-reader-text" role="status" aria-live="polite"></span></div>';
