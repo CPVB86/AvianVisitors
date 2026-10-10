@@ -387,3 +387,27 @@ Bats/andere identities geven fallback. Zonder waarnemingen geldt fallback, terwi
 statistieken nul geven. Een oude API die identity niet ondersteunt wordt geweigerd.
 Werk daarom ook de Pi bij en herstart backyard-api. Voor WordPress volstaat het
 bijwerken van includes/data-shortcodes.php. Voorbeelden staan in de Handleiding.
+
+## Lucide-iconen
+
+Lucide static 1.54.0 is lokaal meegeleverd (2134 iconen, ISC-licentie in
+`assets/lucide/LICENSE`). Geen CDN, API of JavaScript nodig voor shortcodes.
+
+```text
+[backyard_icon name="bird"]
+[backyard_icon name="feather" size="32" color="#2271b1" label="Vogel"]
+```
+
+Parameters: name (Lucide-naam), size (8–256 px, standaard 24), color (hexkleur of
+currentColor), stroke (0.5–4, standaard 2), label (toegankelijke omschrijving;
+standaard decoratief). Namen: https://lucide.dev/icons. Voorbeelden en klikbare
+parameters staan in de Handleiding onder Lucide-iconen.
+
+In Elementor open je de iconenkiezer van bijvoorbeeld een Icoon-, Knop- of
+Iconenlijst-widget en kies je **Lucide**. Grootte en kleur stel je daar met de
+normale Elementor-controls in. Deze integratie gebruikt het lokale Lucide-font;
+stroke is alleen instelbaar bij de SVG-shortcode. Zonder Elementor blijft de
+shortcode werken. Heropen de Elementor-editor na het bijwerken.
+
+Update: upload backyard.php, includes/icons.php en de volledige map assets/lucide.
+De bestaande audio-, API- en reviewbestanden hoeven niet te worden vervangen.
