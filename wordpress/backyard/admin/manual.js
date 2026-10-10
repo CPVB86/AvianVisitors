@@ -43,3 +43,23 @@ document.querySelectorAll('.backyard-copy-shortcode').forEach((button) => {
 		}
 	});
 });
+
+/* Local filtering; no remote requests or dependency on the Lucide website. */
+const iconBrowser = document.querySelector('.backyard-icon-browser');
+if (iconBrowser) {
+	const search = iconBrowser.querySelector('input[type="search"]');
+	const tiles = [...iconBrowser.querySelectorAll('[data-icon-name]')];
+	const counter = iconBrowser.querySelector('.backyard-icon-count');
+	const empty = iconBrowser.querySelector('.backyard-icon-empty');
+	search.addEventListener('input', () => {
+		const terms = search.value.toLowerCase().trim().split(/[\s_-]+/).filter(Boolean);
+		let count = 0;
+		tiles.forEach(tile => {
+			const matches = terms.every(term => tile.dataset.iconName.includes(term));
+			tile.hidden = !matches;
+			if (matches) count++;
+		});
+		counter.textContent = `${count} van ${tiles.length} iconen`;
+		empty.hidden = count !== 0;
+	});
+}

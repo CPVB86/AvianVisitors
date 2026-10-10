@@ -18,3 +18,7 @@ foreach ( $list as $name ) { check( isset( backyard_lucide_icons()[ $name ] ) &&
 check( count( $list ) === 2134 && file_exists( $dir . 'lucide.woff2' ) && file_exists( $dir . 'LICENSE' ), 'Complete licensed local set' );
 check( ! $requests, 'Icons never call an API' );
 echo "Lucide shortcode and Elementor registration checks passed.\n";
+
+ob_start(); backyard_manual_icons(); $browser = ob_get_clean();
+check( substr_count( $browser, 'data-icon-name=' ) === 2134, 'Every bundled icon is browsable' );
+check( strpos( $browser, 'title="bird"' ) !== false && strpos( $browser, 'data-copy="[backyard_icon name=&quot;bird&quot;]"' ) !== false, 'Tooltip and complete copy text' );
