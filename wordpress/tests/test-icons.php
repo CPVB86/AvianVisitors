@@ -22,3 +22,8 @@ echo "Lucide shortcode and Elementor registration checks passed.\n";
 ob_start(); backyard_manual_icons(); $browser = ob_get_clean();
 check( substr_count( $browser, 'data-icon-name=' ) === 2134, 'Every bundled icon is browsable' );
 check( strpos( $browser, 'title="bird"' ) !== false && strpos( $browser, 'data-copy="[backyard_icon name=&quot;bird&quot;]"' ) !== false, 'Tooltip and complete copy text' );
+
+foreach ( array( '32px' => 32, '32' => 32, ' 48PX ' => 48, '999px' => 256, '1px' => 8, 'bad' => 24, '32px;display:none' => 24 ) as $input => $expected ) {
+	$html = backyard_icon_shortcode( array( 'size' => $input ) );
+	check( strpos( $html, 'width="' . $expected . '" height="' . $expected . '"' ) !== false, 'Pixel size parsed and bounded safely' );
+}
