@@ -411,3 +411,13 @@ shortcode werken. Heropen de Elementor-editor na het bijwerken.
 
 Update: upload backyard.php, includes/icons.php en de volledige map assets/lucide.
 De bestaande audio-, API- en reviewbestanden hoeven niet te worden vervangen.
+
+### Shortcode-builder
+
+Bovenaan de Handleiding staat een builder voor backyard_data: module → type →
+veld → periode, met passende uitvoer, rang, Otje, soortnaam, datumformaat en fallback.
+De veldlijsten komen uit dezelfde PHP-functies als de shortcode. Stats gebruikt
+last_activity; last_seen is een soortveld. Vandaag-statistieken kiezen automatisch
+today. Ongeldige combinaties worden aangepast of blokkeren kopiëren. De builder
+haalt geen data op en genereert alleen shortcode-tekst; de bestaande voorbeelden
+met losse kopieerbare parameters blijven beschikbaar.

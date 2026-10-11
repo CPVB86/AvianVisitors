@@ -3,6 +3,7 @@ defined( 'ABSPATH' ) || exit;
 require_once __DIR__ . '/commands.php';
 require_once __DIR__ . '/manual-parameters.php';
 require_once __DIR__ . '/manual-icons.php';
+require_once __DIR__ . '/manual-builder.php';
 require_once __DIR__ . '/index.php';
 
 add_action( 'admin_menu', function () {
@@ -26,13 +27,14 @@ add_action( 'admin_enqueue_scripts', function ( $hook ) {
 	if ( ! in_array( $hook, array( 'index.php', 'backyard_page_backyard-manual', 'toplevel_page_backyard', 'backyard_page_backyard-settings', 'backyard_page_backyard-birds', 'backyard_page_backyard-bats' ), true ) ) {
 		return;
 	}
-	wp_enqueue_style( 'backyard-manual', plugins_url( 'manual.css', __FILE__ ), array(), '0.6.1' );
+	wp_enqueue_style( 'backyard-manual', plugins_url( 'manual.css', __FILE__ ), array(), '0.6.2' );
 	if ( in_array( $hook, array( 'toplevel_page_backyard', 'backyard_page_backyard-birds' ), true ) ) {
 		wp_enqueue_script( 'backyard-review', plugins_url( 'review.js', __FILE__ ), array(), '0.4.0', true );
 		wp_enqueue_script( 'backyard-corrections', plugins_url( 'corrections.js', __FILE__ ), array( 'backyard-review' ), '0.4.1', true );
 		wp_localize_script( 'backyard-corrections', 'backyardCorrections', array( 'url' => admin_url( 'admin-ajax.php' ), 'nonce' => wp_create_nonce( 'backyard_corrections' ) ) );
 	}
 	if ( 'backyard_page_backyard-manual' === $hook ) {
+		wp_enqueue_script( 'backyard-builder', plugins_url( 'manual-builder.js', __FILE__ ), array(), '0.6.2', true );
 		wp_enqueue_script( 'backyard-manual', plugins_url( 'manual.js', __FILE__ ), array(), '0.6.1', true );
 	}
 } );
@@ -81,6 +83,7 @@ function backyard_settings_page() {
 function backyard_manual_page() {
 	backyard_require_admin();
 	echo '<div class="wrap"><h1>Handleiding</h1>';
+	backyard_manual_builder();
 	backyard_manual_commands();
 	$entries = backyard_shortcode_docs();
 	if ( ! $entries ) {
