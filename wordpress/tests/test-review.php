@@ -5,8 +5,8 @@ require __DIR__ . '/test-backyard.php';
 function wp_remote_post( $url, $args ) { return wp_remote_get( $url, $args ); }
 function wp_json_encode( $value ) { return json_encode( $value ); }
 function wp_nonce_url( $url, $action ) { return add_query_arg( '_wpnonce', 'test-nonce', $url ); }
-function wp_verify_nonce( $nonce, $action ) { return $GLOBALS['nonce_ok'] && 'test-nonce' === $nonce && $action === 'backyard_birds_audio_' . $GLOBALS['review_id']; }
-function wp_tempnam( $name, $directory = '' ) { check( '' === $directory ? 'backyard-audio.wav' === $name : $directory === sys_get_temp_dir(), 'Recognized audio tempfile call' ); $file = tempnam( sys_get_temp_dir(), 'backyard-test-' ); $GLOBALS['audio_files'][] = $file; return $file; }
+function wp_verify_nonce( $nonce, $action ) { return $GLOBALS['nonce_ok'] && 'test-nonce' === $nonce && $action === ( $GLOBALS['audio_nonce_prefix'] ?? 'backyard_birds_audio_' ) . $GLOBALS['review_id']; }
+function wp_tempnam( $name, $directory = '' ) { check( '' === $directory && 'backyard-audio.wav' === $name, 'WordPress chooses the writable audio tempfile location' ); $file = tempnam( sys_get_temp_dir(), 'backyard-test-' ); $GLOBALS['audio_files'][] = $file; return $file; }
 function wp_delete_file( $file ) { if ( file_exists( $file ) ) { unlink( $file ); } }
 function wp_remote_retrieve_header( $response, $name ) { return $response['headers'][ $name ] ?? ''; }
 class ReviewRedirect extends RuntimeException {}
@@ -51,6 +51,7 @@ $http_handler = function ( $url, $args ) use ( &$record, &$forced_post_code, &$c
 	$path = parse_url( $url, PHP_URL_PATH );
 	if ( strpos( $path, '/api/generator/' ) === 0 ) { return review_response( 200, array( 'assets' => array() ) ); }
 	parse_str( parse_url( $url, PHP_URL_QUERY ) ?? '', $query );
+	if ( '/api/observations/count' === $path && 'bat' === ( $query['domain'] ?? '' ) ) { return review_response( 200, array( 'count' => 0 ) ); }
 	if ( '/api/observations/count' === $path || '/api/observations/review' === $path ) {
 		check( $query['domain'] === 'bird' && ( '/api/observations/review' === $path || $query['review_only'] === 'true' ), 'Only human review birds requested' );
 		if ( '/api/observations/count' === $path ) { return review_response( 200, array( 'count' => $count_total ) ); }

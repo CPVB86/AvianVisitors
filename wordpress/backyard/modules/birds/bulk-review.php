@@ -1,9 +1,9 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
-function backyard_birds_review_image( $generator, $row ) {
+function backyard_birds_review_image( $generator, $row, $domain = 'bird' ) {
 	$fallback = plugins_url( 'assets/nest.webp', dirname( __DIR__, 2 ) . '/backyard.php' );
-	$url = $generator->thumbnail( 'bird', ( $row['effective_identity']['scientific_name'] ?? $row['scientific_name'] ), array( 'perched', 'flight', 'photo_cutout' ) );
+	$url = $generator->thumbnail( $domain, ( $row['effective_identity']['scientific_name'] ?? $row['scientific_name'] ), 'bat' === $domain ? array( 'hanging', 'flight', 'perched', 'photo_cutout' ) : array( 'perched', 'flight', 'photo_cutout' ) );
 	return '<img class="backyard-review-image" src="' . esc_url( $url ?: $fallback ) . '" data-fallback="' . esc_url( $fallback ) . '" width="64" height="64" alt="" loading="lazy" style="width:64px;height:64px;object-fit:contain;background:transparent">';
 }
 
@@ -29,30 +29,33 @@ function backyard_birds_bulk_notice() {
 	) ) . '</p></div>';
 }
 
-function backyard_birds_handle_bulk_review() {
+function backyard_birds_handle_bulk_review( $domain = 'bird' ) {
+	$module = 'bat' === $domain ? 'bats' : 'birds';
 	backyard_require_admin();
-	check_admin_referer( 'backyard_birds_bulk_review' );
+	check_admin_referer( 'backyard_' . $module . '_bulk_review' );
 	$ids = $_POST['observation_ids'] ?? array();
 	$decision = $_POST['decision'] ?? null;
 	if ( 'POST' !== ( $_SERVER['REQUEST_METHOD'] ?? '' ) || ! is_array( $ids ) || ! $ids || count( $ids ) > 50
-		|| ! in_array( $decision, array( 'confirm', 'reject', 'otje' ), true ) ) {
+		|| ! in_array( $decision, ( 'bat' === $domain ? array( 'confirm', 'reject' ) : array( 'confirm', 'reject', 'otje' ) ), true ) ) {
 		wp_die( 'Ongeldige reviewselectie.', '', array( 'response' => 400 ) );
 	}
 	foreach ( $ids as $id ) {
 		if ( ! backyard_birds_observation_id( $id ) ) { wp_die( 'Ongeldige waarneming.', '', array( 'response' => 400 ) ); }
 	}
 	$ids = array_values( array_unique( $ids ) );
-	$view = 'otje' === ( $_POST['review_view'] ?? '' ) ? 'otje' : '';
+	$view = 'bird' === $domain && 'otje' === ( $_POST['review_view'] ?? '' ) ? 'otje' : '';
 	$query = array( 'review_result' => 'bulk', 'done' => 0, 'failed' => 0, 'skipped' => 0 );
 	// Bound slow batches below typical PHP request limits. Remaining rows stay open.
 	$deadline = microtime( true ) + 15;
 	foreach ( $ids as $index => $id ) {
 		if ( microtime( true ) >= $deadline ) { $query['skipped'] = count( $ids ) - $index; break; }
-		$result = backyard_birds_apply_review( $id, $decision, $view );
+		$result = backyard_birds_apply_review( $id, $decision, $view, $domain );
 		$query[ in_array( $result, array( 'confirmed', 'rejected', 'otje' ), true ) ? 'done' : 'failed' ]++;
 	}
 	if ( $view ) { $query['view'] = $view; }
-	wp_safe_redirect( add_query_arg( $query, admin_url( 'admin.php?page=backyard-birds' ) ) );
+	wp_safe_redirect( add_query_arg( $query, admin_url( 'admin.php?page=backyard-' . $module ) ) );
 	exit;
 }
 add_action( 'admin_post_backyard_birds_bulk_review', 'backyard_birds_handle_bulk_review' );
+
+add_action( 'admin_post_backyard_bats_bulk_review', function () { backyard_birds_handle_bulk_review( 'bat' ); } );

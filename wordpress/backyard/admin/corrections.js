@@ -6,7 +6,7 @@ function backyardInitCorrections() {
     let current, id, requestId, pending = null, busy = false;
     const labels = { auto_accepted: 'Automatisch geaccepteerd', human_confirmed: 'Handmatig bevestigd', human_rejected: 'Handmatig afgewezen' };
     async function api(operation, values = {}) {
-        const body = new URLSearchParams({ action: 'backyard_correction', nonce: backyardCorrections.nonce, operation, ...values });
+        const body = new URLSearchParams({ action: 'backyard_correction', nonce: backyardCorrections.nonce, domain: backyardCorrections.domain || 'bird', operation, ...values });
         let response, result;
         try {
             response = await fetch(backyardCorrections.url, { method: 'POST', credentials: 'same-origin', body });
@@ -24,7 +24,7 @@ function backyardInitCorrections() {
         const detail = dialog.querySelector('.correction-detail');
         detail.replaceChildren();
         const lines = [
-            ['BirdNET oorspronkelijk', `${current.original_name} — ${current.original_scientific_name}`],
+            [backyardCorrections.domain === 'bat' ? 'BattyBirdNET oorspronkelijk' : 'BirdNET oorspronkelijk', `${current.original_name} — ${current.original_scientific_name}`],
             ['Huidige soort / identiteit', `${current.scientific_name}${current.identity ? ' / Otje' : ''}`],
             ['Confidence', `${(Number(current.confidence) * 100).toFixed(1)}%`],
             ['Datum', current.date], ['Status', labels[current.status] || current.status]
@@ -99,7 +99,7 @@ function backyardInitCorrections() {
             const snapshot = await api('refresh');
             document.dispatchEvent(new CustomEvent('backyard:observations-updated', { detail: snapshot }));
             const summary = document.createElement('p');
-            summary.textContent = `Actuele Backyard-totalen: ${snapshot.stats.all_time_observation_count} geldige waarnemingen, ${snapshot.stats.all_time_species_count} soorten. Review: ${snapshot.counts.review}; Otje: ${snapshot.counts.otje}.`;
+            summary.textContent = `Actuele Backyard-totalen: ${snapshot.stats.all_time_observation_count} geldige waarnemingen, ${snapshot.stats.all_time_species_count} soorten. Review: ${snapshot.counts.review}${backyardCorrections.domain === 'bat' ? '.' : `; Otje: ${snapshot.counts.otje}.`}`;
             dialog.querySelector('.correction-detail').append(summary);
             message.textContent = 'Correctie opgeslagen. Waarneming, lijst, tellers en API-statistieken/Atlas opnieuw opgehaald.';
         } catch (error) {

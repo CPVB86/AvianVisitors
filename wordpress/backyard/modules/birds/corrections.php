@@ -13,11 +13,12 @@ function backyard_birds_correction_error( $error ) {
 }
 
 /** Browser receives only display fields and a WordPress audio URL. */
-function backyard_birds_correction_projection( $row ) {
-	if ( ! is_array( $row ) || ! backyard_birds_observation_id( $row['id'] ?? null ) || 'bird' !== ( $row['domain'] ?? null )
+function backyard_birds_correction_projection( $row, $domain = 'bird' ) {
+	if ( ! is_array( $row ) || ! backyard_birds_observation_id( $row['id'] ?? null ) || $domain !== ( $row['domain'] ?? null )
 		|| ! is_int( $row['review_version'] ?? null ) || ! is_string( $row['scientific_name'] ?? null ) ) {
 		return new WP_Error( 'correction_contract', 'Correctiecontract niet beschikbaar.' );
 	}
+	$module = 'bat' === $domain ? 'bats' : 'birds';
 	$effective = $row['effective_identity'] ?? array();
 	return array(
 		'id' => $row['id'], 'status' => $row['status'], 'review_version' => $row['review_version'],
@@ -29,7 +30,7 @@ function backyard_birds_correction_projection( $row ) {
 		'date' => wp_date( 'd-m-Y H:i:s', strtotime( $row['timestamp'] ) ),
 		'actions' => $row['correction_capabilities']['actions'] ?? array(),
 		// JSON/DOM URLs need raw query separators; wp_nonce_url() escapes them for HTML.
-		'audio' => ! empty( $row['audio_available'] ) ? add_query_arg( array( 'action' => 'backyard_birds_audio', 'observation_id' => $row['id'], '_wpnonce' => wp_create_nonce( 'backyard_birds_audio_' . $row['id'] ) ), admin_url( 'admin-post.php' ) ) : '',
+		'audio' => ! empty( $row['audio_available'] ) ? add_query_arg( array( 'action' => 'backyard_' . $module . '_audio', 'observation_id' => $row['id'], '_wpnonce' => wp_create_nonce( 'backyard_' . $module . '_audio_' . $row['id'] ) ), admin_url( 'admin-post.php' ) ) : '',
 	);
 }
 
@@ -55,8 +56,16 @@ function backyard_birds_correction_payload( $input ) {
 function backyard_birds_correction_ajax() {
 	backyard_require_admin();
 	check_ajax_referer( 'backyard_corrections', 'nonce' );
+	$domain = $_POST['domain'] ?? 'bird';
+	if ( ! in_array( $domain, array( 'bird', 'bat' ), true ) ) { wp_send_json_error( array( 'message' => 'Ongeldige module.' ), 400 ); }
 	$client = new Backyard_API_Client();
 	$op = $_POST['operation'] ?? '';
+	if ( 'refresh' === $op && 'bat' === $domain ) {
+		$data = backyard_data_snapshot( 'bats' );
+		$count = backyard_birds_review_count( false, 'bat' );
+		if ( is_wp_error( $data ) || is_wp_error( $count ) ) { wp_send_json_error( array( 'message' => 'Correctie opgeslagen, maar overzichten konden niet worden vernieuwd.' ), 502 ); }
+		wp_send_json_success( array( 'counts' => array( 'review' => $count ), 'stats' => array( 'all_time_observation_count' => $data['stats']['total_observations'], 'all_time_species_count' => $data['stats']['unique_species'] ), 'atlas' => $data['species'] ) );
+	}
 	if ( 'refresh' === $op ) {
 		$stats = $client->get( '/api/avian-visitors/stats', array( 'hours' => 24, 'locale' => 'nl' ) );
 		$atlas = $client->get( '/api/avian-visitors/lifelist', array( 'locale' => 'nl' ) );
@@ -73,7 +82,7 @@ function backyard_birds_correction_ajax() {
 	if ( 'search' === $op ) {
 		$q = isset( $_POST['q'] ) && is_string( $_POST['q'] ) ? trim( wp_unslash( $_POST['q'] ) ) : '';
 		if ( '' === $q || strlen( $q ) > 400 ) { wp_send_json_error( array( 'message' => 'Vul een soortnaam in.' ), 400 ); }
-		$result = $client->get( '/api/avian-visitors/search', array( 'q' => $q, 'limit' => 8 ) );
+		$result = $client->get( 'bat' === $domain ? '/api/species/search' : '/api/avian-visitors/search', array( 'domain' => $domain, 'q' => rawurlencode( $q ), 'limit' => 8 ) );
 		if ( is_wp_error( $result ) ) { backyard_birds_correction_error( $result ); }
 		$rows = array();
 		foreach ( $result['results'] ?? array() as $row ) {
@@ -85,16 +94,17 @@ function backyard_birds_correction_ajax() {
 	if ( ! backyard_birds_observation_id( $id ) || ! in_array( $op, array( 'load', 'save' ), true ) ) { wp_send_json_error( array( 'message' => 'Ongeldige aanvraag.' ), 400 ); }
 	$row = $client->get( '/api/observations/' . $id );
 	if ( is_wp_error( $row ) ) { backyard_birds_correction_error( $row ); }
-	$display = backyard_birds_correction_projection( $row );
+	$display = backyard_birds_correction_projection( $row, $domain );
 	if ( is_wp_error( $display ) || $display['id'] !== $id ) { wp_send_json_error( array( 'message' => 'Correctiecontract niet beschikbaar voor deze waarneming.' ), 502 ); }
 	if ( 'save' === $op ) {
 		$input = is_string( $_POST['payload'] ?? null ) ? json_decode( wp_unslash( $_POST['payload'] ), true ) : null;
 		$payload = backyard_birds_correction_payload( $input );
+		if ( 'bat' === $domain && ! is_wp_error( $payload ) && ! empty( $payload['identity_override'] ) ) { wp_send_json_error( array( 'message' => 'Lokale identiteit is niet beschikbaar voor vleermuizen.' ), 400 ); }
 		if ( is_wp_error( $payload ) ) { wp_send_json_error( array( 'message' => $payload->get_error_message() ), 400 ); }
 		// Preserve the user's version and UUID: do not silently retry against newer data.
 		$result = $client->post( '/api/observations/' . $id . '/correct', $payload );
 		if ( is_wp_error( $result ) ) { backyard_birds_correction_error( $result ); }
-		$display = backyard_birds_correction_projection( $result );
+		$display = backyard_birds_correction_projection( $result, $domain );
 		if ( is_wp_error( $display ) || $display['id'] !== $id ) { wp_send_json_error( array( 'message' => 'Opslagantwoord niet bevestigd; haal de actuele waarneming op.' ), 502 ); }
 		if ( $display['status'] !== ( 'confirm' === $payload['action'] ? 'human_confirmed' : 'human_rejected' ) || $display['review_version'] <= $payload['expected_version'] ) {
 			wp_send_json_error( array( 'message' => 'Correctie niet bevestigd door de API; haal de actuele waarneming op.' ), 502 );
@@ -104,12 +114,15 @@ function backyard_birds_correction_ajax() {
 }
 add_action( 'wp_ajax_backyard_correction', 'backyard_birds_correction_ajax' );
 
-function backyard_birds_correction_editor() {
+function backyard_birds_correction_editor( $domain = 'bird' ) {
 	echo '<dialog id="backyard-correction" aria-labelledby="backyard-correction-title"><h2 id="backyard-correction-title">Waarneming bewerken</h2><p class="correction-message" role="status"></p><div class="correction-detail"></div><audio class="correction-audio" controls preload="none" hidden></audio>';
 	echo '<form class="correction-form"><fieldset><p><label>Status <select name="decision"><option value="confirm">Bevestigd</option><option value="reject">Afgewezen</option></select></label></p>';
-	echo '<p><label>Soort <select name="species_mode"><option value="keep">Huidige soort behouden</option><option value="original">Oorspronkelijke BirdNET-soort herstellen</option><option value="choose">Andere soort kiezen</option></select></label></p>';
+	echo '<p><label>Soort <select name="species_mode"><option value="keep">Huidige soort behouden</option><option value="original">Oorspronkelijke detectiesoort herstellen</option><option value="choose">Andere soort kiezen</option></select></label></p>';
 	echo '<div class="correction-search" hidden><label>Zoek in Backyard <input type="search" name="species_query" maxlength="100" autocomplete="off"></label> <button type="button" class="button correction-find">Zoeken</button><p><label>Catalogusresultaat <select name="species"><option value="">Kies een zoekresultaat</option></select></label></p></div>';
-	echo '<p><label>Identiteit <select name="identity"><option value="">Geen lokale identiteit (gewone soort)</option><option value="otje">Otje</option></select></label></p><p>Otje is alleen toegestaan voor een geschikte doelsoort; Backyard controleert dit.</p><p><label>Toelichting<br><textarea name="note" maxlength="1000" rows="3"></textarea></label></p></fieldset><p><button type="submit" class="button button-primary">Opslaan</button> <button type="button" class="button correction-reload">Actuele waarneming ophalen</button> <button type="button" class="button correction-close">Sluiten</button></p></form></dialog>';
+	if ( 'bird' === $domain ) { echo '<p><label>Identiteit <select name="identity"><option value="">Geen lokale identiteit (gewone soort)</option><option value="otje">Otje</option></select></label></p><p>Otje is alleen toegestaan voor een geschikte doelsoort; Backyard controleert dit.</p>'; } else { echo '<input type="hidden" name="identity" value="">'; }
+	echo '<p><label>Toelichting<br><textarea name="note" maxlength="1000" rows="3"></textarea></label></p></fieldset><p><button type="submit" class="button button-primary">Opslaan</button> <button type="button" class="button correction-reload">Actuele waarneming ophalen</button> <button type="button" class="button correction-close">Sluiten</button></p></form></dialog>';
 }
 add_action( 'admin_footer-backyard_page_backyard-birds', 'backyard_birds_correction_editor' );
 add_action( 'admin_footer-toplevel_page_backyard', 'backyard_birds_correction_editor' );
+
+add_action( 'admin_footer-backyard_page_backyard-bats', function () { backyard_birds_correction_editor( 'bat' ); } );

@@ -70,8 +70,8 @@ class Backyard_API_Client {
 		if ( ! function_exists( 'wp_tempnam' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
 		}
-		// Use the system temp directory, not WordPress's possible wp-content fallback.
-		$file = wp_tempnam( 'backyard-audio', sys_get_temp_dir() );
+		// Let WordPress choose a writable temporary directory.
+		$file = wp_tempnam( 'backyard-audio.wav' );
 		if ( ! $file ) {
 			return new WP_Error( 'backyard_audio', 'Audio tijdelijk niet beschikbaar.' );
 		}

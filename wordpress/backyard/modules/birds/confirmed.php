@@ -19,9 +19,9 @@ function backyard_birds_confirmed_filters( $rejected = false ) {
 	);
 }
 
-function backyard_birds_confirmed_controls( $rejected = false ) {
+function backyard_birds_confirmed_controls( $rejected = false, $domain = 'bird' ) {
 	list( $period, $status ) = backyard_birds_confirmed_filters( $rejected );
-	echo '<form method="get"><input type="hidden" name="page" value="backyard-birds"><input type="hidden" name="view" value="' . ( $rejected ? 'rejected' : 'confirmed' ) . '">';
+	echo '<form method="get"><input type="hidden" name="page" value="backyard-' . ( 'bat' === $domain ? 'bats' : 'birds' ) . '"><input type="hidden" name="view" value="' . ( $rejected ? 'rejected' : 'confirmed' ) . '">';
 	foreach ( array( 'period' => array( 'Periode', backyard_birds_confirmed_options(), $period ), 'status' => array( 'Status', array( 'all' => 'Alle statussen' ) + backyard_birds_confirmed_statuses( $rejected ), $status ) ) as $key => $field ) {
 		echo '<label>' . esc_html( $field[0] ) . ' <select name="' . esc_attr( $key ) . '">';
 		foreach ( $field[1] as $value => $label ) {
@@ -32,18 +32,18 @@ function backyard_birds_confirmed_controls( $rejected = false ) {
 	echo '<button class="button" type="submit">Filteren</button></form>';
 }
 
-function backyard_birds_confirmed_observations( $rejected = false ) {
+function backyard_birds_confirmed_observations( $rejected = false, $domain = 'bird', $open_statuses = null ) {
 	list( $period, $status ) = backyard_birds_confirmed_filters( $rejected );
 	$durations = array( '1h' => 3600, '12h' => 43200, '24h' => 86400, '7d' => 604800 );
-	$cutoff = isset( $durations[ $period ] ) ? time() - $durations[ $period ] : 0;
+	$cutoff = ! $open_statuses && isset( $durations[ $period ] ) ? time() - $durations[ $period ] : 0;
 	$rows = array();
 	$client = new Backyard_API_Client();
-	foreach ( 'all' === $status ? ( $rejected ? array( 'human_rejected' ) : array( 'auto_accepted', 'human_confirmed' ) ) : array( $status ) as $wanted ) {
-		$result = $client->get( '/api/observations', array( 'domain' => 'bird', 'status' => $wanted, 'limit' => 50 ) );
+	foreach ( $open_statuses ?? ( 'all' === $status ? ( $rejected ? array( 'human_rejected' ) : array( 'auto_accepted', 'human_confirmed' ) ) : array( $status ) ) as $wanted ) {
+		$result = $client->get( '/api/observations', array( 'domain' => $domain, 'status' => $wanted, 'limit' => 50 ) );
 		if ( is_wp_error( $result ) ) { return $result; }
 		if ( ! is_array( $result ) || array_values( $result ) !== $result ) { return new WP_Error( 'backyard_review', 'Ongeldig antwoord.' ); }
 		foreach ( $result as $row ) {
-			if ( ! is_array( $row ) || ( $row['domain'] ?? null ) !== 'bird' || ( $row['status'] ?? null ) !== $wanted ) { continue; }
+			if ( ! is_array( $row ) || ( $row['domain'] ?? null ) !== $domain || ( $row['status'] ?? null ) !== $wanted ) { continue; }
 			if ( ! backyard_birds_observation_id( $row['id'] ?? null ) || ! is_string( $row['timestamp'] ?? null ) || false === strtotime( $row['timestamp'] )
 				|| ! is_string( $row['scientific_name'] ?? null ) || ! is_numeric( $row['confidence'] ?? null ) || $row['confidence'] < 0 || $row['confidence'] > 1
 				|| ! is_int( $row['supports'] ?? null ) || $row['supports'] < 0 || ! is_bool( $row['audio_available'] ?? null ) ) {

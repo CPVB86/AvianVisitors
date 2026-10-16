@@ -421,3 +421,40 @@ last_activity; last_seen is een soortveld. Vandaag-statistieken kiezen automatis
 today. Ongeldige combinaties worden aangepast of blokkeren kopiëren. De builder
 haalt geen data op en genereert alleen shortcode-tekst; de bestaande voorbeelden
 met losse kopieerbare parameters blijven beschikbaar.
+
+
+## Bats review (0.7.0)
+
+Backyard → Bats gebruikt dezelfde reviewtabel en editor als Birds, zonder Otje.
+Review toont open bat-observations (`pending_review` en `review_recommended`),
+ook met classificatie `unknown`: BattyBirdNET heeft nog geen lokale
+plausibiliteitsprovider. De bestaande bird-reviewselectie en policy blijven intact.
+De dashboardteller telt dezelfde open statussen via de API, onafhankelijk van de
+lijstlimiet van 50. Bevestigd en Afgewezen hebben de bestaande periodefilters;
+Overzicht, Soorten en Statistieken blijven beschikbaar.
+
+Selecteer één of meerdere regels (ook shift-click/select-all) en bevestig of wijs
+ze af. Bij Bevestigd/Afgewezen opent Bewerken de gedeelde editor: oorspronkelijke
+detectie, actuele soort, datum, confidence, audio, status en doorzoekbare
+bat-soortencatalogus. Correcties gebruiken versies en request-ID's en bewaren de
+originele evidence. Zonder bewaarde audio kan Backyard niet opnieuw bevestigen.
+
+Audio gebruikt de beveiligde WordPress-route `backyard_bats_audio`, dezelfde
+streaming/Range/206-flow en `wp_tempnam( 'backyard-audio.wav' )`. Het blijft het
+originele WAV-bestand, zonder ultrasoon-naar-hoorbaar conversie. Afbeeldingen komen
+uitsluitend via de bestaande Generator-lookup/proxy; zonder asset verschijnt het
+lege nest. Er wordt vanuit WordPress geen afbeeldingsgeneratie gestart. De huidige
+Pi-generator heeft nog geen bat-adapter; tot de API bat-assets aanbiedt blijft het
+nest zichtbaar.
+
+Update eerst de Backyard-backend (`git pull --ff-only`, daarna
+`sudo systemctl restart backyard-api`) voor bat-correcties en
+`GET /api/species/search?domain=bat&q=...`. Upload vervolgens de pluginmap naar
+`wp-content/plugins/backyard` en open Bats. Detector- en bat-services hoeven voor
+deze wijzigingen niet te worden herstart.
+
+Handmatige controle op Pi/WP: controleer een open bat-record met datum/audio,
+bevestig het, open Bevestigd → Alle → Bewerken, zoek een andere vleermuissoort,
+sla op en controleer de originele detectie en actuele soort. Wijs af en bevestig
+opnieuw; lijst/teller en API-statistieken moeten volgen. Browsernetwerkverkeer
+voor audio/afbeeldingen gaat uitsluitend naar WordPress, zonder API-token.
