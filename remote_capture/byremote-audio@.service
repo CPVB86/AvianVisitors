@@ -1,0 +1,24 @@
+[Unit]
+Description=BYRemote lossless audio source %i
+Wants=network-online.target
+After=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+DynamicUser=yes
+SupplementaryGroups=audio
+EnvironmentFile=/etc/byremote/%i.conf
+ExecStart=/usr/bin/python3 -u /opt/byremote/stream.py --bind ${BIND} --port ${PORT} --device ${DEVICE} --rate ${RATE} --path ${STREAM_PATH}
+Restart=always
+RestartSec=5
+TimeoutStopSec=10
+KillMode=control-group
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

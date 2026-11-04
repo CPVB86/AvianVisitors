@@ -1,5 +1,30 @@
 # Local development status
 
+## BYRemote opnamepunt (2026-11-04)
+
+BYRemote is een Raspberry Pi 3 Model B Rev 1.2 met 64-bit Pi OS, desktop,
+Connect en SSH. Beide USB-microfoons zijn fysiek overgezet vanaf Backyard.
+Backyard blijft eigenaar van modellen, detectie, API en opslag. De gebruiker
+heeft de drie centrale capture/bridge-services tijdelijk gestopt.
+
+Gebruiker heeft gelijktijdige 120s FLAC-overdracht van beide bronnen uitgevoerd:
+ontvangst mono PCM16 op 48000 en 384000 Hz, beide rond realtime. Iedere zender
+meldt één opstart-xrun bij de tijdelijke FFmpeg HTTP-listener. Geen claim over
+ultrasone signaalkwaliteit of langdurige betrouwbaarheid.
+
+`remote_capture/` bevat nu een afzonderlijke on-demand HTTP-opnameservice,
+systemd-template, twee voorbeeldconfiguraties en installer. Vier lokale HTTP-
+lifecycle-tests met nagebootste captureprocessen slagen. De service opent ALSA
+pas na een GET en geeft het apparaat vrij na disconnect; oplossing voor de
+vermoedelijke opstartoorzaak is nog niet op de Pi geverifieerd.
+
+Volgende stap: installatie op BYRemote, controle op beide endpoints inclusief
+probe/herverbinden, daarna back-up en omzetting van centrale BirdNET-Go
+20261014 naar twee HTTP-bronnen met gescheiden birdnet/bat-modeltoewijzing.
+384000-Hz-probe, echte detecties, reboot/herstel en centrale bridges moeten nog
+worden getest. Zie `remote_capture/README.md`. Bestaande lokale WordPress-
+wijzigingen zijn buiten dit werk gehouden.
+
 ## Koerswijziging: Linux-backend (2026-09-25)
 
 Fase 1 is onderzocht: advies is BirdNET-Go release 20260823 in een Debian 13 VM

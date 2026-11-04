@@ -1,5 +1,8 @@
 # AvianVisitors
 
+Voor het aparte microfoonstation BYRemote (alleen opnemen en doorgeven,
+verwerking op de centrale Backyard Pi): [remote capture](remote_capture/README.md).
+
 De WordPress-plugin **Backyard** (API-authenticatie en Birds-logshortcode) staat in
 [wordpress/backyard/](wordpress/backyard/README.md), met installatie- en API-testinstructies.
 
