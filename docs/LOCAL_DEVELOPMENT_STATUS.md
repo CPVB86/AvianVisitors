@@ -2,6 +2,25 @@
 
 ## BYRemote opnamepunt (2026-11-04)
 
+Nieuwste opruimresultaat, door gebruiker uitgevoerd: gestopte container
+`backyard-bats-go` en de oude map `/home/cpvb86/backyard-bats-go` verwijderd.
+`docker image prune -a` verwijderde ongebruikte imagerecords, meldde 0B vrijgemaakt.
+Alleen MyRender en de gedeelde BirdNET-Go-container draaien; Go is healthy.
+Schijf nu 39% gebruikt, 31 GB beschikbaar. `.detector-test` is nog NIET verwijderd;
+procesgebruik moet eerst worden gecontroleerd. De twee actieve venvs, modellen,
+illustraties en resetback-up blijven behouden.
+
+Gebruiker heeft het gewenste audiobeleid gekozen: één reviewopname per soort,
+maximaal 14 dagen. Verder gewenst: één bruikbare opname per bevestigde soort,
+afgewezen audio naar trash; detectiehistorie behouden. Dit beleid is nog NIET
+geïmplementeerd in de centrale Backyard-backend. Zie AUDIO_RETENTION_PLAN.md.
+
+Readiness-drop-ins zijn inmiddels op de Pi uitgevoerd: beide bridges melden
+"BirdNET-Go detection API ready" om 11:37:35 en draaien daarna zonder fout in
+de getoonde logs. De oeverlopertest is om 11:42 herkend en opgenomen op 48000 Hz;
+om 11:44:46–47 zijn drie nieuwe events geïmporteerd als accepted.
+Avian toont de oeverloper; fysieke automatische frame-update nog niet bevestigd.
+
 Latere productietest door de gebruiker: Oeverloper correct herkend, audio opgeslagen
 en drie nieuwe observaties geïmporteerd met classificatie `accepted`. In het
 API-contract hoort hierbij lifecycle-status `auto_accepted`; deze registraties
