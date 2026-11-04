@@ -64,8 +64,12 @@ Vogel microphone was heard without obvious distortion. Ultrasonic quality has
 not yet been verified with a spectrogram.
 
 Local HTTP lifecycle tests use fake capture processes; they do not verify ALSA,
-FLAC encoding or ARM/systemd permissions. The on-demand service, reboot recovery,
-BirdNET-Go integration and real detections remain to be verified on the Pis.
+FLAC encoding or ARM/systemd permissions. Subsequent user-run Pi checks verified
+both on-demand services, two sequential probes per endpoint, automatic startup
+after BYRemote reboot and reconnection from Backyard. Central model processing
+and bat WAV export at 384000 Hz were observed; three bat events were imported
+before a short clip and later an audio 404 blocked the bridge. This does not
+verify the biological correctness of model labels or ultrasonic signal quality.
 All four lifecycle tests passed on Windows using Python and real localhost HTTP
 requests, with mocked capture processes.
 
@@ -107,4 +111,9 @@ backup. Restart only the required API/capture/bridge services after success;
 previously active optional timers must be deliberately restored separately.
 
 The four reset tests use synthetic SQLite/audio files and pass locally on
-Windows. Real Pi reset and post-reset ingestion remain unverified.
+Windows. The user subsequently executed the reset on the central Pi and reported
+success with backup `reset-backups/20261104T103227635675Z`. Disk use fell from
+84% to 41%, with 30 GB available. Required central services were started again.
+Post-reset service health, imports, retained catalog inventory and restoration
+of wanted optional timers still need runtime verification. Do not repeat the
+reset merely because those checks are pending.

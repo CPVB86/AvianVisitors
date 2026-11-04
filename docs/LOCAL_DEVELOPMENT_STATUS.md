@@ -8,21 +8,28 @@ getoonde logs. Centrale BirdNET-Go verwerkt beide bronnen, exporteert bat-WAV
 op 384000 Hz en drie bat-events zijn in Backyard geïmporteerd. Eén clip rond de
 reboot was korter dan het event en blokkeerde de bridge. Na een nieuwe cutoff
 blokkeert een nieuwe detectie op audio-404. Exportpad/mounts kloppen, clip ontbreekt.
-Rootbestandssysteem is 84% vol tegenover Go-retentiedrempel 70%; dit is een
-mogelijke verklaring, nog geen bewezen verwijderoorzaak. Backyard/data bevat
-22 GB audio, vooral review. Gebruiker wil schone reset in plaats van herstel.
+Vóór reset was het rootbestandssysteem 84% vol tegenover Go-retentiedrempel
+70%; mogelijke verklaring voor verdwenen clips, geen bewezen verwijderoorzaak.
+Backyard/data bevatte 22 GB audio, vooral review.
 
 `remote_capture/reset_central.py` is voorbereid met read-only preview, DB/state-
 back-up, gerichte reset van vier detectietabellen/audiomappen en gezamenlijke
-cutoff. Vier synthetische reset-tests slagen. Definitieve reset is nog NIET
-uitgevoerd. Soortcatalogus, generatorassets en upstream Go-data blijven behouden.
-Nog te verifiëren: schijfruimte na reset, nieuwe import zonder 404/timingfout,
+cutoff. Vier synthetische reset-tests slagen. Gebruiker heeft de reset op de
+centrale Pi uitgevoerd: "Reset completed", DB/checkpointback-up onder
+`/home/cpvb86/Backyard/reset-backups/20261104T103227635675Z`.
+Daarna API, BirdNET-Go en beide bridges gestart; df toont 41% gebruikt,
+30 GB beschikbaar (voorheen 84%). Soortcatalogus/generatorbehoud is lokaal
+getest; behoud op de Pi wordt door scriptuitvoer gemeld, nog niet onafhankelijk
+via een post-reset-inventaris gecontroleerd. Upstream Go-data is niet gereset.
+Nog te verifiëren: actuele servicestatus en nieuwe import zonder 404/timingfout,
 vogelimport bij geschikte detectie en beleid dat nieuwe reviewgroei begrenst.
+Alle centrale Backyard-timers zijn voor reset gestopt; gewenste optionele timers
+moeten nog afzonderlijk worden hersteld. Geen reset opnieuw uitvoeren.
 
 BYRemote is een Raspberry Pi 3 Model B Rev 1.2 met 64-bit Pi OS, desktop,
 Connect en SSH. Beide USB-microfoons zijn fysiek overgezet vanaf Backyard.
 Backyard blijft eigenaar van modellen, detectie, API en opslag. De gebruiker
-heeft de drie centrale capture/bridge-services tijdelijk gestopt.
+heeft de centrale services na de reset opnieuw gestart.
 
 Gebruiker heeft gelijktijdige 120s FLAC-overdracht van beide bronnen uitgevoerd:
 ontvangst mono PCM16 op 48000 en 384000 Hz, beide rond realtime. Iedere zender
@@ -32,14 +39,16 @@ ultrasone signaalkwaliteit of langdurige betrouwbaarheid.
 `remote_capture/` bevat nu een afzonderlijke on-demand HTTP-opnameservice,
 systemd-template, twee voorbeeldconfiguraties en installer. Vier lokale HTTP-
 lifecycle-tests met nagebootste captureprocessen slagen. De service opent ALSA
-pas na een GET en geeft het apparaat vrij na disconnect; oplossing voor de
-vermoedelijke opstartoorzaak is nog niet op de Pi geverifieerd.
+pas na een GET en geeft het apparaat vrij na disconnect. Gebruiker heeft op de
+Pi beide bronnen tweemaal met ffprobe gecontroleerd op FLAC, mono en de juiste
+samplefrequentie. De getoonde on-demand-servicelogs hebben geen xruns.
 
-Volgende stap: installatie op BYRemote, controle op beide endpoints inclusief
-probe/herverbinden, daarna back-up en omzetting van centrale BirdNET-Go
-20261014 naar twee HTTP-bronnen met gescheiden birdnet/bat-modeltoewijzing.
-384000-Hz-probe, echte detecties, reboot/herstel en centrale bridges moeten nog
-worden getest. Zie `remote_capture/README.md`. Bestaande lokale WordPress-
+Volgende stap: post-resetservicestatus en importlogs van Backyard ontvangen,
+daarna benodigde timers herstellen en opslaggroei begrenzen. De omzetting naar
+twee HTTP-bronnen met gescheiden modellen is uitgevoerd; detectieverwerking,
+384000-Hz-export en reboot/herverbinding zijn door gebruikerslogs bevestigd.
+Soortcorrectheid en ultrasone signaalkwaliteit zijn niet daarmee bewezen.
+Zie `remote_capture/README.md`. Bestaande lokale WordPress-
 wijzigingen zijn buiten dit werk gehouden.
 
 ## Koerswijziging: Linux-backend (2026-09-25)
