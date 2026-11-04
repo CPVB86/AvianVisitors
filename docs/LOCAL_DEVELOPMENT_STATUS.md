@@ -26,6 +26,14 @@ vogelimport bij geschikte detectie en beleid dat nieuwe reviewgroei begrenst.
 Alle centrale Backyard-timers zijn voor reset gestopt; gewenste optionele timers
 moeten nog afzonderlijk worden hersteld. Geen reset opnieuw uitvoeren.
 
+Post-resetstatus uit gebruikerslogs: API, BirdNET-Go en beide bridges zijn
+active/running. Beide bridges begonnen vóór de Go-API beschikbaar was; bat
+herstelde via retry en bird via één systemd-herstart. Nog geen nieuwe import
+bewezen in deze korte logperiode. `wait_go.py` en `install_central_wait.sh`
+voegen een begrensde Go-API-readinesscheck toe vóór beide bridges, bovenop hun
+bestaande API/policy-check. Vier gemockte readiness-tests slagen. Deze drop-ins
+zijn nog niet op de Pi geïnstalleerd/getest.
+
 BYRemote is een Raspberry Pi 3 Model B Rev 1.2 met 64-bit Pi OS, desktop,
 Connect en SSH. Beide USB-microfoons zijn fysiek overgezet vanaf Backyard.
 Backyard blijft eigenaar van modellen, detectie, API en opslag. De gebruiker

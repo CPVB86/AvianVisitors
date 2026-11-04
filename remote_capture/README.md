@@ -117,3 +117,24 @@ success with backup `reset-backups/20261104T103227635675Z`. Disk use fell from
 Post-reset service health, imports, retained catalog inventory and restoration
 of wanted optional timers still need runtime verification. Do not repeat the
 reset merely because those checks are pending.
+
+## Central bridge startup readiness
+
+Post-reset logs showed both bridges attempting to connect before BirdNET-Go's
+HTTP server was ready. The bat bridge retried and the bird bridge recovered
+through systemd after one failed start. `wait_go.py` polls the local detection
+endpoint for HTTP 200 and the expected JSON shape, with bounded timeouts and no
+API token forwarding. It does not test inference or successful import.
+
+Copy `wait_go.py` and `install_central_wait.sh` to the central Pi and run:
+
+```sh
+sudo sh install_central_wait.sh
+```
+
+The installer adds one drop-in per bridge, preserving the original API/policy
+pre-start checks. Each bridge waits up to 90 seconds for its configured Go URL;
+the total unit startup timeout becomes 180 seconds. Only the two bridge services
+are restarted. Audio data, checkpoints, API and detector configuration are not
+reset. Four mocked readiness tests pass locally; real startup/recovery with
+these drop-ins still needs verification on the central Pi.
