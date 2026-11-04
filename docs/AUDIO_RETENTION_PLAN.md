@@ -1,6 +1,8 @@
 # Gewenst audiobeleid voor centrale Backyard-opslag
 
 Status 2026-11-04: ontwerp en gebruikersvoorkeuren, nog niet geïmplementeerd.
+Het uitgewerkte werkvoorstel met API-impact, wijzigingsplekken, budgetvoorstellen,
+uitrol en acceptatietests staat in [AUDIO_RETENTION_IMPLEMENTATION.md](AUDIO_RETENTION_IMPLEMENTATION.md).
 De centrale backend staat in de afzonderlijke Backyard-repository. De WP-plugin
 mag geen eigen audiobestanden verwijderen; zij volgt beschikbaarheid uit de API.
 
