@@ -2,6 +2,28 @@
 
 ## BYRemote opnamepunt (2026-11-04)
 
+Nieuwste stand audiobewaring: Backyard-branch `codex/audio-retention`, commit
+`e676ff3`, is geïmplementeerd en gepusht vanuit een geïsoleerde worktree onder
+`.avian/backyard-retention`. Geen Pi-activering uitgevoerd. Opt-in kernbeleid:
+één bevestigd + één reviewvoorbeeld per domein/effectieve soort, review 14 dagen,
+trash 24 uur/256 MiB, 3-GiB-budget voor Backyard-audio en 8-GiB-vrije-ruimteguard.
+Metadata/reviewhistorie blijven; schema/reset niet gewijzigd. Er zijn een
+read-only preview, back-up/activeringshelper, API-statussen, soortvoorbeeldendpoint,
+vijfminutentimer, legacy-integratie en begrensde source-quarantaine toegevoegd.
+Reeds bevroren pending-uploads worden nooit automatisch opgegeven.
+
+Verificatie: laatste relevante run 74 passed / 2 skipped. Volledige suite
+583 passed / 4 skipped / 1 Windows PermissionError in ongewijzigde Samsung-
+bestandstest; die slaagt daarna geïsoleerd met 19 andere tests. Een bestaande
+CLI-test-environmentlekkage is alleen in de test geïsoleerd. Echte systemd-
+activering en nieuwe imports na activering moeten nog op de Pi worden getest.
+De voorgestelde aparte 2-GiB/48-uursquota voor Go-bronclips is NIET geïmplementeerd;
+Go behoudt eigen native retentie. Uitrolinstructies staan in de Backyard-branch.
+
+Gebruiker rapporteert na de `.detector-test`-opruimstap 37 GB vrij / 28% gebruikt.
+Daarvoor logmap van 5 GB naar 403 MB; drie centrale services active. Verdere
+eenmalige opruiming is niet urgent. Bestaande WP-wijzigingen blijven onaangeroerd.
+
 Nieuwste opruimresultaat, door gebruiker uitgevoerd: gestopte container
 `backyard-bats-go` en de oude map `/home/cpvb86/backyard-bats-go` verwijderd.
 `docker image prune -a` verwijderde ongebruikte imagerecords, meldde 0B vrijgemaakt.

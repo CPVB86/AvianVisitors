@@ -1,6 +1,10 @@
 # Gewenst audiobeleid voor centrale Backyard-opslag
 
-Status 2026-11-04: ontwerp en gebruikersvoorkeuren, nog niet geïmplementeerd.
+Status 2026-11-04: centrale Backyard-implementatie gepusht op
+`codex/audio-retention`, commit `e676ff3`; nog NIET op de Pi geactiveerd.
+Uitvoering/activering: [Backyard AUDIO_RETENTION.md](https://github.com/CPVB86/Backyard/blob/codex/audio-retention/docs/AUDIO_RETENTION.md).
+Onderstaande tekst is de oorspronkelijke ontwerpbasis. De aparte Go-bronbuffer-
+quota van 2 GiB/48 uur is niet geïmplementeerd; native Go-retentie blijft staan.
 Het uitgewerkte werkvoorstel met API-impact, wijzigingsplekken, budgetvoorstellen,
 uitrol en acceptatietests staat in [AUDIO_RETENTION_IMPLEMENTATION.md](AUDIO_RETENTION_IMPLEMENTATION.md).
 De centrale backend staat in de afzonderlijke Backyard-repository. De WP-plugin

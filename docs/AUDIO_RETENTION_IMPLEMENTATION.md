@@ -1,6 +1,10 @@
 # Implementatievoorstel audiobewaring
 
-Status 4 november 2026: gereed als werkopdracht; nog NIET geïmplementeerd.
+Status 4 november 2026: oorspronkelijk werkvoorstel. Kernbeleid is inmiddels
+geïmplementeerd in Backyard, branch `codex/audio-retention`, commit `e676ff3`.
+Pi-activering en post-activatiecontroles staan nog open. De aparte 2-GiB/48-uurs
+Go-bronbuffer-quota is NIET gerealiseerd; bronbestanden worden niet los verwijderd.
+Zie de [actuele uitrolinstructies](https://github.com/CPVB86/Backyard/blob/codex/audio-retention/docs/AUDIO_RETENTION.md).
 De codewijzigingen horen in de afzonderlijke Backyard-backendrepository.
 WordPress en Avian volgen de backend; zij verwijderen zelf geen audiobestanden.
 
