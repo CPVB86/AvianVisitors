@@ -2,6 +2,23 @@
 
 ## BYRemote opnamepunt (2026-11-04)
 
+Aanvulling uit door gebruiker uitgevoerde Pi-tests: on-demand services starten
+automatisch na reboot; beide endpoints verbinden opnieuw zonder xruns in de
+getoonde logs. Centrale BirdNET-Go verwerkt beide bronnen, exporteert bat-WAV
+op 384000 Hz en drie bat-events zijn in Backyard geïmporteerd. Eén clip rond de
+reboot was korter dan het event en blokkeerde de bridge. Na een nieuwe cutoff
+blokkeert een nieuwe detectie op audio-404. Exportpad/mounts kloppen, clip ontbreekt.
+Rootbestandssysteem is 84% vol tegenover Go-retentiedrempel 70%; dit is een
+mogelijke verklaring, nog geen bewezen verwijderoorzaak. Backyard/data bevat
+22 GB audio, vooral review. Gebruiker wil schone reset in plaats van herstel.
+
+`remote_capture/reset_central.py` is voorbereid met read-only preview, DB/state-
+back-up, gerichte reset van vier detectietabellen/audiomappen en gezamenlijke
+cutoff. Vier synthetische reset-tests slagen. Definitieve reset is nog NIET
+uitgevoerd. Soortcatalogus, generatorassets en upstream Go-data blijven behouden.
+Nog te verifiëren: schijfruimte na reset, nieuwe import zonder 404/timingfout,
+vogelimport bij geschikte detectie en beleid dat nieuwe reviewgroei begrenst.
+
 BYRemote is een Raspberry Pi 3 Model B Rev 1.2 met 64-bit Pi OS, desktop,
 Connect en SSH. Beide USB-microfoons zijn fysiek overgezet vanaf Backyard.
 Backyard blijft eigenaar van modellen, detectie, API en opslag. De gebruiker

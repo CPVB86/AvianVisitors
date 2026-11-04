@@ -74,3 +74,37 @@ Run local tests from repository root:
 ```sh
 python -m unittest discover -s remote_capture -p 'test_*.py' -v
 ```
+
+## Explicit reset on the CENTRAL Backyard Pi
+
+`reset_central.py` is a separate maintenance tool, not part of the remote
+capture service. Its default preview is read-only. It expects the inspected
+Backyard schema, default database/storage paths and both current bridge state
+paths in `/etc/backyard/backyard.env`. Unknown relationships, symlinked paths,
+non-default storage and pending imports cause refusal before reset.
+
+```sh
+sudo python3 reset_central.py
+# Stop central writers and timers before applying; BYRemote stays running.
+sudo systemctl stop 'backyard-*.timer' 'backyard-*.service'
+sudo python3 reset_central.py --apply
+df -h /home/cpvb86/Backyard/data
+```
+
+Apply backs up the SQLite database and current bridge checkpoints under
+`Backyard/reset-backups/<timestamp>/`. It clears ONLY observation_candidates,
+bird_audio, observations and bird_detections, and permanently deletes ONLY
+data/birds/audio, data/bats/audio, data/review/bird/audio and
+data/review/bat/audio. Audio is NOT backed up. Catalog, generator files,
+Samsung settings, code, environment and models remain. The current checkpoints
+retain instance IDs but get empty done lists and a shared new UTC cutoff.
+The upstream BirdNET-Go database and clips are not reset by this tool.
+
+Do not restart central writers if any reset step fails. Check the printed
+backup/manifest and failure first; database and filesystem changes are not one
+atomic transaction. Previously deleted audio cannot be restored from the DB
+backup. Restart only the required API/capture/bridge services after success;
+previously active optional timers must be deliberately restored separately.
+
+The four reset tests use synthetic SQLite/audio files and pass locally on
+Windows. Real Pi reset and post-reset ingestion remain unverified.
