@@ -7,7 +7,7 @@ function backyard_birds_confirmed_options() {
 
 function backyard_birds_confirmed_statuses( $rejected = false ) {
 	if ( $rejected ) { return array( 'human_rejected' => 'Handmatig afgewezen' ); }
-	return array( 'auto_accepted' => 'Automatisch geaccepteerd', 'human_confirmed' => 'Handmatig bevestigd', 'human_rejected' => 'Handmatig afgewezen' );
+	return array( 'auto_accepted' => 'Automatisch geaccepteerd', 'human_confirmed' => 'Handmatig bevestigd' );
 }
 
 function backyard_birds_confirmed_filters( $rejected = false ) {

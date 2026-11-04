@@ -16,3 +16,10 @@ foreach ( backyard_shortcode_docs() as $entry ) {
 	}
 }
 echo "Manual parameter copy checks passed.\n";
+foreach ( array( 'backyard', 'byremote' ) as $host ) {
+	$_GET['cmd_host'] = $host;
+	ob_start(); backyard_manual_commands(); $commands = ob_get_clean();
+	$remote = 'byremote' === $host;
+	check( strpos( $commands, '<code>ssh cpvb86@192.168.1.' . ( $remote ? '105' : '31' ) . '</code>' ) !== false, 'Copyable SSH command for selected host' );
+	check( ( false !== strpos( $commands, 'byremote-audio@birds' ) ) === $remote && ( false !== strpos( $commands, 'backyard-birdnet-go' ) ) !== $remote, 'Service commands stay on their own host tab' );
+}

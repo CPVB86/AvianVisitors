@@ -37,9 +37,16 @@ $before = count( $requests ); $_POST['observation_ids'] = array( $ids[0], '../ba
 try { backyard_birds_handle_bulk_review(); } catch ( RuntimeException $e ) {}
 check( count( $requests ) === $before, 'Validate entire selection before mutations' );
 $records[ $ids[0] ]['status'] = 'auto_accepted';
+$records[ $ids[0] ]['classification'] = 'accepted';
+$records[ $ids[0] ]['scientific_name'] = 'Actitis hypoleucos';
+$records[ $ids[0] ]['common_name_nl'] = 'Oeverloper';
 $records[ $ids[1] ]['timestamp'] = gmdate( 'c', time() - 7200 );
 $_GET = array( 'view' => 'confirmed', 'period' => '1h' );
 check( count( backyard_birds_confirmed_observations() ) === 1, 'One-hour filter uses observation time' );
+$_GET['status'] = 'human_rejected';
+$html = render_review();
+check( strpos( $html, 'Oeverloper' ) !== false && strpos( $html, 'Automatisch geaccepteerd' ) !== false && strpos( $html, 'backyard_birds_audio' ) !== false && strpos( $html, 'Handmatig afgewezen' ) === false, 'Accepted bridge observation has WP audio; rejected status cannot enter confirmed view' );
+unset( $_GET['status'] );
 $_GET['period'] = '12h';
 check( count( backyard_birds_confirmed_observations() ) === 2, 'Twelve-hour filter includes both accepted statuses' );
 foreach ( array( '24h', '7d', 'all' ) as $period ) { $_GET['period'] = $period; check( count( backyard_birds_confirmed_observations() ) === 2, 'Time filter ' . $period ); }

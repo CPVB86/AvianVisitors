@@ -4,17 +4,34 @@ defined( 'ABSPATH' ) || exit;
 function backyard_manual_commands() {
 	$ssh = 'ssh cpvb86@192.168.1.31';
 	$status = 'cd ~/Backyard && sudo .venv/bin/python -m operations.status';
-	$logs = 'sudo journalctl -u backyard-detector -f';
+	$logs = 'sudo journalctl -u backyard-birds -u backyard-bats -f';
 	// Ask in the terminal, never embed the saved WordPress token in documentation.
 	$auth = ' -Headers @{ Authorization = "Bearer " + [System.Net.NetworkCredential]::new("", (Read-Host "API-token" -AsSecureString)).Password }';
 	$public_test = 'Invoke-RestMethod https://backyard.tail99c3bd.ts.net/api/health' . $auth;
 	echo '<section class="backyard-card"><h2>Powershell en Pi CMD</h2>';
+	$remote = 'byremote' === ( $_GET['cmd_host'] ?? '' );
+	echo '<nav id="backyard-commands" class="nav-tab-wrapper" aria-label="Commandos per computer">';
+	foreach ( array( 'backyard' => 'Backyard', 'byremote' => 'BYRemote' ) as $key => $label ) {
+		$active = $remote === ( 'byremote' === $key );
+		$url = add_query_arg( array( 'page' => 'backyard-manual', 'cmd_host' => $key ), admin_url( 'admin.php' ) ) . '#backyard-commands';
+		echo '<a class="nav-tab' . ( $active ? ' nav-tab-active' : '' ) . '" ' . ( $active ? 'aria-current="page" ' : '' ) . 'href="' . esc_url( $url ) . '">' . esc_html( $label ) . '</a>';
+	}
+	echo '</nav>';
+	if ( $remote ) {
+		echo '<p>BYRemote neemt beide microfoons op en streamt hun audio naar Backyard.</p><div class="backyard-commands">';
+		backyard_manual_command( 'SSH verbinden · Windows', 'ssh cpvb86@192.168.1.105' );
+		backyard_manual_command( 'Microfoonservices · na SSH', 'systemctl --no-pager status byremote-audio@birds byremote-audio@bats' );
+		backyard_manual_command( 'Live microfoonlogs · na SSH', 'sudo journalctl -u byremote-audio@birds -u byremote-audio@bats -f' );
+		echo '</div></section>';
+		return;
+	}
+	echo '<p>Op Backyard verwerkt één BirdNET-Go-instantie beide streams. De vogel- en vleermuisbridge importeren waarnemingen en audio in de Backyard API. WordPress leest uit die API.</p>';
 	echo '<div class="backyard-commands">';
 	foreach ( array(
 		array( 'SSH verbinden · Windows', $ssh ),
 		array( 'Naar Backyard-map · Pi na SSH', 'cd ~/Backyard' ),
 		array( 'Backyard status · Pi na SSH', $status ),
-		array( 'Live detectorlog · Pi na SSH', $logs ),
+		array( 'Live importlogs · Pi na SSH', $logs ),
 		array( 'Backyard- en OpenAI-tokens tonen · Pi na SSH', "sudo sed -n -e '/^BACKYARD_API_TOKEN=/p' -e '/^OPENAI_API_KEY=/p' /etc/backyard/backyard.env" ),
 		array( 'Publieke API-test · Windows', $public_test ),
 	) as $command ) {
@@ -26,7 +43,8 @@ function backyard_manual_commands() {
 		'Pi pingen' => 'ping 192.168.1.31',
 		'Lokale API testen' => 'Invoke-RestMethod http://192.168.1.31:8010/api/health' . $auth,
 		'Pi-status vanaf Windows' => $ssh . ' -t "' . $status . '"',
-		'Services vanaf Windows' => $ssh . ' "systemctl status backyard-api backyard-detector --no-pager"',
+		'Services vanaf Windows' => $ssh . ' "systemctl status backyard-api backyard-birdnet-go backyard-birds backyard-bats --no-pager"',
+		'Laatste drie waarnemingen · Windows' => '(Invoke-RestMethod "http://192.168.1.31:8010/api/observations?limit=3"' . $auth . ') | Select-Object timestamp,domain,scientific_name,status,classification,audio_available',
 	) as $label => $command ) {
 		backyard_manual_command( $label, $command );
 	}
@@ -34,12 +52,11 @@ function backyard_manual_commands() {
 	foreach ( array(
 		'Uitgebreide status + database' => $status . ' --json --check-db',
 		'API-status' => 'systemctl status backyard-api --no-pager',
-		'Detectorstatus' => 'systemctl status backyard-detector --no-pager',
-		'Beide herstarten' => 'sudo systemctl restart backyard-api backyard-detector',
+		'BirdNET-Go en bridges' => 'systemctl status backyard-birdnet-go backyard-birds backyard-bats --no-pager',
 		'API herstarten' => 'sudo systemctl restart backyard-api',
-		'Detector herstarten' => 'sudo systemctl restart backyard-detector',
+		'Bridges herstarten' => 'sudo systemctl restart backyard-birds backyard-bats',
 		'Live API-log' => 'sudo journalctl -u backyard-api -f',
-		'Laatste detectorlogs' => 'sudo journalctl -u backyard-detector -n 50 --no-pager',
+		'Laatste importlogs' => 'sudo journalctl -u backyard-birds -u backyard-bats -n 50 --no-pager',
 		'Tailscale-status' => 'tailscale status',
 		'Funnel-status' => 'tailscale funnel status',
 		'Git-versie' => 'cd ~/Backyard && git log -1 --oneline',

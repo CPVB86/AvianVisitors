@@ -2,6 +2,11 @@
 
 ## BYRemote opnamepunt (2026-11-04)
 
+Latere productietest door de gebruiker: Oeverloper correct herkend, audio opgeslagen
+en drie nieuwe observaties geïmporteerd met classificatie `accepted`. In het
+API-contract hoort hierbij lifecycle-status `auto_accepted`; deze registraties
+vallen onder Bevestigd. De eerdere post-resetnotities hieronder zijn historisch.
+
 Aanvulling uit door gebruiker uitgevoerde Pi-tests: on-demand services starten
 automatisch na reboot; beide endpoints verbinden opnieuw zonder xruns in de
 getoonde logs. Centrale BirdNET-Go verwerkt beide bronnen, exporteert bat-WAV
