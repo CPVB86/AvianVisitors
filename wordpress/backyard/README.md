@@ -467,8 +467,9 @@ Bij Birds staat Otje als laatste tab. Het dubbele Bats-tabblad Overzicht is
 vervallen; bestaande overview-links openen Statistieken.
 Het WordPress-dashboard heeft drie afzonderlijke widgets: Birds, Bats en Otje.
 Birds/Bats tonen de open reviewteller, geaccepteerde waarnemingen vandaag,
-het totale aantal waargenomen soorten en de laatst waargenomen soort met
-beschikbare afbeelding. Alle cijfers komen uit de Backyard API; de ingestelde
-WordPress-tijdzone bepaalt vandaag. Otje toont alleen kandidaten en haar portret.
+het aantal waargenomen soorten vandaag en de laatst waargenomen soort met
+beschikbare vliegende afbeelding. Alle cijfers komen uit de Backyard API; de ingestelde
+WordPress-tijdzone bepaalt vandaag. Otje toont kandidaten, haar vliegende illustratie en de laatste bevestigde
+Otje-waarneming met datum/tijd. Zonder datum verschijnt “Dat is al een tijdje geleden”.
 Widgets zijn afzonderlijk te verplaatsen/verbergen via Scherminstellingen.
 Geen afbeeldingsgeneratie of wijzigingen aan audio/review/correcties.
