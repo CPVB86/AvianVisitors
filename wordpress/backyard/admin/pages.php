@@ -5,6 +5,7 @@ require_once __DIR__ . '/manual-parameters.php';
 require_once __DIR__ . '/manual-icons.php';
 require_once __DIR__ . '/manual-builder.php';
 require_once __DIR__ . '/index.php';
+require_once __DIR__ . '/module-information.php';
 
 add_action( 'admin_menu', function () {
 	add_menu_page( 'Backyard', 'Backyard', 'manage_options', 'backyard', 'backyard_birds_admin_page', 'dashicons-carrot' );
@@ -27,7 +28,7 @@ add_action( 'admin_enqueue_scripts', function ( $hook ) {
 	if ( ! in_array( $hook, array( 'index.php', 'backyard_page_backyard-manual', 'toplevel_page_backyard', 'backyard_page_backyard-settings', 'backyard_page_backyard-birds', 'backyard_page_backyard-bats' ), true ) ) {
 		return;
 	}
-	wp_enqueue_style( 'backyard-manual', plugins_url( 'manual.css', __FILE__ ), array(), '0.6.2' );
+	wp_enqueue_style( 'backyard-manual', plugins_url( 'manual.css', __FILE__ ), array(), '0.7.1' );
 	if ( in_array( $hook, array( 'toplevel_page_backyard', 'backyard_page_backyard-birds', 'backyard_page_backyard-bats' ), true ) ) {
 		wp_enqueue_script( 'backyard-review', plugins_url( 'review.js', __FILE__ ), array(), '0.4.0', true );
 		wp_enqueue_script( 'backyard-corrections', plugins_url( 'corrections.js', __FILE__ ), array( 'backyard-review' ), '0.7.0', true );

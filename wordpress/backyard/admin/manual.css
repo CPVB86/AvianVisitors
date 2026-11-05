@@ -268,3 +268,16 @@
 .backyard-builder-fields select, .backyard-builder-fields input { width:100%; max-width:100%; }
 .backyard-builder-error { color:#b32d2e; }
 .backyard-builder-copy:disabled { cursor:not-allowed; opacity:.6; }
+
+.backyard-dashboard-summary { position:relative; min-height:100px; padding:6px 2px; }
+.backyard-dashboard-review { display:inline-block; font-size:15px; font-weight:600; margin:4px 0 16px; }
+.backyard-dashboard-numbers { border-top:1px solid #e2e8e5; margin:0; padding:14px 0; }
+.backyard-dashboard-numbers > div { display:flex; justify-content:space-between; align-items:baseline; gap:16px; padding:5px 0; }
+.backyard-dashboard-numbers dt { color:#50575e; }
+.backyard-dashboard-numbers dd { margin:0; font-size:20px; font-weight:600; font-variant-numeric:tabular-nums; color:#23483d; }
+.backyard-dashboard-last { display:flex; align-items:center; gap:16px; padding:14px; border-radius:8px; background:#f4f7f5; }
+.backyard-dashboard-last img { width:88px; height:88px; object-fit:contain; flex-shrink:0; }
+.backyard-dashboard-last span, .backyard-dashboard-last strong, .backyard-dashboard-last time { display:block; }
+.backyard-dashboard-last span, .backyard-dashboard-last time { font-size:12px; color:#646970; }
+.backyard-dashboard-last strong { font-size:16px; line-height:1.4; margin:4px 0; }
+.backyard-dashboard-portrait { display:block; width:112px; height:112px; object-fit:contain; margin:0 auto; }

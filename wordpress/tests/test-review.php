@@ -49,6 +49,7 @@ $http_handler = function ( $url, $args ) use ( &$record, &$forced_post_code, &$c
 	check( $args['headers']['Authorization'] === 'Bearer ' . $GLOBALS['token'], 'All review requests must authenticate' );
 	check( $args['redirection'] === 0, 'Never follow private API redirects' );
 	$path = parse_url( $url, PHP_URL_PATH );
+	if ( strpos( $path, '/api/presentation/' ) === 0 ) { return new WP_Error( 'unavailable', 'Statistics unavailable' ); }
 	if ( strpos( $path, '/api/generator/' ) === 0 ) { return review_response( 200, array( 'assets' => array() ) ); }
 	parse_str( parse_url( $url, PHP_URL_QUERY ) ?? '', $query );
 	if ( '/api/observations/count' === $path && 'bat' === ( $query['domain'] ?? '' ) ) { return review_response( 200, array( 'count' => 0 ) ); }
@@ -82,7 +83,7 @@ foreach ( $GLOBALS['actions']['wp_dashboard_setup'] as $callback ) { $callback()
 check( empty( $GLOBALS['dashboard_widgets'] ), 'Dashboard widget only available to administrators' );
 $allowed = true;
 foreach ( $GLOBALS['actions']['wp_dashboard_setup'] as $callback ) { $callback(); }
-check( $GLOBALS['dashboard_widgets']['backyard_status'] === array( 'Backyard', 'backyard_index_page' ), 'Native dashboard widget registered for Screen Options' );
+check( $GLOBALS['dashboard_widgets']['backyard_birds'] === array( 'Birds', 'backyard_birds_dashboard' ), 'Native dashboard widget registered for Screen Options' );
 check( count( $requests ) === $before, 'Dashboard registration does not fetch data' );
 $html = render_index();
 check( strpos( $html, '152 te reviewen waarnemingen' ) !== false && strpos( $html, 'page=backyard-birds' ) !== false, 'Uncapped linked summary count' );

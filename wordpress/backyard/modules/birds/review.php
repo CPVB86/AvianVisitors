@@ -106,19 +106,17 @@ function backyard_birds_admin_page( $domain = 'bird' ) {
 	$rejected = 'rejected' === ( $_GET['view'] ?? '' );
 	$confirmed = $rejected || 'confirmed' === ( $_GET['view'] ?? '' );
 	$active = $rejected ? 'rejected' : ( $confirmed ? 'confirmed' : ( $otje_view ? 'otje' : 'review' ) );
-	$tabs = array( 'review' => 'Review', 'otje' => 'Otje', 'confirmed' => 'Bevestigd', 'rejected' => 'Afgewezen' );
-	if ( 'bat' === $domain ) {
-		unset( $tabs['otje'] );
-		$tabs += array( 'overview' => 'Overzicht', 'species' => 'Soorten', 'stats' => 'Statistieken' );
-		if ( in_array( $_GET['view'] ?? '', array( 'overview', 'species', 'stats' ), true ) ) { $active = $_GET['view']; }
-	}
+	$tabs = array( 'review' => 'Review', 'confirmed' => 'Bevestigd', 'rejected' => 'Afgewezen', 'species' => 'Soorten', 'stats' => 'Statistieken' );
+	if ( 'bird' === $domain ) { $tabs['otje'] = 'Otje'; }
+	if ( 'overview' === ( $_GET['view'] ?? '' ) ) { $active = 'stats'; }
+	if ( in_array( $_GET['view'] ?? '', array( 'species', 'stats' ), true ) ) { $active = $_GET['view']; }
 	echo '<nav class="nav-tab-wrapper" aria-label="' . esc_attr( $title ) . '">';
 	foreach ( $tabs as $view => $label ) {
 		echo '<a class="nav-tab' . ( $active === $view ? ' nav-tab-active' : '' ) . '" href="' . esc_url( add_query_arg( array( 'page' => 'backyard-' . $module, 'view' => $view ), admin_url( 'admin.php' ) ) ) . '"' . ( $active === $view ? ' aria-current="page"' : '' ) . '>' . ( 'otje' === $view ? backyard_otje_icon() : '' ) . esc_html( $label ) . '</a>';
 	}
-	if ( 'bat' === $domain && in_array( $active, array( 'overview', 'species', 'stats' ), true ) ) {
+	if ( in_array( $active, array( 'species', 'stats' ), true ) ) {
 		echo '</nav><section class="backyard-card"><h2>' . esc_html( $tabs[ $active ] ) . '</h2>';
-		backyard_bats_information( $active );
+		backyard_module_information( $active, $module );
 		echo '</section></div>';
 		return;
 	}
