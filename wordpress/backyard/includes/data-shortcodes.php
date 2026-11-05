@@ -105,7 +105,7 @@ function backyard_data_shortcode( $attributes = array(), $content = null, $tag =
 	if ( $is_image ) {
 		static $generator = null;
 		if ( null === $generator ) { $generator = new Backyard_Generator(); }
-		$pose = 'flying' === $a['field'] ? 'flight' : 'perched';
+		$pose = 'flying' === $a['field'] ? 'flight' : ( 'bats' === $a['module'] ? 'hanging' : 'perched' );
 		$asset = $row['assets'][ $pose ] ?? $pose;
 		$value = is_string( $asset ) ? $generator->thumbnail( 'birds' === $a['module'] ? 'bird' : 'bat', $row['scientific_name'], array( $asset ) ) : '';
 	}
