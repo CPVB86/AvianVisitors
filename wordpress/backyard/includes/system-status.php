@@ -147,6 +147,6 @@ function backyard_status_dashboard() {
 	$data = backyard_system_status();
 	echo '<div class="backyard-system-overview">';
 	foreach ( backyard_status_components() as $component => $label ) { echo backyard_status_html( $component, '', true, $data, true ); }
-	echo '</div><p class="description">Backyard: API/database. Backyard Remote: bereikbaarheid van de audioservices. Microfoon online: recente actieve audio-overdracht, geen bevestiging van BirdNET-verwerking.</p>';
+	echo '</div>';
 	if ( ! empty( $data['issue'] ) ) { echo '<p role="status">' . esc_html( backyard_status_admin_message( $data['issue'] ) ) . '</p>'; }
 }
