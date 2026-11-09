@@ -14,7 +14,7 @@ $http_handler = function ( $url, $args ) {
 	return review_response( 200, array( 'module' => $module, 'period' => 'all', 'species' => array( array( 'species_id' => 'one', 'name' => $name, 'scientific_name' => $name, 'count' => 10, 'last_seen' => '2026-11-05T10:00:00Z' ) ), 'stats' => array( 'total_observations' => 10, 'unique_species' => 9, 'today_observations' => 3, 'today_species' => 1, 'active_days' => 2 ), 'rankings' => array( 'last' => array( 'one' ) ) ) );
 };
 foreach ( $actions['wp_dashboard_setup'] as $callback ) { $callback(); }
-check( array_keys( $dashboard_widgets ) === array( 'backyard_birds', 'backyard_bats', 'backyard_otje' ), 'Three independent native dashboard cards' );
+check( array_keys( $dashboard_widgets ) === array( 'backyard_system_status', 'backyard_birds', 'backyard_bats', 'backyard_otje' ), 'Independent system status and observation dashboard cards' );
 foreach ( array( 'birds', 'bats' ) as $module ) {
 	ob_start(); backyard_dashboard_card( $module ); $html = ob_get_clean();
 	check( strpos( $html, 'Waarnemingen vandaag' ) !== false && strpos( $html, '>3</dd>' ) !== false && strpos( $html, 'Waargenomen soorten vandaag' ) !== false && strpos( $html, '>1</dd>' ) !== false && strpos( $html, '>9</dd>' ) === false, 'API daily statistics rendered without local recount' );

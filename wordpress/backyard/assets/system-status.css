@@ -1,0 +1,11 @@
+.backyard-system-status { padding:8px 0; color:inherit; }
+.backyard-status-line { display:flex; align-items:center; flex-wrap:wrap; gap:10px; }
+.backyard-status-dot { display:inline-block; width:10px; height:10px; flex-shrink:0; border-radius:50%; background:#757575; }
+.backyard-system-status.is-online .backyard-status-dot { background:#168047; }
+.backyard-system-status.is-offline .backyard-status-dot { background:#c33131; }
+.backyard-status-name { font-weight:600; }
+.backyard-status-value { font-size:.9em; }
+.backyard-status-checked { display:block; margin-top:5px; font-size:.8em; }
+.backyard-system-overview .backyard-system-status + .backyard-system-status { border-top:1px solid #e2e8e5; }
+.backyard-system-overview .backyard-status-value { margin-left:auto; }
+.backyard-status-info { font-size:13px; }

@@ -473,3 +473,55 @@ WordPress-tijdzone bepaalt vandaag. Otje toont kandidaten, haar vliegende illust
 Otje-waarneming met datum/tijd. Zonder datum verschijnt “Dat is al een tijdje geleden”.
 Widgets zijn afzonderlijk te verplaatsen/verbergen via Scherminstellingen.
 Geen afbeeldingsgeneratie of wijzigingen aan audio/review/correcties.
+
+## Systeemstatus (0.8.0)
+
+In Elementor zoek je **Backyard status**. Sleep het element naar de pagina en
+kies Backyard, Backyard Remote, BirdMic of VleerMic. Plaats het viermaal voor
+vier afzonderlijke indicatoren. Onder Inhoud kun je een eigen label en het
+laatst-gecontroleerd tijdstip instellen. Onder Stijl zijn typografie, tekstkleur,
+bolgrootte en tussenruimte beschikbaar. Groen/rood/grijs behouden hun betekenis;
+het naastliggende tekstlabel maakt de status ook zonder kleur begrijpelijk.
+Zonder Elementor blijft de Home-kaart werken; er worden geen Elementor-klassen
+buiten de widgetregistratie geladen.
+
+Op Dashboard → Home staat één extra kaart **Backyard · Systeemstatus** met de
+vier onderdelen en veilige beheerinformatie. Deze is via Scherminstellingen te
+verbergen en staat naast de bestaande Birds/Bats/Otje-kaarten.
+
+Alle elementen lezen uitsluitend GET /api/system/status via de bestaande
+server-side Bearer-client (8 seconden timeout). Eén gedeelde transient bewaart
+succes én fouten 30 seconden; wijziging van URL/token wijzigt de cachekey.
+checked_at uit het versie-1-contract bepaalt de maximale geldigheid: na 60
+seconden is de status onbekend. null blijft onbekend. Geen tellingen of
+waarnemingen worden gebruikt om microphone-online af te leiden.
+
+Een klein lokaal script controleert uitsluitend de leeftijd: het doet geen
+netwerkverzoeken of polling en maakt verouderde indicatoren grijs, ook bij een
+open tab of gecachte pagina. Vernieuw de pagina voor een nieuwe controle.
+Online wordt pas groen na deze leeftijdscontrole; zonder JavaScript blijft
+online veilig grijs/onbekend. Elementor-elementcaching wordt voor deze widget
+uitgeschakeld. Sluit pagina's met actuele status bij voorkeur uit van externe
+full-page caching; oude HTML wordt veilig grijs maar kan geen nieuwe status tonen.
+
+Transportfout: Backyard offline, de overige onderdelen onbekend.
+Authenticatie-, configuratie- of contractfout: alles onbekend, met uitleg alleen
+op de beheerkaart. Ruwe API-fouten, reason-teksten, private URLs en tokens komen
+niet in publieke HTML. Beheermeldingen gebruiken een vaste vertaalde whitelist.
+Backyard betekent API/database; Remote betekent bereikbaarheid van audioservices;
+een microfoon online betekent recente actieve overdracht, geen bewijs van
+inference, biologische juistheid of import. Geen dierdetecties is geen storing.
+
+Update de pluginbestanden inclusief includes/system-status.php,
+includes/class-backyard-status-widget.php, assets/system-status.css en
+assets/system-status.js, plus backyard.php en includes/class-backyard-api-client.php.
+Het definitieve backendcontract staat in CPVB86/Backyard docs/SYSTEM_STATUS.md
+(commit 99a5511). Deze WP-uitbreiding start geen opname, generatie of service.
+De bestaande productie-audioproxy blijft ongewijzigd.
+
+Gerichte checks: php wordpress/tests/test-system-status.php en
+node wordpress/tests/test-system-status.js (WordPress/Elementor-testdoubles en
+browserleeftijdscontrole, geen live Pi/Elementor-test).
+Elementor-registratie en assetafhankelijkheden volgen de officiële documentatie:
+https://developers.elementor.com/docs/widgets/add-new-widget/ en
+https://developers.elementor.com/docs/widgets/widget-dependencies/.

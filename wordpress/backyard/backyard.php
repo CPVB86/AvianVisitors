@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Backyard
  * Description: Modulaire presentatie en beheer via de Backyard API.
- * Version: 0.7.0
+ * Version: 0.8.0
  * Requires at least: 6.0
  * Requires PHP: 7.4
  * Text Domain: backyard
@@ -16,6 +16,7 @@ require_once __DIR__ . '/includes/class-backyard-generator.php';
 require_once __DIR__ . '/includes/shortcodes.php';
 require_once __DIR__ . '/includes/icons.php';
 require_once __DIR__ . '/includes/data-shortcodes.php';
+require_once __DIR__ . '/includes/system-status.php';
 
 function backyard_activate() {
 	add_option( 'backyard_api_base_url', BACKYARD_DEFAULT_API_URL );

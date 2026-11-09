@@ -2,6 +2,11 @@
 defined( 'ABSPATH' ) || exit;
 
 class Backyard_API_Client {
+	/** System status checks two remote services sequentially. */
+	public function system_status() {
+		return $this->decode( $this->request( '/api/system/status', array(), array( 'timeout' => 8 ) ) );
+	}
+
 	/** Read a relative API path; return decoded JSON or WP_Error. */
 	public function get( $path, $query = array() ) {
 		return $this->decode( $this->request( $path, $query ) );
