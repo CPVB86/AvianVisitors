@@ -26,7 +26,8 @@ $html = render_review();
 check( substr_count( $html, 'name="decision" value="confirm"' ) === 1 && substr_count( $html, 'name="observation_ids[]"' ) === 2 && strpos( $html, 'backyard-select-all' ) !== false && strpos( $html, 'assets/nest.webp' ) !== false, 'One shared action set, selection and nest fallback' );
 $_SERVER['REQUEST_METHOD'] = 'POST';
 $_POST = array( 'observation_ids' => array_merge( $ids, array( $ids[0] ) ), 'decision' => 'confirm' );
-try { backyard_birds_handle_bulk_review(); } catch ( ReviewRedirect $e ) { $redirect = $e->getMessage(); }
+// WordPress do_action() supplies an empty argument for hooks without arguments.
+try { $GLOBALS['actions']['admin_post_backyard_birds_bulk_review'][0]( '' ); } catch ( ReviewRedirect $e ) { $redirect = $e->getMessage(); }
 check( strpos( $redirect, 'done=2' ) !== false && strpos( $redirect, 'failed=1' ) !== false, 'Deduplicate selection and report stale observation separately' );
 foreach ( array( 'allowed', 'nonce_ok' ) as $gate ) {
 	$GLOBALS[ $gate ] = false; $before = count( $requests );
@@ -63,3 +64,11 @@ $records[ $ids[2] ]['timestamp'] = gmdate( 'c', time() - 7200 );
 $_GET['period'] = '1h';
 check( backyard_birds_confirmed_observations( true ) === array(), 'Rejected time filter' );
 echo "Rejected-tab status and time-filter checks passed.\n";
+// Both mutations must work through the actual registered WordPress callback.
+foreach ( array( 'confirm' => 'human_confirmed', 'reject' => 'human_rejected' ) as $decision => $status ) {
+	$records[ $ids[0] ] = $base + array( 'id' => $ids[0] );
+	$_POST = array( 'observation_ids' => array( $ids[0] ), 'decision' => $decision );
+	try { $GLOBALS['actions']['admin_post_backyard_birds_bulk_review'][0]( '' ); } catch ( ReviewRedirect $e ) { $redirect = $e->getMessage(); }
+	check( $records[ $ids[0] ]['status'] === $status && strpos( $redirect, 'done=1' ) !== false, 'WordPress hook keeps bird domain for ' . $decision );
+}
+echo "WordPress bulk hook confirm/reject regression passed.\n";

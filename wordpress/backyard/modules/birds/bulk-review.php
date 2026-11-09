@@ -56,6 +56,7 @@ function backyard_birds_handle_bulk_review( $domain = 'bird' ) {
 	wp_safe_redirect( add_query_arg( $query, admin_url( 'admin.php?page=backyard-' . $module ) ) );
 	exit;
 }
-add_action( 'admin_post_backyard_birds_bulk_review', 'backyard_birds_handle_bulk_review' );
+// do_action() can pass an empty argument: never let it replace the domain.
+add_action( 'admin_post_backyard_birds_bulk_review', function () { backyard_birds_handle_bulk_review( 'bird' ); } );
 
 add_action( 'admin_post_backyard_bats_bulk_review', function () { backyard_birds_handle_bulk_review( 'bat' ); } );
