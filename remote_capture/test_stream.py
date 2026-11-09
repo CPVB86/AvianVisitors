@@ -2,6 +2,8 @@
 
 import http.client
 import io
+import json
+import time
 import threading
 import unittest
 from unittest.mock import patch
@@ -25,6 +27,24 @@ class FakeCapture:
 
 
 class HTTPTests(unittest.TestCase):
+    @patch("stream.subprocess.Popen")
+    def test_health_never_opens_audio_even_when_busy(self, popen):
+        self.server.capture_lock.acquire()
+        try:
+            status, body = self.request("GET", "/health")
+            self.assertEqual(status, 200)
+            self.assertEqual(json.loads(body)["status"], "unknown")
+            self.server.active = True
+            self.server.sent_audio()
+            self.assertEqual(json.loads(self.request("GET", "/health")[1])["status"], "online")
+            self.server.last_data = time.monotonic() - 16
+            self.assertEqual(self.server.report()["reason"], "audio_stalled")
+            self.server.failed = True
+            self.assertEqual(self.server.report()["status"], "offline")
+            popen.assert_not_called()
+        finally:
+            self.server.capture_lock.release()
+
     def setUp(self):
         self.server = CaptureServer(("127.0.0.1", 0), "hw:CARD=Test,DEV=0", 384000, "/bats.flac")
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)

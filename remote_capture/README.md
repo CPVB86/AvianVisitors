@@ -37,6 +37,16 @@ sudo systemctl stop byremote-audio@birds byremote-audio@bats
 
 ## Behavior and central integration
 
+GET `/health` on each existing port returns a small, uncached JSON status,
+without opening ALSA or competing with the stream reader. `online` means an
+active stream wrote bytes in the last 15 seconds; `offline` means capture failed
+or stalled; `unknown` means no receiver or startup. `last_audio_at` is UTC.
+This is transmission health, not proof of inference or microphone signal quality.
+Backyard Pi 5 aggregates these routes as authenticated `/api/system/status`;
+see `docs/SYSTEM_STATUS.md` in CPVB86/Backyard for the consumer contract.
+Re-run the installer after updating stream.py; this briefly restarts both
+audio services. Existing configuration is preserved. Ports remain LAN-only.
+
 GET `/birds.flac` captures mono PCM16 at 48000 Hz; GET `/bats.flac` captures
 mono PCM16 at 384000 Hz. FFmpeg encodes losslessly, without changing rate.
 Capture starts only after the HTTP request, avoiding opening ALSA while waiting
