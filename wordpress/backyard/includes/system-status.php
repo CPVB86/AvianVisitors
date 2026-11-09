@@ -124,7 +124,7 @@ function backyard_status_html( $component, $label = '', $show_checked = false, $
 
 function backyard_status_register_assets() {
 	$base = plugins_url( 'assets/', dirname( __DIR__ ) . '/backyard.php' );
-	wp_register_style( 'backyard-system-status', $base . 'system-status.css', array(), '1.0.0' );
+	wp_register_style( 'backyard-system-status', $base . 'system-status.css', array(), '1.0.1' );
 	wp_register_script( 'backyard-system-status', $base . 'system-status.js', array(), '1.0.0', true );
 }
 add_action( 'wp_enqueue_scripts', 'backyard_status_register_assets' );

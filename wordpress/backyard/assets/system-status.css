@@ -1,7 +1,14 @@
 .backyard-system-status { padding:8px 0; color:inherit; }
 .backyard-status-line { display:flex; align-items:center; flex-wrap:wrap; gap:10px; }
 .backyard-status-dot { display:inline-block; width:10px; height:10px; flex-shrink:0; border-radius:50%; background:#757575; }
-.backyard-system-status.is-online .backyard-status-dot { background:#168047; }
+.backyard-system-status.is-online .backyard-status-dot { background:#39ff14; outline:1px solid #168047; animation:backyard-status-pulse 2s ease-out infinite; }
+@keyframes backyard-status-pulse {
+    0% { box-shadow:0 0 0 0 rgba(57,255,20,.55); }
+    75%, 100% { box-shadow:0 0 0 6px rgba(57,255,20,0); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .backyard-system-status.is-online .backyard-status-dot { animation:none; }
+}
 .backyard-system-status.is-offline .backyard-status-dot { background:#c33131; }
 .backyard-status-name { font-weight:600; }
 .backyard-status-value { font-size:.9em; }
