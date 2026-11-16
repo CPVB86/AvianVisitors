@@ -11,3 +11,4 @@ assert.equal(context.backyardAudioShortcode('bats',id),`[backyard_audio module="
 assert.equal(context.backyardAudioShortcode('birds','"bad"]'),'');
 assert.equal(context.backyardAudioShortcode('other',id),'');
 console.log('Audio cursor timing and shortcode builder checks passed.');
+assert.match(context.backyardAudioShortcode('birds',id,'no'), /spectrogram="no"/);

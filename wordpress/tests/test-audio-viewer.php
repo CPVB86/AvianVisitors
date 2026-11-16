@@ -24,3 +24,6 @@ check(strpos($html,$GLOBALS['token'])===false,'Token not in markup');
 check(backyard_audio_shortcode(array('observation_id'=>'../../secret'))==='','Invalid ID refused');
 echo "Audio viewer authorization and shortcode checks passed.
 ";
+$html = backyard_audio_shortcode(array('module'=>'birds','observation_id'=>$id,'spectrogram'=>'no'));
+check(strpos($html,'<audio')!==false && strpos($html,'part=listen')!==false,'Plain player uses shared listening proxy');
+check(strpos($html,'<canvas')===false,'Plain player does not render a spectrogram');
