@@ -30,7 +30,7 @@ function backyard_birds_correction_projection( $row, $domain = 'bird' ) {
 		'date' => wp_date( 'd-m-Y H:i:s', strtotime( $row['timestamp'] ) ),
 		'actions' => $row['correction_capabilities']['actions'] ?? array(),
 		// JSON/DOM URLs need raw query separators; wp_nonce_url() escapes them for HTML.
-		'audio' => ! empty( $row['audio_available'] ) ? add_query_arg( array( 'action' => 'backyard_' . $module . '_audio', 'observation_id' => $row['id'], '_wpnonce' => wp_create_nonce( 'backyard_' . $module . '_audio_' . $row['id'] ) ), admin_url( 'admin-post.php' ) ) : '',
+		'audio' => ! empty( $row['audio_available'] ) ? add_query_arg( array( 'action' => 'backyard_audio_view', 'observation_id' => $row['id'], 'domain' => $domain, 'scope' => 'admin', 'part' => 'listen', 'key' => wp_create_nonce( 'backyard_audio_view_' . $row['id'] ) ), admin_url( 'admin-post.php' ) ) : '',
 	);
 }
 
@@ -123,7 +123,8 @@ function backyard_birds_correction_editor( $domain = 'bird' ) {
 	if ( 'bird' === $domain ) { echo '<p><label>Identiteit <select name="identity"><option value="">Geen lokale identiteit (gewone soort)</option><option value="otje">Otje</option></select></label></p><p>Otje is alleen toegestaan voor een geschikte doelsoort; Backyard controleert dit.</p>'; } else { echo '<input type="hidden" name="identity" value="">'; }
 	echo '<p><label>Toelichting<br><textarea name="note" maxlength="1000" rows="3"></textarea></label></p></fieldset><p><button type="submit" class="button button-primary">Opslaan</button> <button type="button" class="button correction-reload">Actuele waarneming ophalen</button> <button type="button" class="button correction-close">Sluiten</button></p></form></dialog>';
 }
-add_action( 'admin_footer-backyard_page_backyard-birds', 'backyard_birds_correction_editor' );
-add_action( 'admin_footer-toplevel_page_backyard', 'backyard_birds_correction_editor' );
+// WordPress may pass an empty hook argument: never use it as the domain.
+add_action( 'admin_footer-backyard_page_backyard-birds', function () { backyard_birds_correction_editor( 'bird' ); } );
+add_action( 'admin_footer-toplevel_page_backyard', function () { backyard_birds_correction_editor( 'bird' ); } );
 
 add_action( 'admin_footer-backyard_page_backyard-bats', function () { backyard_birds_correction_editor( 'bat' ); } );

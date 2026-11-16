@@ -16,6 +16,12 @@ check( $display['original_scientific_name'] === 'Gallus gallus' && $display['sci
 $row['audio_available'] = true;
 $display = backyard_birds_correction_projection( $row );
 parse_str( parse_url( $display['audio'], PHP_URL_QUERY ), $audio_query );
-check( $audio_query === array( 'action' => 'backyard_birds_audio', 'observation_id' => $row['id'], '_wpnonce' => 'test-nonce' ), 'JSON audio URL retains raw query parameters for DOM src assignment' );
-check( $GLOBALS['correction_nonce_action'] === 'backyard_birds_audio_' . $row['id'] && strpos( $display['audio'], 'private' ) === false, 'Audio uses observation nonce and WordPress proxy' );
+check( $audio_query === array( 'action' => 'backyard_audio_view', 'observation_id' => $row['id'], 'domain' => 'bird', 'scope' => 'admin', 'part' => 'listen', 'key' => 'test-nonce' ), 'JSON audio URL retains raw query parameters for DOM src assignment' );
+check( $GLOBALS['correction_nonce_action'] === 'backyard_audio_view_' . $row['id'] && strpos( $display['audio'], 'private' ) === false, 'Audio uses observation nonce and WordPress proxy' );
 echo "Correction payload/projection smoke checks passed.\n";
+foreach ( array('admin_footer-backyard_page_backyard-birds', 'admin_footer-toplevel_page_backyard') as $hook ) {
+    ob_start();
+    foreach ($GLOBALS['actions'][$hook] as $callback) { $callback(''); }
+    $html = ob_get_clean();
+    check(strpos($html, 'name="identity"') !== false && strpos($html, '<option value="otje">Otje</option>') !== false, 'Empty WordPress hook argument preserves bird identity selector');
+}
