@@ -10,14 +10,18 @@ function backyardAudioOriginalTime(playbackTime, factor, duration) {
         let data, picture;
         function paint() {
             if (!data || !picture) return;
-            const x = 58, y = 12, w = 726, h = 250, duration = data.duration_seconds;
+            const x = 58, y = 38, w = 726, h = 224, duration = data.duration_seconds;
             ctx.fillStyle='#10151c'; ctx.fillRect(0,0,800,330);
             ctx.drawImage(picture,x,y,w,h);
             const window = data.detection_window;
             if (window) {
-                const left = x + window.start_seconds/duration*w, right = x + window.end_seconds/duration*w;
-                ctx.fillStyle='rgba(70,180,255,.18)'; ctx.fillRect(left,y,right-left,h);
-                ctx.strokeStyle='#64c7ff'; ctx.strokeRect(left,y,right-left,h);
+                const left = x + Math.max(0,window.start_seconds)/duration*w;
+                const right = x + Math.min(duration,window.end_seconds)/duration*w;
+                if (right > left) {
+                    ctx.fillStyle='#64c7ff'; ctx.font='14px sans-serif';
+                    ctx.fillText('Detectievenster',x,17);
+                    ctx.fillRect(left,25,right-left,4);
+                }
             }
             ctx.font='12px sans-serif';ctx.fillStyle='#fff';
             for(let i=0;i<=4;i++){
@@ -46,7 +50,7 @@ function backyardAudioOriginalTime(playbackTime, factor, duration) {
                 box.querySelector('.backyard-audio-caption').textContent=
                     (data.time_expansion===10?'Bats: 10× vertraagd. ':'Normale snelheid. ')+
                     'Volumecorrectie: '+data.gain_db+' dB. Tijd/frequentie-as: originele opname. '+
-                    'Blauw: analysevenster, geen exact herkenningspunt. Kleur: −90 tot 0 dBFS.';
+                    'Blauw balkje boven de grafiek: detectievenster, geen exact herkenningspunt. Kleur: −90 tot 0 dBFS.';
                 message.textContent='';button.hidden=true;paint();
             }catch(e){message.textContent='Audio-preview niet beschikbaar. Controleer of de opname nog aanwezig en toegankelijk is.';button.disabled=false;}
         });

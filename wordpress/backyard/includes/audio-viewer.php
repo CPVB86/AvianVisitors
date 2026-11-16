@@ -4,7 +4,7 @@ defined( 'ABSPATH' ) || exit;
 function backyard_audio_viewer( $id, $domain, $private = false ) {
     if ( ! is_string( $id ) || ! preg_match( '/^[0-9a-f-]{36}$/D', $id )
         || ! in_array( $domain, array( 'bird', 'bat' ), true ) ) { return ''; }
-    wp_enqueue_script( 'backyard-audio-viewer', plugins_url( 'assets/audio-viewer.js', dirname( __DIR__ ) . '/backyard.php' ), array(), '1', true );
+    wp_enqueue_script( 'backyard-audio-viewer', plugins_url( 'assets/audio-viewer.js', dirname( __DIR__ ) . '/backyard.php' ), array(), '2', true );
     wp_enqueue_style( 'backyard-audio-viewer', plugins_url( 'assets/audio-viewer.css', dirname( __DIR__ ) . '/backyard.php' ), array(), '1' );
     $args = array( 'action' => 'backyard_audio_view', 'observation_id' => $id, 'domain' => $domain,
         'scope' => $private ? 'admin' : 'public',
