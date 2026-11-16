@@ -58,3 +58,10 @@ foreach ( array( 'allowed', 'nonce_ok' ) as $gate ) {
 	$GLOBALS[ $gate ] = true;
 }
 echo "Otje review contract tests passed (WordPress doubles; backend implementation still required).\n";
+
+foreach ( array( 'Porzana porzana', 'Meleagris gallopavo' ) as $species ) {
+    $row = array( 'scientific_name' => $species, 'status' => 'human_confirmed',
+        'effective_identity' => array( 'identity_override' => 'otje' ) );
+    $generator = new class { function thumbnail() { throw new RuntimeException('Otje must not request species art'); } };
+    check( strpos( backyard_birds_review_image( $generator, $row ), 'assets/otje.png' ) !== false, 'Confirmed alias uses Otje artwork' );
+}

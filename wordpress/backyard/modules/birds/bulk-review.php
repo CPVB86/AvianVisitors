@@ -3,6 +3,10 @@ defined( 'ABSPATH' ) || exit;
 
 function backyard_birds_review_image( $generator, $row, $domain = 'bird' ) {
 	$fallback = plugins_url( 'assets/nest.webp', dirname( __DIR__, 2 ) . '/backyard.php' );
+	if ( 'bird' === $domain && in_array( $row['status'] ?? '', array( 'auto_accepted', 'human_confirmed' ), true )
+		&& 'otje' === ( $row['effective_identity']['identity_override'] ?? $row['review']['identity_override'] ?? null ) ) {
+		return '<img class="backyard-review-image" src="' . esc_url( plugins_url( 'assets/otje.png', dirname( __DIR__, 2 ) . '/backyard.php' ) ) . '" width="64" height="64" alt="Otje" loading="lazy" style="width:64px;height:64px;object-fit:contain;background:transparent">';
+	}
 	$url = $generator->thumbnail( $domain, ( $row['effective_identity']['scientific_name'] ?? $row['scientific_name'] ), 'bat' === $domain ? array( 'hanging', 'flight', 'perched', 'photo_cutout' ) : array( 'perched', 'flight', 'photo_cutout' ) );
 	return '<img class="backyard-review-image" src="' . esc_url( $url ?: $fallback ) . '" data-fallback="' . esc_url( $fallback ) . '" width="64" height="64" alt="" loading="lazy" style="width:64px;height:64px;object-fit:contain;background:transparent">';
 }
