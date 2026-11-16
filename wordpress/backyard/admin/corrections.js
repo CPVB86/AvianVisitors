@@ -3,6 +3,11 @@ function backyardInitCorrections() {
     if (!dialog) return;
     const form = dialog.querySelector('form'), fields = form.elements;
     const message = dialog.querySelector('.correction-message');
+    if (backyardCorrections.domain !== 'bat') {
+        const option = document.createElement('option');
+        option.value = 'otje'; option.textContent = 'Otje (individuele identiteit)';
+        fields.species_mode.append(option);
+    }
     let current, id, requestId, pending = null, busy = false;
     const labels = { auto_accepted: 'Automatisch geaccepteerd', human_confirmed: 'Handmatig bevestigd', human_rejected: 'Handmatig afgewezen' };
     async function api(operation, values = {}) {
@@ -55,7 +60,14 @@ function backyardInitCorrections() {
         form.querySelector('fieldset').disabled = true;
         dialog.showModal(); load();
     });
-    fields.species_mode.addEventListener('change', () => { dialog.querySelector('.correction-search').hidden = fields.species_mode.value !== 'choose'; });
+    fields.species_mode.addEventListener('change', () => {
+        dialog.querySelector('.correction-search').hidden = fields.species_mode.value !== 'choose';
+        if (fields.species_mode.value === 'otje') {
+            fields.identity.value = 'otje'; fields.decision.value = 'confirm'; fields.identity.disabled = false;
+        } else if (fields.species_mode.value === 'choose' || fields.species_mode.value === 'original') {
+            fields.identity.value = '';
+        }
+    });
     fields.decision.addEventListener('change', () => { fields.identity.disabled = fields.decision.value === 'reject'; });
     dialog.querySelector('.correction-find').addEventListener('click', async () => {
         if (busy) return;

@@ -5,12 +5,14 @@ const source = fs.readFileSync(require('node:path').join(__dirname, '../backyard
 function run(readyState) {
     const handlers = {};
     let mounted = readyState !== 'loading', opened = false, requested = false;
-    const node = { addEventListener() {}, replaceChildren() {}, pause() {}, elements: {} };
+    const options = [];
+    const node = { addEventListener(name, fn) { this[name] = fn; }, append(option) { options.push(option); }, replaceChildren() {}, pause() {}, elements: {} };
     node.querySelector = () => node;
     node.elements.species_mode = node;
     node.elements.decision = node;
+    node.elements.identity = {};
     const dialog = { querySelector: () => node, addEventListener() {}, showModal() { opened = true; } };
-    const document = { readyState, querySelector: () => mounted ? dialog : null, addEventListener(name, fn) { handlers[name] = fn; } };
+    const document = { readyState, createElement: () => ({}), querySelector: () => mounted ? dialog : null, addEventListener(name, fn) { handlers[name] = fn; } };
     vm.runInNewContext(source, { document, URLSearchParams, backyardCorrections: { url: '/admin-ajax.php', nonce: 'test' },
         fetch() { requested = true; return new Promise(() => {}); } });
     if (!mounted) {
@@ -19,6 +21,7 @@ function run(readyState) {
         handlers.DOMContentLoaded();
     }
     assert.equal(typeof handlers.click, 'function');
+    assert.equal(options[0].value, 'otje');
     handlers.click({ target: { closest: () => ({ dataset: { id: 'test-id' } }) } });
     assert.equal(opened, true);
     assert.equal(requested, true);
