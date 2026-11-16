@@ -525,3 +525,29 @@ browserleeftijdscontrole, geen live Pi/Elementor-test).
 Elementor-registratie en assetafhankelijkheden volgen de officiële documentatie:
 https://developers.elementor.com/docs/widgets/add-new-widget/ en
 https://developers.elementor.com/docs/widgets/widget-dependencies/.
+
+## Audio + spectrogram
+
+Backend minimum: Backyard audio-view/audio-listen endpoints (docs/AUDIO_VIEWER.md).
+Admin Birds/Bats tables use the shared viewer for every available observation clip,
+including confirmed and rejected lists. Open on demand; no requests for every row
+during page load. The correction dialog retains the existing original-audio link.
+
+Frontend:
+```
+[backyard_audio module="bats" observation_id="OBSERVATION-UUID"]
+[backyard_audio module="birds" observation_id="OBSERVATION-UUID"]
+```
+The manual shortcode builder has an Audio + spectrogram section and copy button.
+Copy an observation ID from the admin table. Public requests only serve accepted
+observations with audio; every request revalidates availability/status. Review
+audio requires administrator capability and nonce. Tokens stay server-side.
+
+Bats playback: 10x time expansion; Birds: original speed. Both use bounded gain.
+Axes show ORIGINAL recording time/frequency; cursor is corrected for slowdown.
+Blue indicates the available analysis window, not an exact localized animal call.
+Original evidence remains untouched. Silent or noisy audio is not automatically
+valid evidence. Deploy the plugin including new includes/audio-viewer.php,
+assets/audio-viewer.{js,css}, admin/audio-builder.js, backyard.php,
+admin/manual-builder.php and modules/birds/review.php. Preserve local changes.
+No database migration. Purge frontend asset caches after updating.

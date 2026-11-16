@@ -58,7 +58,7 @@ $http_handler = function ( $url, $args ) use ( &$record ) {
 $_GET = array();
 $html = render_bats();
 check( strpos( $html, '1 te reviewen' ) !== false && strpos( $html, 'Gewone dwergvleermuis' ) !== false && strpos( $html, '15-10-2026 20:00:01' ) !== false, 'Unknown bat appears with date and count' );
-check( strpos( $html, 'backyard-select-all' ) !== false && strpos( $html, 'backyard_bats_bulk_review' ) !== false && strpos( $html, 'backyard_bats_audio' ) !== false, 'Shared bulk selection and local audio' );
+check( strpos( $html, 'backyard-select-all' ) !== false && strpos( $html, 'backyard_bats_bulk_review' ) !== false && strpos( $html, 'backyard_audio_view' ) !== false, 'Shared bulk selection and local audio' );
 check( strpos( $html, 'Otje' ) === false && strpos( $html, 'backyard_generator_asset' ) !== false && strpos( $html, 'private' ) === false && strpos( $html, $token ) === false, 'Existing bat image, no Otje or secrets' );
 check( backyard_bats_summary()['text'] === '1 te reviewen waarnemingen', 'Dashboard uses open bat count' );
 $_GET['action'] = 'backyard_bats_audio';

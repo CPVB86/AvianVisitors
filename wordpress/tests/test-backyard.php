@@ -59,6 +59,10 @@ function number_format_i18n( $number, $decimals = 0 ) { return number_format( $n
 function add_menu_page( $title, $label, $cap, $slug, $callback, $icon ) { $GLOBALS['menu_icon'] = $icon; }
 function add_submenu_page( $parent, $title, $label, $cap, $slug, $callback ) { if ( empty( $GLOBALS['menu'] ) ) { $GLOBALS['menu'][ $parent ] = 'Backyard'; } $GLOBALS['menu'][ $slug ] = $label; }
 function remove_submenu_page( $parent, $slug ) { unset( $GLOBALS['menu'][ $slug ] ); }
+function wp_enqueue_script( ...$args ) {}
+function wp_enqueue_style( ...$args ) {}
+if ( ! function_exists( 'wp_create_nonce' ) ) { function wp_create_nonce( $action ) { return 'test-nonce'; } }
+if ( ! function_exists( 'wp_hash' ) ) { function wp_hash( $data ) { return hash_hmac( 'sha256', $data, 'test-only'); } }
 require dirname( __DIR__ ) . '/backyard/backyard.php';
 function check( $condition, $message ) { if ( ! $condition ) { throw new RuntimeException( $message ); } }
 function reply( $code, $body ) { $GLOBALS['response'] = array( 'response' => array( 'code' => $code ), 'body' => $body ); }

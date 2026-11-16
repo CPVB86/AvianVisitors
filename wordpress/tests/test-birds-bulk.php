@@ -46,7 +46,7 @@ $_GET = array( 'view' => 'confirmed', 'period' => '1h' );
 check( count( backyard_birds_confirmed_observations() ) === 1, 'One-hour filter uses observation time' );
 $_GET['status'] = 'human_rejected';
 $html = render_review();
-check( strpos( $html, 'Oeverloper' ) !== false && strpos( $html, 'Automatisch geaccepteerd' ) !== false && strpos( $html, 'backyard_birds_audio' ) !== false && strpos( $html, 'Handmatig afgewezen' ) === false, 'Accepted bridge observation has WP audio; rejected status cannot enter confirmed view' );
+check( strpos( $html, 'Oeverloper' ) !== false && strpos( $html, 'Automatisch geaccepteerd' ) !== false && strpos( $html, 'backyard_audio_view' ) !== false && strpos( $html, 'Handmatig afgewezen' ) === false, 'Accepted bridge observation has WP audio; rejected status cannot enter confirmed view' );
 unset( $_GET['status'] );
 $_GET['period'] = '12h';
 check( count( backyard_birds_confirmed_observations() ) === 2, 'Twelve-hour filter includes both accepted statuses' );

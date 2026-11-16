@@ -89,7 +89,7 @@ $html = render_index();
 check( strpos( $html, '152 te reviewen waarnemingen' ) !== false && strpos( $html, 'page=backyard-birds' ) !== false, 'Uncapped linked summary count' );
 $html = render_review();
 foreach ( array( 'Koolmees', 'Parus major', '78,0%', '>3</td>', '02-10-2026 08:30:00', 'Bevestigen', 'Afwijzen', 'preload="none"' ) as $text ) { check( strpos( $html, $text ) !== false, 'Review fields: ' . $text ); }
-check( strpos( $html, 'admin-post.php?action=backyard_birds_audio' ) !== false, 'Player uses WordPress proxy' );
+check( strpos( $html, 'admin-post.php?action=backyard_audio_view' ) !== false, 'Player uses WordPress proxy' );
 check( strpos( $html, $token ) === false && strpos( $html, 'private-pi' ) === false && strpos( $html, $option ) === false, 'No private URL or bearer token in HTML' );
 check( ! isset( $GLOBALS['actions']['admin_post_nopriv_backyard_birds_audio'] ), 'Audio not public' );
 check( ! isset( $GLOBALS['actions']['admin_post_nopriv_backyard_birds_review'] ), 'Review not public' );

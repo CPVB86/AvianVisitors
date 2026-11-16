@@ -17,6 +17,7 @@ require_once __DIR__ . '/includes/shortcodes.php';
 require_once __DIR__ . '/includes/icons.php';
 require_once __DIR__ . '/includes/data-shortcodes.php';
 require_once __DIR__ . '/includes/system-status.php';
+require_once __DIR__ . '/includes/audio-viewer.php';
 
 function backyard_activate() {
 	add_option( 'backyard_api_base_url', BACKYARD_DEFAULT_API_URL );

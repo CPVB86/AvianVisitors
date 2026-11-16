@@ -167,7 +167,8 @@ function backyard_birds_admin_page( $domain = 'bird' ) {
 		if ( $row['audio_available'] ) {
 			// Never use audio_url supplied by the API: only an authenticated WP route.
 			$url = wp_nonce_url( add_query_arg( array( 'action' => 'backyard_' . $module . '_audio', 'observation_id' => $row['id'] ), admin_url( 'admin-post.php' ) ), 'backyard_' . $module . '_audio_' . $row['id'] );
-			echo '<audio controls preload="none" src="' . esc_url( $url ) . '" aria-label="' . esc_attr( 'Audio van ' . $name ) . '">Je browser ondersteunt geen audio.</audio>';
+			echo backyard_audio_viewer( $row['id'], $domain, true );
+            echo '<small>Opname-ID: ' . esc_html( $row['id'] ) . '</small>';
 		} else {
 			echo 'Geen audio beschikbaar';
 		}

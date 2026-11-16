@@ -22,4 +22,5 @@ function backyard_manual_builder() {
 		echo '<label data-builder-row="' . esc_attr( $key ) . '">' . esc_html( $label ) . '<input name="' . esc_attr( $key ) . '" type="text" maxlength="' . ( 'format' === $key ? '100' : '255' ) . '"></label>';
 	}
 	echo '</div><p class="backyard-builder-hint"></p><p class="backyard-builder-error" role="status"></p><div class="backyard-copy-item"><button type="button" class="backyard-copy-shortcode backyard-builder-copy" disabled aria-label="Kopieer samengestelde shortcode"><code>Kies de opties hierboven.</code><span class="dashicons dashicons-admin-page" aria-hidden="true"></span></button><span class="backyard-copy-status screen-reader-text" role="status" aria-live="polite"></span></div><p class="description">Klik op de code om te kopiëren. Geldige instellingen garanderen niet dat er al waarnemingen of afbeeldingen beschikbaar zijn.</p></section>';
+	backyard_audio_builder();
 }
