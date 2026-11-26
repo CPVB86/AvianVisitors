@@ -12,3 +12,8 @@ assert.equal(context.backyardAudioShortcode('birds','"bad"]'),'');
 assert.equal(context.backyardAudioShortcode('other',id),'');
 console.log('Audio cursor timing and shortcode builder checks passed.');
 assert.match(context.backyardAudioShortcode('birds',id,'no'), /spectrogram="no"/);
+
+assert.equal(context.backyardAudioColorCaption({}), 'Kleur: -90 tot 0 dBFS.');
+assert.equal(context.backyardAudioColorCaption({spectrogram_dbfs_min:-92,spectrogram_dbfs_max:-32,spectrogram_scale:'adaptive'}),
+    'Kleur: -92 tot -32 dBFS. Contrast per opname; lichtgeel = sterk signaal.');
+console.log('Spectrogram scale caption checks passed.');

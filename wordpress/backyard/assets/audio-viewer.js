@@ -1,3 +1,9 @@
+function backyardAudioColorCaption(data) {
+    const min = Number.isFinite(data.spectrogram_dbfs_min) ? data.spectrogram_dbfs_min : -90;
+    const max = Number.isFinite(data.spectrogram_dbfs_max) ? data.spectrogram_dbfs_max : 0;
+    return 'Kleur: ' + min + ' tot ' + max + ' dBFS.' +
+        (data.spectrogram_scale === 'adaptive' ? ' Contrast per opname; lichtgeel = sterk signaal.' : '');
+}
 function backyardAudioOriginalTime(playbackTime, factor, duration) {
     return Math.max(0, Math.min(duration, playbackTime / factor));
 }
@@ -50,7 +56,7 @@ function backyardAudioOriginalTime(playbackTime, factor, duration) {
                 box.querySelector('.backyard-audio-caption').textContent=
                     (data.time_expansion===10?'Bats: 10× vertraagd. ':'Normale snelheid. ')+
                     'Volumecorrectie: '+data.gain_db+' dB. Tijd/frequentie-as: originele opname. '+
-                    'Blauw balkje boven de grafiek: detectievenster, geen exact herkenningspunt. Kleur: −90 tot 0 dBFS.';
+                    'Blauw balkje boven de grafiek: detectievenster, geen exact herkenningspunt. ' + backyardAudioColorCaption(data);
                 message.textContent='';button.hidden=true;paint();
             }catch(e){message.textContent='Audio-preview niet beschikbaar. Controleer of de opname nog aanwezig en toegankelijk is.';button.disabled=false;}
         });
