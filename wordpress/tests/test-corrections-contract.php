@@ -25,3 +25,12 @@ foreach ( array('admin_footer-backyard_page_backyard-birds', 'admin_footer-tople
     $html = ob_get_clean();
     check(strpos($html, 'name="identity"') !== false && strpos($html, '<option value="otje">Otje</option>') !== false, 'Empty WordPress hook argument preserves bird identity selector');
 }
+
+$row['effective_identity']['identity_override'] = 'otje';
+$display = backyard_birds_correction_projection( $row );
+check( strpos( $display['flight_image'], 'otje-2.png' ) !== false, 'Editor uses existing flying Otje illustration' );
+ob_start();
+backyard_birds_correction_editor( 'bird' );
+$html = ob_get_clean();
+check( strpos( $html, '<template id="backyard-correction-audio-template">' ) !== false && strpos( $html, 'backyard-audio-placeholder' ) !== false, 'Editor includes lazy shared viewer template' );
+check( strpos( $html, 'preload="none"' ) !== false, 'Editor does not preload audio' );

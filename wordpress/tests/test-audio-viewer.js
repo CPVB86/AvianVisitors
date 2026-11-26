@@ -17,3 +17,8 @@ assert.equal(context.backyardAudioColorCaption({}), 'Kleur: -90 tot 0 dBFS.');
 assert.equal(context.backyardAudioColorCaption({spectrogram_dbfs_min:-92,spectrogram_dbfs_max:-32,spectrogram_scale:'adaptive'}),
     'Kleur: -92 tot -32 dBFS. Contrast per opname; lichtgeel = sterk signaal.');
 console.log('Spectrogram scale caption checks passed.');
+
+assert.equal(context.backyardAudioFrequencyRange(24000, 4000), 4000);
+assert.equal(context.backyardAudioFrequencyRange(24000, 0), 24000);
+assert.equal(context.backyardAudioFrequencyRange(48000, 80000), 48000);
+console.log('Frequency range checks passed.');

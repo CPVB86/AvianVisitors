@@ -21,6 +21,7 @@ function backyard_birds_correction_projection( $row, $domain = 'bird' ) {
 	$module = 'bat' === $domain ? 'bats' : 'birds';
 	$effective = $row['effective_identity'] ?? array();
 	return array(
+		'flight_image' => 'otje' === ( $effective['identity_override'] ?? null ) ? backyard_data_otje_image( 'flying' ) : ( new Backyard_Generator() )->thumbnail( $domain, $effective['scientific_name'] ?? $row['scientific_name'], array( 'flight' ) ),
 		'id' => $row['id'], 'status' => $row['status'], 'review_version' => $row['review_version'],
 		'original_name' => $row['common_name_nl'] ?? $row['common_name'] ?? '',
 		'original_scientific_name' => $row['scientific_name'],
@@ -115,13 +116,14 @@ function backyard_birds_correction_ajax() {
 add_action( 'wp_ajax_backyard_correction', 'backyard_birds_correction_ajax' );
 
 function backyard_birds_correction_editor( $domain = 'bird' ) {
-	echo '<dialog id="backyard-correction" aria-labelledby="backyard-correction-title"><h2 id="backyard-correction-title">Waarneming bewerken</h2><p class="correction-message" role="status"></p><div class="correction-detail"></div><audio class="correction-audio" controls preload="none" hidden></audio>';
-	echo '<form class="correction-form"><fieldset><p><label>Status <select name="decision"><option value="confirm">Bevestigd</option><option value="reject">Afgewezen</option></select></label></p>';
+	echo '<dialog id="backyard-correction" aria-labelledby="backyard-correction-title"><h2 id="backyard-correction-title">Waarneming bewerken</h2><p class="correction-message" role="status"></p><div class="correction-detail"></div><div class="correction-media"></div>';
+	echo '<template id="backyard-correction-audio-template">' . backyard_audio_viewer_markup( '' ) . '</template>';
+	echo '<form class="correction-form"><fieldset><legend>Correctie</legend><p><label>Status <select name="decision"><option value="confirm">Bevestigd</option><option value="reject">Afgewezen</option></select></label></p>';
 	echo '<p><label>Soort <select name="species_mode"><option value="keep">Huidige soort behouden</option><option value="original">Oorspronkelijke detectiesoort herstellen</option><option value="choose">Andere soort kiezen</option></select></label></p>';
-	if ( 'bird' === $domain ) { echo '<p>Voor onze kip: kies <strong>Otje (individuele identiteit)</strong> in het soortmenu. De oorspronkelijke BirdNET-detectie blijft bewaard.</p>'; }
+	if ( 'bird' === $domain ) { echo '<p class="correction-help">Voor onze kip: kies <strong>Otje (individuele identiteit)</strong> in het soortmenu. De oorspronkelijke BirdNET-detectie blijft bewaard.</p>'; }
 	echo '<div class="correction-search" hidden><label>Zoek in Backyard <input type="search" name="species_query" maxlength="100" autocomplete="off"></label> <button type="button" class="button correction-find">Zoeken</button><p><label>Catalogusresultaat <select name="species"><option value="">Kies een zoekresultaat</option></select></label></p></div>';
-	if ( 'bird' === $domain ) { echo '<p><label>Identiteit <select name="identity"><option value="">Geen lokale identiteit (gewone soort)</option><option value="otje">Otje</option></select></label></p><p>Otje is alleen toegestaan voor een geschikte doelsoort; Backyard controleert dit.</p>'; } else { echo '<input type="hidden" name="identity" value="">'; }
-	echo '<p><label>Toelichting<br><textarea name="note" maxlength="1000" rows="3"></textarea></label></p></fieldset><p><button type="submit" class="button button-primary">Opslaan</button> <button type="button" class="button correction-reload">Actuele waarneming ophalen</button> <button type="button" class="button correction-close">Sluiten</button></p></form></dialog>';
+	if ( 'bird' === $domain ) { echo '<p><label>Identiteit <select name="identity"><option value="">Geen lokale identiteit (gewone soort)</option><option value="otje">Otje</option></select></label></p><p class="correction-help">Otje is alleen toegestaan voor een geschikte doelsoort; Backyard controleert dit.</p>'; } else { echo '<input type="hidden" name="identity" value="">'; }
+	echo '<p class="correction-note"><label>Toelichting<br><textarea name="note" maxlength="1000" rows="3"></textarea></label></p></fieldset><p class="correction-actions"><button type="submit" class="button button-primary">Opslaan</button> <button type="button" class="button correction-reload">Actuele waarneming ophalen</button> <button type="button" class="button correction-close">Sluiten</button></p></form></dialog>';
 }
 // WordPress may pass an empty hook argument: never use it as the domain.
 add_action( 'admin_footer-backyard_page_backyard-birds', function () { backyard_birds_correction_editor( 'bird' ); } );

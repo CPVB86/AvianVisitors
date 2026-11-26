@@ -7,18 +7,48 @@ function backyardAudioColorCaption(data) {
 function backyardAudioOriginalTime(playbackTime, factor, duration) {
     return Math.max(0, Math.min(duration, playbackTime / factor));
 }
+function backyardAudioFrequencyRange(maximum, requested) {
+    return requested > 0 && requested < maximum ? requested : maximum;
+}
 (() => {
     function init() { document.querySelectorAll('.backyard-audio-viewer').forEach(box => {
         if (box.dataset.initialized) return;
         box.dataset.initialized='1';
-        const button = box.querySelector('button'), message = box.querySelector('.backyard-audio-message');
+        const button = box.querySelector('.backyard-audio-load'), message = box.querySelector('.backyard-audio-message');
         const audio = box.querySelector('audio'), canvas = box.querySelector('canvas'), ctx = canvas.getContext('2d');
+        const display = box.querySelector('.backyard-audio-display');
+        const placeholder = box.querySelector('.backyard-audio-placeholder');
+        const frequency = box.querySelector('.backyard-audio-frequency');
+        const zoom = box.querySelector('.backyard-audio-zoom');
         let data, picture;
+        const enlarged = document.createElement('dialog');
+        enlarged.className = 'backyard-audio-enlarged';
+        enlarged.setAttribute('aria-label', 'Vergroot spectrogram');
+        const close = document.createElement('button');
+        close.type = 'button'; close.textContent = 'Sluiten';
+        enlarged.append(close); box.append(enlarged);
+        function moveDisplay(parent) {
+            const playing = !audio.paused, position = audio.currentTime;
+            parent.append(display);
+            if (audio.src) audio.currentTime = position;
+            if (playing) audio.play().catch(() => {});
+        }
+        zoom.addEventListener('click', () => {
+            moveDisplay(enlarged); zoom.hidden = true;
+            enlarged.showModal(); close.focus(); paint();
+        });
+        close.addEventListener('click', () => enlarged.close());
+        enlarged.addEventListener('close', () => {
+            moveDisplay(box); zoom.hidden = false; zoom.focus(); paint();
+        });
+        frequency.addEventListener('change', paint);
         function paint() {
             if (!data || !picture) return;
             const x = 58, y = 38, w = 726, h = 224, duration = data.duration_seconds;
             ctx.fillStyle='#10151c'; ctx.fillRect(0,0,800,330);
-            ctx.drawImage(picture,x,y,w,h);
+            const maximum = backyardAudioFrequencyRange(data.frequency_max_hz, Number(frequency.value));
+            const sourceHeight = picture.height * maximum / data.frequency_max_hz;
+            ctx.drawImage(picture,0,picture.height-sourceHeight,picture.width,sourceHeight,x,y,w,h);
             const window = data.detection_window;
             if (window) {
                 const left = x + Math.max(0,window.start_seconds)/duration*w;
@@ -32,7 +62,7 @@ function backyardAudioOriginalTime(playbackTime, factor, duration) {
             ctx.font='12px sans-serif';ctx.fillStyle='#fff';
             for(let i=0;i<=4;i++){
                 ctx.fillText((duration*i/4).toFixed(1)+' s',x+i*w/4-14,283);
-                ctx.fillText((data.frequency_max_hz/1000*(1-i/4)).toFixed(0)+' kHz',2,y+i*h/4+9);
+                ctx.fillText((maximum/1000*(1-i/4)).toFixed(0)+' kHz',2,y+i*h/4+9);
             }
             ctx.strokeStyle='#aaa';ctx.beginPath();
             data.waveform.forEach((v,i)=>{const px=x+i*w/(data.waveform.length-1);ctx.moveTo(px,309-v*15);ctx.lineTo(px,309+v*15);});ctx.stroke();
@@ -48,9 +78,14 @@ function backyardAudioOriginalTime(playbackTime, factor, duration) {
                 const response=await fetch(metadata,{credentials:'same-origin',cache:'no-store'});
                 if(!response.ok) throw Error();
                 data=await response.json();
-                if(!(data.duration_seconds>0)||![1,10].includes(data.time_expansion)||!Array.isArray(data.waveform)) throw Error();
+                if(!(data.frequency_max_hz>0)||!(data.duration_seconds>0)||![1,10].includes(data.time_expansion)||!Array.isArray(data.waveform)) throw Error();
                 picture=new Image();
                 await new Promise((resolve,reject)=>{picture.onload=resolve;picture.onerror=reject;picture.src='data:image/png;base64,'+data.spectrogram_png;});
+                if (!box.isConnected) return;
+                const ranges = data.time_expansion === 10 ? [20000, 40000, 80000, 120000] : [4000, 8000, 12000];
+                frequency.replaceChildren(new Option('Volledig bereik', '0'));
+                ranges.filter(value => value < data.frequency_max_hz).forEach(value => frequency.add(new Option('0–' + value / 1000 + ' kHz', value)));
+                placeholder.hidden = true;
                 const listen=new URL(box.dataset.url);listen.searchParams.set('part','listen');audio.src=listen;
                 box.querySelector('.backyard-audio-display').hidden=false;
                 box.querySelector('.backyard-audio-caption').textContent=

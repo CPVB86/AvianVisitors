@@ -28,15 +28,31 @@ function backyardInitCorrections() {
         current = data.observation; requestId = data.request_id; pending = null;
         const detail = dialog.querySelector('.correction-detail');
         detail.replaceChildren();
+        if (current.flight_image) {
+            const image = document.createElement('img');
+            image.className = 'correction-flight'; image.src = current.flight_image;
+            image.alt = current.identity === 'otje' ? 'Otje' : current.scientific_name;
+            image.addEventListener('error', () => image.remove(), { once: true });
+            detail.append(image);
+        }
         const lines = [
             [backyardCorrections.domain === 'bat' ? 'BattyBirdNET oorspronkelijk' : 'BirdNET oorspronkelijk', `${current.original_name} — ${current.original_scientific_name}`],
             ['Huidige soort / identiteit', `${current.scientific_name}${current.identity ? ' / Otje' : ''}`],
             ['Confidence', `${(Number(current.confidence) * 100).toFixed(1)}%`],
             ['Datum', current.date], ['Status', labels[current.status] || current.status]
         ];
-        lines.forEach(([label, value]) => { const p = document.createElement('p'); p.textContent = `${label}: ${value}`; detail.append(p); });
-        const audio = dialog.querySelector('audio'); audio.pause(); audio.removeAttribute('src'); audio.hidden = !current.audio;
-        if (current.audio) audio.src = current.audio;
+        lines.forEach(([label, value]) => {
+            const cell = document.createElement('div'), heading = document.createElement('strong'), text = document.createElement('span');
+            heading.textContent = label; text.textContent = value; cell.append(heading, text); detail.append(cell);
+        });
+        clearMedia();
+        if (current.audio) {
+            const viewer = dialog.querySelector('template').content.firstElementChild.cloneNode(true);
+            viewer.dataset.url = current.audio;
+            dialog.querySelector('.correction-media').append(viewer);
+        } else {
+            dialog.querySelector('.correction-media').textContent = 'Geen audio beschikbaar.';
+        }
         fields.decision.value = current.status === 'human_rejected' ? 'reject' : 'confirm';
         Array.from(fields.decision.options).forEach(option => { option.disabled = !current.actions.includes(option.value); });
         fields.identity.value = current.identity || '';
@@ -44,6 +60,11 @@ function backyardInitCorrections() {
         dialog.querySelector('.correction-search').hidden = true;
         form.querySelector('fieldset').disabled = false;
         fields.identity.disabled = fields.decision.value === 'reject';
+    }
+    function clearMedia() {
+        const media = dialog.querySelector('.correction-media');
+        media.querySelectorAll('audio').forEach(audio => audio.pause());
+        media.replaceChildren();
     }
     async function load() {
         if (busy) return;
@@ -57,6 +78,7 @@ function backyardInitCorrections() {
         if (!button || busy) return;
         id = button.dataset.id; current = null; pending = null;
         dialog.querySelector('.correction-detail').replaceChildren();
+        clearMedia();
         form.querySelector('fieldset').disabled = true;
         dialog.showModal(); load();
     });
@@ -83,7 +105,7 @@ function backyardInitCorrections() {
     dialog.querySelector('.correction-close').addEventListener('click', () => { if (!busy) dialog.close(); });
     dialog.querySelector('.correction-reload').addEventListener('click', load);
     dialog.addEventListener('cancel', event => { if (busy) event.preventDefault(); });
-    dialog.addEventListener('close', () => { dialog.querySelector('audio').pause(); });
+    dialog.addEventListener('close', clearMedia);
     form.addEventListener('submit', async event => {
         event.preventDefault();
         if (busy || !current) return;

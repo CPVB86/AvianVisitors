@@ -1,11 +1,19 @@
 <?php
 defined( 'ABSPATH' ) || exit;
 
+function backyard_audio_viewer_assets() {
+    wp_enqueue_script( 'backyard-audio-viewer', plugins_url( 'assets/audio-viewer.js', dirname( __DIR__ ) . '/backyard.php' ), array(), '4', true );
+    wp_enqueue_style( 'backyard-audio-viewer', plugins_url( 'assets/audio-viewer.css', dirname( __DIR__ ) . '/backyard.php' ), array(), '2' );
+}
+
+function backyard_audio_viewer_markup( $url ) {
+    return '<div class="backyard-audio-viewer" data-url="' . esc_url( $url ) . '"><div class="backyard-audio-placeholder"><button type="button" class="backyard-audio-load">Audio en spectrogram laden</button></div><p class="backyard-audio-message" role="status"></p><div class="backyard-audio-display" hidden><div class="backyard-audio-tools"><button type="button" class="backyard-audio-zoom" aria-label="Spectrogram vergroten">&#128269; Vergroten</button><label>Frequentiebereik <select class="backyard-audio-frequency"><option value="0">Volledig bereik</option></select></label></div><canvas width="800" height="330" aria-label="Spectrogram: tijd en oorspronkelijke frequentie"></canvas><audio controls preload="none"></audio><p class="backyard-audio-caption"></p></div></div>';
+}
+
 function backyard_audio_viewer( $id, $domain, $private = false, $spectrogram = true ) {
     if ( ! is_string( $id ) || ! preg_match( '/^[0-9a-f-]{36}$/D', $id )
         || ! in_array( $domain, array( 'bird', 'bat' ), true ) ) { return ''; }
-    wp_enqueue_script( 'backyard-audio-viewer', plugins_url( 'assets/audio-viewer.js', dirname( __DIR__ ) . '/backyard.php' ), array(), '3', true );
-    wp_enqueue_style( 'backyard-audio-viewer', plugins_url( 'assets/audio-viewer.css', dirname( __DIR__ ) . '/backyard.php' ), array(), '1' );
+    backyard_audio_viewer_assets();
     $args = array( 'action' => 'backyard_audio_view', 'observation_id' => $id, 'domain' => $domain,
         'scope' => $private ? 'admin' : 'public',
         'key' => $private ? wp_create_nonce( 'backyard_audio_view_' . $id ) : wp_hash( 'audio-view|' . $domain . '|' . $id ) );
@@ -13,7 +21,7 @@ function backyard_audio_viewer( $id, $domain, $private = false, $spectrogram = t
     if ( ! $spectrogram ) {
         return '<audio controls preload="none" src="' . esc_url( add_query_arg( array( 'part' => 'listen' ), $url ) ) . '"></audio><p>' . ( 'bat' === $domain ? 'Luisterversie: volume versterkt en 10× vertraagd.' : 'Luisterversie met volumeversterking.' ) . '</p>';
     }
-    return '<div class="backyard-audio-viewer" data-url="' . esc_url( $url ) . '"><button type="button" class="backyard-audio-load">Audio en spectrogram openen</button><p class="backyard-audio-message" role="status"></p><div class="backyard-audio-display" hidden><canvas width="800" height="330" aria-label="Spectrogram: tijd en oorspronkelijke frequentie"></canvas><audio controls preload="none"></audio><p class="backyard-audio-caption"></p></div></div>';
+    return backyard_audio_viewer_markup( $url );
 }
 
 function backyard_audio_shortcode( $attributes ) {

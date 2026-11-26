@@ -8,6 +8,7 @@ function run(readyState) {
     const options = [];
     const node = { addEventListener(name, fn) { this[name] = fn; }, append(option) { options.push(option); }, replaceChildren() {}, pause() {}, elements: {} };
     node.querySelector = () => node;
+    node.querySelectorAll = () => [];
     node.elements.species_mode = node;
     node.elements.decision = node;
     node.elements.identity = {};

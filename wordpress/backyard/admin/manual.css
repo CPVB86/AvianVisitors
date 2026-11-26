@@ -11,7 +11,7 @@
 }
 
 #backyard-correction {
-	width: min(680px, 90vw);
+	width: min(960px, 92vw);
 	max-height: 85vh;
 	overflow: auto;
 	border: 1px solid #c3c4c7;
@@ -281,3 +281,20 @@
 .backyard-dashboard-last span, .backyard-dashboard-last time { font-size:12px; color:#646970; }
 .backyard-dashboard-last strong { font-size:16px; line-height:1.4; margin:4px 0; }
 .backyard-dashboard-portrait { display:block; width:112px; height:112px; object-fit:contain; margin:0 auto; }
+
+#backyard-correction .correction-detail{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+#backyard-correction .correction-detail>div{padding:12px;background:#f6f7f7;border-radius:6px;overflow-wrap:anywhere}
+#backyard-correction .correction-detail strong,#backyard-correction .correction-detail span{display:block}
+#backyard-correction .correction-detail strong{font-size:12px;color:#646970;margin-bottom:4px}
+#backyard-correction .correction-flight{grid-column:2;grid-row:1 / span 3;object-fit:contain;width:100%;height:210px}
+#backyard-correction .correction-media{padding:16px;background:#f6f7f7;border-radius:8px;margin-bottom:18px}
+#backyard-correction .backyard-audio-viewer{max-width:none;min-width:0}
+#backyard-correction fieldset{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;border:1px solid #dcdcde;padding:16px;border-radius:8px}
+#backyard-correction legend{font-weight:600;padding:0 6px}
+#backyard-correction fieldset p{margin:0}
+#backyard-correction fieldset label{display:block;font-weight:600}
+#backyard-correction fieldset select,#backyard-correction fieldset input[type=search],#backyard-correction textarea{display:block;width:100%;max-width:100%;margin-top:5px;box-sizing:border-box;font-weight:400}
+#backyard-correction .correction-help,#backyard-correction .correction-note,#backyard-correction .correction-search{grid-column:1 / -1}
+#backyard-correction .correction-help{font-size:12px;color:#646970}
+#backyard-correction .correction-actions{display:flex;gap:8px;flex-wrap:wrap;position:sticky;bottom:-24px;background:#fff;padding:12px 0;margin-bottom:0;border-top:1px solid #dcdcde}
+@media(max-width:600px){#backyard-correction .correction-detail,#backyard-correction fieldset{grid-template-columns:1fr}#backyard-correction .correction-flight{grid-column:1;grid-row:auto;height:140px}}

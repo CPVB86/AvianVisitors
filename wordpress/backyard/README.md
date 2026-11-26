@@ -528,6 +528,15 @@ https://developers.elementor.com/docs/widgets/widget-dependencies/.
 
 ## Audio + spectrogram
 
+The correction editor groups observation details, the existing flight illustration,
+and correction fields into a work card. Its audio/spectrogram placeholder loads
+only on click. The shared viewer offers enlargement (close button or Escape) and
+frequency zoom, starting with the complete frequency range. Birds offer 0–4/8/12
+kHz; bats offer 0–20/40/80/120 kHz where within the recording range. Zoom crops the
+existing image, not the audio, and cannot add spectral resolution. The same player
+and playback position are retained when enlarging. No illustrations are generated.
+
+
 Spectrogram previews use a dark-to-violet/orange/pale-yellow palette with a
 60 dB display range adapted per recording (Backyard preview version 2).
 The caption reports the actual dBFS range; brightness should not be compared
