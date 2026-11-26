@@ -34,6 +34,18 @@ root.querySelectorAll('.backyard-bulk-review').forEach((form) => {
     update();
 });
 
+root.querySelectorAll('.backyard-copy-recording').forEach(button => {
+    button.addEventListener('click', async () => {
+        const status = button.nextElementSibling;
+        try {
+            await navigator.clipboard.writeText(button.dataset.recordingId);
+            button.classList.remove('is-copied');
+            void button.offsetWidth;
+            button.classList.add('is-copied');
+            status.textContent = 'Opname-ID gekopieerd.';
+        } catch (_) { status.textContent = 'Kopiëren niet gelukt. Het opname-ID staat in de hovertekst.'; }
+    });
+});
 root.querySelectorAll('.backyard-review-image').forEach((img) => {
         const fallback = () => {
             if (!img.dataset.fallback) return;

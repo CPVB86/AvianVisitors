@@ -35,16 +35,20 @@ function backyardInitCorrections() {
             image.addEventListener('error', () => image.remove(), { once: true });
             detail.append(image);
         }
-        const lines = [
-            [backyardCorrections.domain === 'bat' ? 'BattyBirdNET oorspronkelijk' : 'BirdNET oorspronkelijk', `${current.original_name} — ${current.original_scientific_name}`],
-            ['Huidige soort / identiteit', `${current.scientific_name}${current.identity ? ' / Otje' : ''}`],
-            ['Confidence', `${(Number(current.confidence) * 100).toFixed(1)}%`],
-            ['Datum', current.date], ['Status', labels[current.status] || current.status]
-        ];
-        lines.forEach(([label, value]) => {
-            const cell = document.createElement('div'), heading = document.createElement('strong'), text = document.createElement('span');
-            heading.textContent = label; text.textContent = value; cell.append(heading, text); detail.append(cell);
-        });
+        const info = document.createElement('div'); info.className = 'correction-info';
+        detail.append(info);
+        function cell(parent, label, value) {
+            const item = document.createElement('div'), heading = document.createElement('strong'), text = document.createElement('span');
+            heading.textContent = label; text.textContent = value; item.append(heading, text); parent.append(item);
+        }
+        cell(info, 'BirdNET oorspronkelijk', `${current.original_name} — ${current.original_scientific_name}`);
+        if (current.scientific_name !== current.original_scientific_name || current.identity) {
+            cell(info, 'Huidige soort / identiteit', `${current.scientific_name}${current.identity ? ' / Otje' : ''}`);
+        }
+        const facts = document.createElement('div'); facts.className = 'correction-facts'; info.append(facts);
+        cell(facts, 'Confidence', `${(Number(current.confidence) * 100).toFixed(1)}%`);
+        cell(facts, 'Datum', current.date);
+        cell(facts, 'Status', labels[current.status] || current.status);
         clearMedia();
         if (current.audio) {
             const viewer = dialog.querySelector('template').content.firstElementChild.cloneNode(true);

@@ -19,7 +19,7 @@ function backyard_audio_viewer( $id, $domain, $private = false, $spectrogram = t
         'key' => $private ? wp_create_nonce( 'backyard_audio_view_' . $id ) : wp_hash( 'audio-view|' . $domain . '|' . $id ) );
     $url = add_query_arg( $args, admin_url( 'admin-post.php' ) );
     if ( ! $spectrogram ) {
-        return '<audio controls preload="none" src="' . esc_url( add_query_arg( array( 'part' => 'listen' ), $url ) ) . '"></audio><p>' . ( 'bat' === $domain ? 'Luisterversie: volume versterkt en 10× vertraagd.' : 'Luisterversie met volumeversterking.' ) . '</p>';
+        return '<audio controls preload="none" src="' . esc_url( add_query_arg( array( 'part' => 'listen' ), $url ) ) . '"></audio>' . ( $private ? '' : '<p>' . ( 'bat' === $domain ? 'Luisterversie: volume versterkt en 10× vertraagd.' : 'Luisterversie met volumeversterking.' ) . '</p>' );
     }
     return backyard_audio_viewer_markup( $url );
 }
