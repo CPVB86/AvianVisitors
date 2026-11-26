@@ -305,3 +305,9 @@
 .backyard-copy-recording.is-copied{animation:backyard-copy-glow 1.2s ease-out}
 @media(prefers-reduced-motion:reduce){.backyard-copy-recording.is-copied{animation:none;background:#d7f5df}}
 @media(max-width:600px){#backyard-correction .correction-info{grid-row:auto}}
+
+.backyard-table-audio{display:flex;align-items:center;gap:5px}
+.backyard-table-audio audio{display:block;width:270px;max-width:calc(100% - 29px);min-width:180px}
+.backyard-table-audio .backyard-copy-recording{appearance:none;display:inline-flex;align-items:center;justify-content:center;flex:0 0 24px;width:24px;height:24px;min-height:0;margin:0;padding:2px;border:0;border-radius:3px;box-shadow:none;background:transparent;color:#646970;cursor:pointer;line-height:1}
+.backyard-table-audio .backyard-copy-recording:hover{color:#2271b1}
+.backyard-table-audio .backyard-copy-recording:focus-visible{outline:2px solid #2271b1;outline-offset:2px}

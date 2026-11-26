@@ -28,7 +28,7 @@ add_action( 'admin_enqueue_scripts', function ( $hook ) {
 	if ( ! in_array( $hook, array( 'index.php', 'backyard_page_backyard-manual', 'toplevel_page_backyard', 'backyard_page_backyard-settings', 'backyard_page_backyard-birds', 'backyard_page_backyard-bats' ), true ) ) {
 		return;
 	}
-	wp_enqueue_style( 'backyard-manual', plugins_url( 'manual.css', __FILE__ ), array(), '0.7.3' );
+	wp_enqueue_style( 'backyard-manual', plugins_url( 'manual.css', __FILE__ ), array(), '0.7.4' );
 	if ( in_array( $hook, array( 'toplevel_page_backyard', 'backyard_page_backyard-birds', 'backyard_page_backyard-bats' ), true ) ) {
 		backyard_audio_viewer_assets();
 		wp_enqueue_script( 'backyard-review', plugins_url( 'review.js', __FILE__ ), array(), '0.4.1', true );

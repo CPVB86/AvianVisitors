@@ -167,8 +167,8 @@ function backyard_birds_admin_page( $domain = 'bird' ) {
 		if ( $row['audio_available'] ) {
 			// Never use audio_url supplied by the API: only an authenticated WP route.
 			$url = wp_nonce_url( add_query_arg( array( 'action' => 'backyard_' . $module . '_audio', 'observation_id' => $row['id'] ), admin_url( 'admin-post.php' ) ), 'backyard_' . $module . '_audio_' . $row['id'] );
-			echo backyard_audio_viewer( $row['id'], $domain, true, false );
-            echo '<button type="button" class="button backyard-copy-recording" data-recording-id="' . esc_attr( $row['id'] ) . '" title="' . esc_attr( 'Opname-ID: ' . $row['id'] . ' — klik om te kopiëren' ) . '" aria-label="Opname-ID kopiëren">' . backyard_icon_shortcode( array( 'name' => 'clipboard', 'size' => '18' ) ) . '</button><span class="screen-reader-text backyard-recording-copy-status" role="status"></span>';
+			echo '<div class="backyard-table-audio">' . backyard_audio_viewer( $row['id'], $domain, true, false );
+            echo '<button type="button" class="backyard-copy-recording" data-recording-id="' . esc_attr( $row['id'] ) . '" title="' . esc_attr( 'Opname-ID: ' . $row['id'] . ' — klik om te kopiëren' ) . '" aria-label="Opname-ID kopiëren">' . backyard_icon_shortcode( array( 'name' => 'clipboard', 'size' => '15' ) ) . '</button><span class="screen-reader-text backyard-recording-copy-status" role="status"></span></div>';
 		} else {
 			echo 'Geen audio beschikbaar';
 		}
